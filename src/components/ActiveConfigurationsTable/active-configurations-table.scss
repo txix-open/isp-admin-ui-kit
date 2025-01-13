@@ -1,0 +1,47 @@
+@import "src/constants/style/styleConst";
+
+
+.active-configurations-table {
+  &__title {
+    margin-bottom: $basic-margin*2;
+    font-size: 20px;
+  }
+
+  &__table {
+    &__name-field {
+      input {
+        color: #606060;
+        border: none;
+        background-color: transparent;
+        width: 100%;
+
+        &:focus-visible {
+          color: var(--ant-color-text);
+          padding: $basic-padding;
+          border-radius: 4px;
+          outline: 1px solid $blue-color;
+        }
+      }
+
+      display: flex;
+      justify-content: space-between;
+      gap: $basic-margin;
+
+      &__actions {
+        display: flex;
+        gap: $basic-margin
+      }
+    }
+  }
+
+  .active-config {
+    tr {
+      background: var(--ant-color-info-bg);
+    }
+  }
+
+  &__buttons {
+    display: flex;
+    justify-content: space-between;
+  }
+}

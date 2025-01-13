@@ -1,0 +1,19 @@
+@import "../../constants/style/styleConst";
+
+.configurations {
+  height: calc(100vh - 80px);
+  width: 100%;
+  overflow-y: auto;
+  min-width: 700px;
+
+  &__buttons {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: $basic-margin*2;
+
+  }
+
+  .active-configurations-table:last-child {
+    margin-top: $basic-margin*3;
+  }
+}

@@ -1,0 +1,19 @@
+@import "src/constants/style/styleConst";
+
+.role-list {
+  .ant-descriptions-item-label {
+    font-size: $text-size-header2;
+  }
+
+  .spin {
+    position: initial;
+  }
+
+  ul, li {
+    list-style-position: inside
+  }
+
+  li {
+    font-size: $text-size
+  }
+}

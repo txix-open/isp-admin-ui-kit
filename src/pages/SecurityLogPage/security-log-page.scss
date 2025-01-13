@@ -1,0 +1,35 @@
+@import "src/constants/style/styleConst";
+
+.security-log-page {
+  height: 100%;
+  border: 1px solid $border-color;
+
+  &__header {
+    border-bottom: 1px solid $border-color;
+    padding: 0 3 * $basic-padding;
+
+    &__title {
+      padding: 3 * $basic-padding 0;
+      display: inline-block;
+      font-weight: 500;
+      font-size: 20px;
+      line-height: 28px;
+    }
+  }
+
+  &__content {
+    padding: 2 * $basic-padding 3 * $basic-padding;
+
+    &__wrap-table {
+      overflow-x: scroll;
+      height: calc(100vh - 160px);
+    }
+
+    &__pagination {
+      margin-top: 20px;
+      display: flex;
+      justify-content: flex-end;
+    }
+
+  }
+}

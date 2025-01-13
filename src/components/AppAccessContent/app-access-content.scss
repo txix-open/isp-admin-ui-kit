@@ -1,0 +1,36 @@
+@import 'src/constants/style/styleConst';
+
+.app-access-content {
+  height: 100%;
+  width: 100%;
+  min-width: 760px;
+
+  padding: $basic-padding * 1.8;
+  border: 1px solid $border-color;
+
+  &__header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: $basic-margin * 2;
+
+    &__action-buttons {
+      display: flex;
+      gap: $basic-margin * 2;
+    }
+  }
+
+  &__main {
+    display: grid;
+    grid-template-columns:1fr 1fr;
+
+
+    &__tree-search-input {
+      width: 350px;
+      margin-bottom: $basic-margin * 2;
+    }
+  }
+
+  .unknown-label {
+    color: $error-red
+  }
+}

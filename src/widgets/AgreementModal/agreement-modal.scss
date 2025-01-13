@@ -1,0 +1,8 @@
+@import "../../constants/style/styleConst";
+
+.agreement-modal {
+  &__description {
+    display: inline-block;
+    margin-bottom: $basic-margin;
+  }
+}

@@ -1,0 +1,65 @@
+@import "../../constants/style/styleConst";
+
+.user-editor {
+  height: 100%;
+  border: 1px solid $border-color;
+
+  &__header {
+    border-bottom: 1px solid $border-color;
+    padding: 22px 24px 0;
+
+    &__nav {
+      display: flex;
+      align-items: center;
+      margin-bottom: $basic-margin* 2.5;
+
+      &__backBtn {
+        margin-left: -$basic-margin;
+        margin-right: $basic-margin;
+      }
+    }
+
+    &__name {
+      font-family: 'Roboto', sans-serif;
+      font-style: normal;
+      font-weight: 500;
+      font-size: 20px;
+      line-height: 28px;
+      color: #000;
+
+    }
+
+    &__btn {
+      margin-left: auto;
+    }
+  }
+
+  &__status {
+    font-family: 'Roboto', sans-serif;
+    font-size: 16px;
+    line-height: 24px;
+  }
+
+  &__content {
+    &__wrap {
+      overflow-x: scroll;
+      height: calc(100vh - 80px);
+    }
+
+    .ant-form-item {
+      margin: 0;
+    }
+
+    &__name, &__description, &__email, &__roles, &__password {
+      padding: $basic-padding*1.5 $basic-padding*3;
+
+      h3 {
+        padding-bottom: $basic-padding*1;
+        font-family: 'Roboto', sans-serif;
+        font-weight: 400;
+        font-size: 14px;
+        line-height: 22px
+      }
+    }
+  }
+}

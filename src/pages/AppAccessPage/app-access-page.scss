@@ -1,0 +1,15 @@
+@import "src/constants/style/styleConst";
+
+.app-access-page {
+  display: flex;
+  height: 100%;
+
+  .ant-tree {
+    background: none;
+  }
+
+  &__content-wrap {
+    width: 100%;
+    overflow-x: scroll;
+  }
+}

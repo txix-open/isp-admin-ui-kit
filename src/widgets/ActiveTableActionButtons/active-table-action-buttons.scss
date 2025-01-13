@@ -1,0 +1,12 @@
+@import "src/constants/style/styleConst";
+
+
+.active-configurations-table-actions-field {
+  display: flex;
+  gap: $basic-margin;
+}
+
+.dropdown {
+  display: flex;
+  gap: $basic-margin;
+}

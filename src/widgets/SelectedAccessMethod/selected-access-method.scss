@@ -1,0 +1,13 @@
+@import "src/constants/style/styleConst";
+
+.selected-access-method {
+  display: flex;
+  flex-direction: column;
+  gap: $basic-margin;
+  padding: $basic-padding;
+  border: 1px dashed $grey;
+
+  overflow-y: scroll;
+  height: calc(100vh - 100px);
+
+}
