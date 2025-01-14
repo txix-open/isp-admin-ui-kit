@@ -1,4 +1,5 @@
 import { MenuProps } from 'antd'
+import { CustomMenuItemType } from '@type/app.type.ts'
 
 export enum MenuItemKeysType {
   users = 'users',
@@ -68,3 +69,7 @@ export const menuKeys: Record<MenuItemKeysType, MenuItem> = {
 }
 
 export type MenuItemType = Required<MenuProps>['items'][number]
+
+export interface LayoutComponentPropsType {
+  customRouters: CustomMenuItemType[]
+}

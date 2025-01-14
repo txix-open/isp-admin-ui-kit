@@ -31,3 +31,16 @@ export interface AppApiResponseType {
   originalResponse: DomainType[]
   appList: SystemTreeAppType[]
 }
+
+export interface CustomMenuItemType {
+  path: string
+  element: any
+  label: string
+  key: string
+  permissions: string[]
+  icon: any
+}
+
+export interface RoutersPropsType {
+  customRouters: CustomMenuItemType[]
+}
