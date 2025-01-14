@@ -11,6 +11,8 @@ import ErrorWrapperPage from '@pages/ErrorWrapperPage'
 
 import PrivateRoute from '@routes/PrivateRoute'
 import { routePaths } from '@routes/routePaths.ts'
+import { RoutersPropsType } from '@type/app.type.ts'
+import { generateCustomRoutes } from '@routes/customRoutes.tsx'
 
 const LoginPage = lazy(() => import('@pages/LoginPage'))
 const ProfilePage = lazy(() => import('@pages/ProfilePage'))
@@ -28,11 +30,11 @@ const ConfigurationEditorPage = lazy(
 )
 const NotFound = lazy(() => import('@pages/NotFound'))
 
-const Routers = () => {
+const Routers = ({ customRouters }: RoutersPropsType) => {
   return (
     <Routes>
       <Route element={<PrivateRoute />}>
-        <Route path={routePaths.home} element={<LayoutComponent />}>
+        <Route path={routePaths.home} element={<LayoutComponent customRouters={customRouters}/>}>
           <Route
             index
             element={
@@ -195,6 +197,7 @@ const Routers = () => {
               />
             </Route>
           </Route>
+          {generateCustomRoutes(customRouters)}
         </Route>
       </Route>
       <Route

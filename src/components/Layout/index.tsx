@@ -15,6 +15,7 @@ import Header from '@widgets/Header'
 
 import DefaultUser from '@components/Icons/DefaultUser.tsx'
 import {
+  LayoutComponentPropsType,
   MenuItemKeysType,
   MenuItemType,
   menuKeys
@@ -36,7 +37,7 @@ import './layout.scss'
 
 const { Content, Sider } = Layout
 
-const LayoutComponent = () => {
+const LayoutComponent = ({ customRouters }: LayoutComponentPropsType) => {
   const [collapsed, setCollapsed] = useState<boolean>(
     LocalStorage.get('menu') === null ? true : LocalStorage.get('menu')
   )
@@ -57,7 +58,7 @@ const LayoutComponent = () => {
 
   const userToken = LocalStorage.get(localStorageKeys.USER_TOKEN)
 
-  const hideItem = (permission: PermissionKeysType | PermissionKeysType[]) => {
+  const hideItem = (permission: PermissionKeysType | PermissionKeysType[] | string[]) => {
     if (Array.isArray(permission)) {
       const result = permission.reduce((acc, currentValue) => {
         const hasPermissionFunc = hasPermission(currentValue)
@@ -67,6 +68,14 @@ const LayoutComponent = () => {
     }
     return hasPermission(permission) ? '' : 'hide-item'
   }
+
+  const customMenuItems: MenuItemType[] = customRouters.map((route) => ({
+    label: route.label,
+    key: route.key,
+    className: hideItem(route.permissions),
+    icon: route.icon
+  }))
+
   const menuItems: MenuItemType[] = [
     {
       label: firstName || '',
@@ -123,7 +132,8 @@ const LayoutComponent = () => {
           className: hideItem(PermissionKeysType.role_view)
         }
       ]
-    }
+    },
+    ...customMenuItems
   ]
 
   useEffect(() => {
@@ -156,13 +166,20 @@ const LayoutComponent = () => {
     const selectedKey = selectedMenuKeys[0] || ''
     const menuItem = menuKeys[menuKey]
 
-    if (menuItem && menuKey !== selectedKey) {
-      setSelectedMenuKeys([menuItem.key])
-      if (selectedKey) {
+    if (menuKey !== selectedKey) {
+      setSelectedMenuKeys([menuKey])
+      if (selectedKey && menuItem) {
         setOpenKeys(menuItem.parent)
       }
     }
   }, [location.pathname])
+
+  const handleCustomRoute = (key: string): void => {
+    const route = customRouters.find((route) => route.key === key)
+    if (route) {
+      navigate(route.path)
+    }
+  }
 
   const handlerOnClickMenu: MenuProps['onClick'] = ({ key }): void => {
     switch (key) {
@@ -192,6 +209,8 @@ const LayoutComponent = () => {
         navigate(routePaths.applicationsGroup)
         break
       default:
+        handleCustomRoute(key)
+        break
     }
   }
 
