@@ -8,7 +8,7 @@ export const useRole = () => {
   const { profile } = useAppSelector((state: any) => state.profileReducer)
   const role: string = useMemo(() => profile && profile.role, [profile])
 
-  const hasPermission = (permission: PermissionKeysType) => {
+  const hasPermission = (permission: PermissionKeysType | string) => {
     const userPermission = profile.permissions || []
     return userPermission.includes(permission)
   }

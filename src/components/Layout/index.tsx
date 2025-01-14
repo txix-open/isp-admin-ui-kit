@@ -15,9 +15,12 @@ import Header from '@widgets/Header'
 
 import DefaultUser from '@components/Icons/DefaultUser.tsx'
 import {
+  LayoutComponentPropsType,
   MenuItemKeysType,
+  MenuItemLabelsType,
   MenuItemType,
-  menuKeys
+  menuKeys,
+  MenuParentItemKeysType
 } from '@components/Layout/layout.type.ts'
 
 import { LocalStorage } from '@utils/localStorageUtils.ts'
@@ -36,7 +39,7 @@ import './layout.scss'
 
 const { Content, Sider } = Layout
 
-const LayoutComponent = () => {
+const LayoutComponent = ({ customRouters }: LayoutComponentPropsType) => {
   const [collapsed, setCollapsed] = useState<boolean>(
     LocalStorage.get('menu') === null ? true : LocalStorage.get('menu')
   )
@@ -57,7 +60,9 @@ const LayoutComponent = () => {
 
   const userToken = LocalStorage.get(localStorageKeys.USER_TOKEN)
 
-  const hideItem = (permission: PermissionKeysType | PermissionKeysType[]) => {
+  const hideItem = (
+    permission: PermissionKeysType | PermissionKeysType[] | string[]
+  ) => {
     if (Array.isArray(permission)) {
       const result = permission.reduce((acc, currentValue) => {
         const hasPermissionFunc = hasPermission(currentValue)
@@ -67,34 +72,42 @@ const LayoutComponent = () => {
     }
     return hasPermission(permission) ? '' : 'hide-item'
   }
+
+  const customMenuItems: MenuItemType[] = customRouters.map((route) => ({
+    label: route.label,
+    key: route.key,
+    className: hideItem(route.permissions),
+    icon: route.icon
+  }))
+
   const menuItems: MenuItemType[] = [
     {
       label: firstName || '',
-      key: 'profile',
+      key: MenuItemKeysType.profile,
       className: 'user-item',
       icon: <DefaultUser />
     },
     {
-      label: 'Приложения',
-      key: 'applications_group',
+      label: MenuItemLabelsType.applications_group,
+      key: MenuItemKeysType.applicationsGroup,
       className: hideItem([PermissionKeysType.read]),
       icon: <AppstoreAddOutlined />
     },
     {
-      label: 'Доступы приложений',
-      key: 'appAccess',
+      label: MenuItemLabelsType.appAccess,
+      key: MenuItemKeysType.appAccess,
       className: hideItem([PermissionKeysType.read]),
       icon: <FileProtectOutlined />
     },
     {
-      label: 'Модули',
-      key: 'modules',
+      label: MenuItemLabelsType.modules,
+      key: MenuItemKeysType.modules,
       className: hideItem(PermissionKeysType.read),
       icon: <ProductOutlined />
     },
     {
-      label: 'Пользователи и роли',
-      key: 'sessionManagement',
+      label: MenuItemLabelsType.session_management,
+      key: MenuParentItemKeysType.sessionManagement,
       className: hideItem([
         PermissionKeysType.user_view,
         PermissionKeysType.session_view,
@@ -103,27 +116,28 @@ const LayoutComponent = () => {
       icon: <ProfileOutlined />,
       children: [
         {
-          label: 'Пользователи',
-          key: 'users',
+          label: MenuItemLabelsType.users,
+          key: MenuItemKeysType.users,
           className: hideItem(PermissionKeysType.user_view)
         },
         {
-          label: 'Пользовательские сессии',
-          key: 'sessions',
+          label: MenuItemLabelsType.sessions,
+          key: MenuItemKeysType.sessions,
           className: hideItem(PermissionKeysType.session_view)
         },
         {
-          label: 'Просмотр журналов ИБ',
-          key: 'securityLog',
+          label: MenuItemLabelsType.securityLog,
+          key: MenuItemKeysType.securityLog,
           className: hideItem(PermissionKeysType.security_log_view)
         },
         {
-          label: 'Роли',
-          key: 'roles',
+          label: MenuItemLabelsType.roles,
+          key: MenuItemKeysType.roles,
           className: hideItem(PermissionKeysType.role_view)
         }
       ]
-    }
+    },
+    ...customMenuItems
   ]
 
   useEffect(() => {
@@ -156,13 +170,20 @@ const LayoutComponent = () => {
     const selectedKey = selectedMenuKeys[0] || ''
     const menuItem = menuKeys[menuKey]
 
-    if (menuItem && menuKey !== selectedKey) {
-      setSelectedMenuKeys([menuItem.key])
-      if (selectedKey) {
+    if (menuKey !== selectedKey) {
+      setSelectedMenuKeys([menuKey])
+      if (selectedKey && menuItem) {
         setOpenKeys(menuItem.parent)
       }
     }
   }, [location.pathname])
+
+  const handleCustomRoute = (key: string): void => {
+    const route = customRouters.find((route) => route.key === key)
+    if (route) {
+      navigate(route.path)
+    }
+  }
 
   const handlerOnClickMenu: MenuProps['onClick'] = ({ key }): void => {
     switch (key) {
@@ -192,6 +213,8 @@ const LayoutComponent = () => {
         navigate(routePaths.applicationsGroup)
         break
       default:
+        handleCustomRoute(key)
+        break
     }
   }
 

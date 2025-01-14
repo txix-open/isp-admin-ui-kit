@@ -22,6 +22,25 @@ const App = () => {
 
   const location = useLocation()
 
+  const customRouters = [
+    {
+      path: '/profile1',
+      element: <div>111</div>,
+      label: 'Profile1',
+      key: 'profile1',
+      permissions: [],
+      icon: ''
+    },
+    {
+      path: '/profile2',
+      element: <div>222</div>,
+      label: 'Profile2',
+      key: 'profile2',
+      permissions: ['read'],
+      icon: ''
+    }
+  ]
+
   useEffect(() => {
     const prevRoute = sessionStorage.getItem('prevRoute')
     if (
@@ -41,7 +60,7 @@ const App = () => {
     <div className="app">
       <Context.Provider value={{ setTheme, setChangeTheme, changeTheme }}>
         <ConfigProvider theme={themes} locale={ruRu}>
-          <Routers />
+          <Routers customRouters={customRouters}/>
         </ConfigProvider>
       </Context.Provider>
     </div>
