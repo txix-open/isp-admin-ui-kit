@@ -34,6 +34,7 @@ import { StateProfileStatus } from '@stores/redusers/ProfileSlice.ts'
 import { routePaths } from '@routes/routePaths.ts'
 
 import { PermissionKeysType } from '@type/roles.type.ts'
+import { CustomMenuItemType } from '@type/app.type.ts'
 
 import './layout.scss'
 
@@ -73,12 +74,24 @@ const LayoutComponent = ({ customRouters }: LayoutComponentPropsType) => {
     return hasPermission(permission) ? '' : 'hide-item'
   }
 
-  const customMenuItems: MenuItemType[] = customRouters.map((route) => ({
-    label: route.label,
-    key: route.key,
-    className: hideItem(route.permissions),
-    icon: route.icon
-  }))
+  const getCustomMenuItems = (routers: CustomMenuItemType[]): MenuItemType[] => {
+    return routers.map((route) => {
+      const menuItem: MenuItemType = {
+        label: route.label,
+        key: route.key,
+        className: hideItem(route.permissions),
+        icon: route.icon,
+      }
+
+      if (route.children && route.children.length > 0) {
+        menuItem.children = getCustomMenuItems(route.children)
+      }
+
+      return menuItem
+    })
+  }
+
+  const customMenuItems: MenuItemType[] = getCustomMenuItems(customRouters)
 
   const menuItems: MenuItemType[] = [
     {
@@ -178,8 +191,15 @@ const LayoutComponent = ({ customRouters }: LayoutComponentPropsType) => {
     }
   }, [location.pathname])
 
-  const handleCustomRoute = (key: string): void => {
-    const route = customRouters.find((route) => route.key === key)
+  const handleCustomRoute = (key: string, routers: CustomMenuItemType[]): void => {
+    const getRoute = () =>
+      routers.find((route) => {
+        if (route.children && route.children.length > 0) {
+          handleCustomRoute(key, route.children)
+        }
+       return route.key === key
+      })
+    const route = getRoute()
     if (route) {
       navigate(route.path)
     }
@@ -213,7 +233,7 @@ const LayoutComponent = ({ customRouters }: LayoutComponentPropsType) => {
         navigate(routePaths.applicationsGroup)
         break
       default:
-        handleCustomRoute(key)
+        handleCustomRoute(key, customRouters)
         break
     }
   }
