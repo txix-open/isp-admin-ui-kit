@@ -63,6 +63,8 @@ export const menuKeys: Record<MenuItemKeysType, MenuItem> = {
   }
 }
 
-export type MenuItemType = Required<MenuProps>['items'][number]
+export type MenuItemType = Required<MenuProps>['items'][number] & {
+  children?: MenuItemType[]
+}
 
 export interface LayoutComponentPropsType extends RoutersPropsType {}

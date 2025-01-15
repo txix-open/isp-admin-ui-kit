@@ -39,6 +39,7 @@ export interface CustomMenuItemType {
   key: string
   permissions: string[]
   icon: any
+  children?: CustomMenuItemType[]
 }
 
 export interface RoutersPropsType {
