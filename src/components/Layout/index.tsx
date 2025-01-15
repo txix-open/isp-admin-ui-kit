@@ -178,29 +178,61 @@ const LayoutComponent = ({ customRouters }: LayoutComponentPropsType) => {
     }
   }, [status])
 
-  useEffect(() => {
-    const menuKey = location.pathname.split('/')[1] as MenuItemKeysType
-    const selectedKey = selectedMenuKeys[0] || ''
-    const menuItem = menuKeys[menuKey]
-
-    if (menuKey !== selectedKey) {
-      setSelectedMenuKeys([menuKey])
-      if (selectedKey && menuItem) {
-        setOpenKeys(menuItem.parent)
+  const findCustomRouteWithParents = (
+    key: string,
+    routers: CustomMenuItemType[],
+    parentKeys: string[] = []
+  ): { route: CustomMenuItemType; parentKeys: string[] } | null => {
+    for (const route of routers) {
+      if (route.key === key) {
+        return { route, parentKeys }
       }
+      if (route) {
+        if (route.children && route.children.length > 0) {
+          const customRouteWithParents = findCustomRouteWithParents(key, route.children, [
+            ...parentKeys,
+            route.key
+          ])
+
+          if (customRouteWithParents) {
+            const { route: childRoute, parentKeys: childParentKeys } = customRouteWithParents
+            if (childRoute) {
+              return { route: childRoute, parentKeys: childParentKeys }
+            }
+          }
+        }
+      }
+    }
+    return null
+  }
+
+  useEffect(() => {
+    const menuKey = location.pathname.split('/')[1]
+    const customRouteWithParents = findCustomRouteWithParents(menuKey, customRouters)
+    if (customRouteWithParents) {
+      const { route, parentKeys } = customRouteWithParents
+      setSelectedMenuKeys([route.key as MenuItemKeysType])
+      setOpenKeys(parentKeys)
+      return
+    }
+
+    const menuItem = menuKeys[menuKey as MenuItemKeysType]
+    if (menuItem) {
+      setSelectedMenuKeys([menuKey as MenuItemKeysType])
+      const parent = menuItem.parent || []
+      setOpenKeys(parent)
+      return
     }
   }, [location.pathname])
 
-  const handleCustomRoute = (key: string, routers: CustomMenuItemType[]): void => {
-    const getRoute = () =>
-      routers.find((route) => {
-        if (route.children && route.children.length > 0) {
-          handleCustomRoute(key, route.children)
-        }
-       return route.key === key
-      })
-    const route = getRoute()
-    if (route) {
+  const handleCustomRoute = (
+    key: string,
+    routers: CustomMenuItemType[]
+  ): void => {
+    const customRouteWithParents = findCustomRouteWithParents(key, routers)
+
+    if (customRouteWithParents && customRouteWithParents.route) {
+      const { route } = customRouteWithParents
       navigate(route.path)
     }
   }
