@@ -37,7 +37,47 @@ const App = () => {
       label: 'Profile2',
       key: 'profile2',
       permissions: ['read'],
-      icon: ''
+      icon: '',
+      children: [
+        {
+          path: '/profile3',
+          element: <div>333</div>,
+          label: 'Profile3',
+          permissions: ['read'],
+          icon: '',
+          key: 'profile3',
+          children: [
+            {
+              path: '/profile4',
+              element: <div>444</div>,
+              label: 'Profile4',
+              permissions: ['read'],
+              icon: '',
+              key: 'profile4',
+              children: []
+            }
+          ]
+        },
+        {
+          path: '/profile5',
+          element: <div>555</div>,
+          label: 'Profile5',
+          permissions: ['read'],
+          icon: '',
+          key: 'profile5',
+          children: [
+            {
+              path: '/profile6',
+              element: <div>666</div>,
+              label: 'Profile6',
+              permissions: ['read'],
+              icon: '',
+              key: 'profile6',
+              children: []
+            }
+          ]
+        }
+      ]
     }
   ]
 
