@@ -34,6 +34,7 @@ import { StateProfileStatus } from '@stores/redusers/ProfileSlice.ts'
 import { routePaths } from '@routes/routePaths.ts'
 
 import { PermissionKeysType } from '@type/roles.type.ts'
+import { CustomMenuItemType } from '@type/app.type.ts'
 
 import './layout.scss'
 
@@ -73,12 +74,24 @@ const LayoutComponent = ({ customRouters }: LayoutComponentPropsType) => {
     return hasPermission(permission) ? '' : 'hide-item'
   }
 
-  const customMenuItems: MenuItemType[] = customRouters.map((route) => ({
-    label: route.label,
-    key: route.key,
-    className: hideItem(route.permissions),
-    icon: route.icon
-  }))
+  const getCustomMenuItems = (routers: CustomMenuItemType[]): MenuItemType[] => {
+    return routers.map((route) => {
+      const menuItem: MenuItemType = {
+        label: route.label,
+        key: route.key,
+        className: hideItem(route.permissions),
+        icon: route.icon,
+      }
+
+      if (route.children && route.children.length > 0) {
+        menuItem.children = getCustomMenuItems(route.children)
+      }
+
+      return menuItem
+    })
+  }
+
+  const customMenuItems: MenuItemType[] = getCustomMenuItems(customRouters)
 
   const menuItems: MenuItemType[] = [
     {
@@ -165,22 +178,61 @@ const LayoutComponent = ({ customRouters }: LayoutComponentPropsType) => {
     }
   }, [status])
 
-  useEffect(() => {
-    const menuKey = location.pathname.split('/')[1] as MenuItemKeysType
-    const selectedKey = selectedMenuKeys[0] || ''
-    const menuItem = menuKeys[menuKey]
-
-    if (menuKey !== selectedKey) {
-      setSelectedMenuKeys([menuKey])
-      if (selectedKey && menuItem) {
-        setOpenKeys(menuItem.parent)
+  const findCustomRouteWithParents = (
+    key: string,
+    routers: CustomMenuItemType[],
+    parentKeys: string[] = []
+  ): { route: CustomMenuItemType; parentKeys: string[] } | null => {
+    for (const route of routers) {
+      if (route.key === key) {
+        return { route, parentKeys }
       }
+      if (route) {
+        if (route.children && route.children.length > 0) {
+          const customRouteWithParents = findCustomRouteWithParents(key, route.children, [
+            ...parentKeys,
+            route.key
+          ])
+
+          if (customRouteWithParents) {
+            const { route: childRoute, parentKeys: childParentKeys } = customRouteWithParents
+            if (childRoute) {
+              return { route: childRoute, parentKeys: childParentKeys }
+            }
+          }
+        }
+      }
+    }
+    return null
+  }
+
+  useEffect(() => {
+    const menuKey = location.pathname.split('/')[1]
+    const customRouteWithParents = findCustomRouteWithParents(menuKey, customRouters)
+    if (customRouteWithParents) {
+      const { route, parentKeys } = customRouteWithParents
+      setSelectedMenuKeys([route.key as MenuItemKeysType])
+      setOpenKeys(parentKeys)
+      return
+    }
+
+    const menuItem = menuKeys[menuKey as MenuItemKeysType]
+    if (menuItem) {
+      setSelectedMenuKeys([menuKey as MenuItemKeysType])
+      const parent = menuItem.parent || []
+      setOpenKeys(parent)
+      return
     }
   }, [location.pathname])
 
-  const handleCustomRoute = (key: string): void => {
-    const route = customRouters.find((route) => route.key === key)
-    if (route) {
+  const handleCustomRoute = (
+    key: string,
+    routers: CustomMenuItemType[]
+  ): void => {
+    const customRouteWithParents = findCustomRouteWithParents(key, routers)
+
+    if (customRouteWithParents && customRouteWithParents.route) {
+      const { route } = customRouteWithParents
       navigate(route.path)
     }
   }
@@ -213,7 +265,7 @@ const LayoutComponent = ({ customRouters }: LayoutComponentPropsType) => {
         navigate(routePaths.applicationsGroup)
         break
       default:
-        handleCustomRoute(key)
+        handleCustomRoute(key, customRouters)
         break
     }
   }
