@@ -13,7 +13,13 @@
     "plugin:@typescript-eslint/recommended",
     "plugin:import/typescript"
   ],
-  "ignorePatterns": ["node_modules", "build", "generateVersionFile.cjs"],
+  "ignorePatterns": [
+    "node_modules",
+    "build",
+    "generateVersionFile.cjs",
+    "rollup.config.js",
+    "babel.config.js"
+  ],
   "parser": "@typescript-eslint/parser",
   "parserOptions": {
     "ecmaFeatures": {
