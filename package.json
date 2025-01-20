@@ -1,6 +1,6 @@
 {
   "name": "isp-admin-ui-kit",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "main": "dist/index.js",
   "type": "module",
   "scripts": {
@@ -70,8 +70,8 @@
     "@monaco-editor/react": "^4.6.0",
     "antd": "^5.12.2",
     "monaco-editor": "^0.52.0",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
+    "react": ">=18.2.0",
+    "react-dom": ">=18.2.0",
     "react-hook-form": "^7.54.0",
     "react-router-dom": "^6.22.3",
     "axios": "^1.7.7",
