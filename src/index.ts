@@ -1,4 +1,5 @@
 import AdminBase from '@components/AdminBase.tsx'
-export {
-  AdminBase
-}
+
+import { baseApiServices, baseSetupStore, Context as AdminBaseContext } from './stores'
+
+export { AdminBase, baseApiServices, baseSetupStore, AdminBaseContext }
