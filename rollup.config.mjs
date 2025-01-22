@@ -19,6 +19,7 @@ export default [
       format: 'esm',
       inlineDynamicImports: true,
     },
+    external: ['antd', '@ant-design/cssinjs', 'react', 'react-dom'],
     plugins: [
       alias({
         entries: [{ find: '@', replacement: './src' }]
