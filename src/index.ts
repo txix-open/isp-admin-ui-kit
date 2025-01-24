@@ -1,5 +1,11 @@
 import AdminBase from '@components/AdminBase.tsx'
 
-import { baseApiServices, baseSetupStore, Context as AdminBaseContext } from './stores'
+import useRole from '@hooks/useRole'
 
-export { AdminBase, baseApiServices, baseSetupStore, AdminBaseContext }
+import {
+  baseApiServices,
+  baseSetupStore,
+  Context as AdminBaseContext
+} from './stores'
+
+export { AdminBase, baseApiServices, baseSetupStore, AdminBaseContext, useRole }
