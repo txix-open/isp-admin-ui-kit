@@ -1,4 +1,9 @@
-import { combineReducers, configureStore } from '@reduxjs/toolkit'
+import {
+  combineReducers,
+  configureStore,
+  Middleware,
+  Reducer
+} from '@reduxjs/toolkit'
 import { theme } from 'antd'
 import { MapToken, SeedToken } from 'antd/es/theme/interface'
 import { createContext, Dispatch, SetStateAction } from 'react'
@@ -12,7 +17,6 @@ import modulesServiceApi from '@services/modulesService.ts'
 import roleApi from '@services/roleService.ts'
 import routeApi from '@services/routeService.ts'
 import securityLogServiceApi from '@services/securityLogService.ts'
-import sessionServiceApi from '@services/sessionService.ts'
 import tokensApi from '@services/tokensService.ts'
 import userServiceApi from '@services/userService.ts'
 
@@ -37,44 +41,72 @@ export const Context = createContext<ContextProps>({
   setTheme: () => theme.defaultAlgorithm
 })
 
-const rootReducer = combineReducers({
-  profileReducer,
+export const baseApiServices = {
+  roleApi,
+  userServiceApi,
+  securityLogServiceApi,
+  appApi,
+  accessListApi,
+  routeApi,
+  applicationsGroupApi,
+  applicationsApi,
+  tokensApi,
+  configServiceApi,
+  modulesServiceApi,
   UIReducer,
-  [roleApi.reducerPath]: roleApi.reducer,
-  [userServiceApi.reducerPath]: userServiceApi.reducer,
-  [sessionServiceApi.reducerPath]: sessionServiceApi.reducer,
-  [securityLogServiceApi.reducerPath]: securityLogServiceApi.reducer,
-  [appApi.reducerPath]: appApi.reducer,
-  [accessListApi.reducerPath]: accessListApi.reducer,
-  [routeApi.reducerPath]: routeApi.reducer,
-  [modulesServiceApi.reducerPath]: modulesServiceApi.reducer,
-  [applicationsGroupApi.reducerPath]: applicationsGroupApi.reducer,
-  [applicationsApi.reducerPath]: applicationsApi.reducer,
-  [configServiceApi.reducerPath]: configServiceApi.reducer,
-  [tokensApi.reducerPath]: tokensApi.reducer
-})
+  profileReducer
+}
 
-export const setupStore = () =>
-  configureStore({
-    reducer: rootReducer,
-    middleware: (getDefaultMiddleware) =>
-      getDefaultMiddleware().concat(
-        roleApi.middleware,
-        userServiceApi.middleware,
-        securityLogServiceApi.middleware,
-        appApi.middleware,
-        accessListApi.middleware,
-        routeApi.middleware,
-        userServiceApi.middleware,
-        sessionServiceApi.middleware,
-        modulesServiceApi.middleware,
-        applicationsGroupApi.middleware,
-        applicationsApi.middleware,
-        tokensApi.middleware,
-        configServiceApi.middleware
-      )
+type ApiService = {
+  middleware: Middleware
+  reducerPath: string
+  reducer: Reducer
+}
+
+type ApiFunction = (...args: any[]) => any
+
+export type ApiServices = Record<string, ApiService | ApiFunction>
+
+type FunctionKeys = Record<string, ApiFunction>
+
+export const baseSetupStore = (
+  apiServices: ApiServices | undefined = {}
+): ReturnType<typeof configureStore> => {
+  const api: ApiServices =
+    Object.keys(apiServices).length > 0
+      ? { ...baseApiServices, ...apiServices }
+      : baseApiServices
+
+  const extractMiddlewares = (services: ApiServices) =>
+    Object.values(services)
+      .filter((api) => (api as ApiService).middleware)
+      .map((api) => (api as ApiService).middleware)
+
+  const findFunctionKeys = (obj: ApiServices): FunctionKeys =>
+    Object.fromEntries(
+      Object.entries(obj).filter(([_, value]) => typeof value === 'function')
+    ) as FunctionKeys
+
+  const apiMiddlewares = extractMiddlewares(api)
+  const functionKeys = findFunctionKeys(api)
+
+  const apiReducerMap = Object.values(api)
+    .filter(
+      (api): api is ApiService => (api as ApiService).reducerPath !== undefined
+    )
+    .reduce((acc: Record<string, Reducer>, api: ApiService) => {
+      acc[api.reducerPath] = api.reducer
+      return acc
+    }, {})
+
+  const rootReducer = combineReducers({
+    ...apiReducerMap,
+    ...functionKeys
   })
 
-export type RootState = ReturnType<typeof rootReducer>
-export type AppStore = ReturnType<typeof setupStore>
-export type AppDispatch = AppStore['dispatch']
+  return configureStore({
+    reducer: rootReducer,
+    middleware: (getDefaultMiddleware) =>
+      getDefaultMiddleware().concat(apiMiddlewares)
+  })
+}
