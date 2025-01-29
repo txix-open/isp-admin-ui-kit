@@ -1,3 +1,5 @@
+import { ReactNode } from 'react'
+
 interface TokenType {
   appId: boolean
   createdAt: string
@@ -33,12 +35,12 @@ export interface AppApiResponseType {
 }
 
 export interface CustomMenuItemType {
-  path: string
-  element: any
+  route?: string
+  element?: any
   label: string
   key: string
   permissions: string[]
-  icon: any
+  icon?: ReactNode
   children?: CustomMenuItemType[]
 }
 
