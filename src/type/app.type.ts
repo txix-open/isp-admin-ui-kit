@@ -1,5 +1,3 @@
-import { ReactNode } from 'react'
-
 interface TokenType {
   appId: boolean
   createdAt: string
@@ -32,18 +30,4 @@ export interface DomainType {
 export interface AppApiResponseType {
   originalResponse: DomainType[]
   appList: SystemTreeAppType[]
-}
-
-export interface CustomMenuItemType {
-  route?: string
-  element?: any
-  label: string
-  key: string
-  permissions: string[]
-  icon?: ReactNode
-  children?: CustomMenuItemType[]
-}
-
-export interface RoutersPropsType {
-  customRouters: CustomMenuItemType[]
 }

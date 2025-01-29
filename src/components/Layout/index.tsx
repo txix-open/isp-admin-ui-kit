@@ -1,11 +1,5 @@
-import {
-  AppstoreAddOutlined,
-  FileProtectOutlined,
-  ProductOutlined,
-  ProfileOutlined
-} from '@ant-design/icons'
-import type { MenuProps } from 'antd'
-import { ConfigProvider, Layout, Menu, Spin } from 'antd'
+import { ConfigProvider, Layout, Spin } from 'antd'
+import { findRouteWithParents, Layout as LayoutUi } from 'isp-ui-kit'
 import { useContext, useEffect, useState } from 'react'
 import { Navigate, Outlet, useLocation, useNavigate } from 'react-router-dom'
 
@@ -13,15 +7,11 @@ import { localStorageKeys } from '@constants/localStorageKeys.ts'
 
 import Header from '@widgets/Header'
 
-import DefaultUser from '@components/Icons/DefaultUser.tsx'
 import {
-  LayoutComponentPropsType,
-  MenuItemKeysType,
-  MenuItemLabelsType,
-  MenuItemType,
-  menuKeys,
-  MenuParentItemKeysType
+  CustomMenuItemType,
+  LayoutComponentPropsType
 } from '@components/Layout/layout.type.ts'
+import { menuConfig } from '@components/Layout/menu-config.tsx'
 
 import { LocalStorage } from '@utils/localStorageUtils.ts'
 
@@ -33,21 +23,15 @@ import { StateProfileStatus } from '@stores/redusers/ProfileSlice.ts'
 
 import { routePaths } from '@routes/routePaths.ts'
 
-import { PermissionKeysType } from '@type/roles.type.ts'
-import { CustomMenuItemType } from '@type/app.type.ts'
-
 import './layout.scss'
 
-const { Content, Sider } = Layout
+const { Content } = Layout
+const { LayoutMenu, LayoutSider } = LayoutUi
 
 const LayoutComponent = ({ customRouters }: LayoutComponentPropsType) => {
   const [collapsed, setCollapsed] = useState<boolean>(
     LocalStorage.get('menu') === null ? true : LocalStorage.get('menu')
   )
-  const [selectedMenuKeys, setSelectedMenuKeys] = useState<MenuItemKeysType[]>(
-    []
-  )
-  const [openKeys, setOpenKeys] = useState<string[]>([])
   const [loading, setLoading] = useState(true)
   const dispatch = useAppDispatch()
   const {
@@ -61,11 +45,9 @@ const LayoutComponent = ({ customRouters }: LayoutComponentPropsType) => {
 
   const userToken = LocalStorage.get(localStorageKeys.USER_TOKEN)
 
-  const hideItem = (
-    permission: PermissionKeysType | PermissionKeysType[] | string[]
-  ) => {
+  const onHideMenuItem = (permission: string | string[]) => {
     if (Array.isArray(permission)) {
-      const result = permission.reduce((acc, currentValue) => {
+      const result = permission.reduce((acc, currentValue: string) => {
         const hasPermissionFunc = hasPermission(currentValue)
         return hasPermissionFunc || acc
       }, false)
@@ -74,13 +56,16 @@ const LayoutComponent = ({ customRouters }: LayoutComponentPropsType) => {
     return hasPermission(permission) ? '' : 'hide-item'
   }
 
-  const getCustomMenuItems = (routers: CustomMenuItemType[]): MenuItemType[] => {
+  const getCustomMenuItems = (
+    routers: CustomMenuItemType[]
+  ): CustomMenuItemType[] => {
     return routers.map((route) => {
-      const menuItem: MenuItemType = {
+      const menuItem: CustomMenuItemType = {
         label: route.label,
         key: route.key,
-        className: hideItem(route.permissions),
-        icon: route.icon,
+        route: route.route,
+        permissions: route.permissions,
+        icon: route.icon
       }
 
       if (route.children && route.children.length > 0) {
@@ -91,67 +76,10 @@ const LayoutComponent = ({ customRouters }: LayoutComponentPropsType) => {
     })
   }
 
-  const customMenuItems: MenuItemType[] = getCustomMenuItems(customRouters)
+  const customMenuItems: CustomMenuItemType[] =
+    getCustomMenuItems(customRouters)
 
-  const menuItems: MenuItemType[] = [
-    {
-      label: firstName || '',
-      key: MenuItemKeysType.profile,
-      className: 'user-item',
-      icon: <DefaultUser />
-    },
-    {
-      label: MenuItemLabelsType.applications_group,
-      key: MenuItemKeysType.applicationsGroup,
-      className: hideItem([PermissionKeysType.read]),
-      icon: <AppstoreAddOutlined />
-    },
-    {
-      label: MenuItemLabelsType.appAccess,
-      key: MenuItemKeysType.appAccess,
-      className: hideItem([PermissionKeysType.read]),
-      icon: <FileProtectOutlined />
-    },
-    {
-      label: MenuItemLabelsType.modules,
-      key: MenuItemKeysType.modules,
-      className: hideItem(PermissionKeysType.read),
-      icon: <ProductOutlined />
-    },
-    {
-      label: MenuItemLabelsType.session_management,
-      key: MenuParentItemKeysType.sessionManagement,
-      className: hideItem([
-        PermissionKeysType.user_view,
-        PermissionKeysType.session_view,
-        PermissionKeysType.role_view
-      ]),
-      icon: <ProfileOutlined />,
-      children: [
-        {
-          label: MenuItemLabelsType.users,
-          key: MenuItemKeysType.users,
-          className: hideItem(PermissionKeysType.user_view)
-        },
-        {
-          label: MenuItemLabelsType.sessions,
-          key: MenuItemKeysType.sessions,
-          className: hideItem(PermissionKeysType.session_view)
-        },
-        {
-          label: MenuItemLabelsType.securityLog,
-          key: MenuItemKeysType.securityLog,
-          className: hideItem(PermissionKeysType.security_log_view)
-        },
-        {
-          label: MenuItemLabelsType.roles,
-          key: MenuItemKeysType.roles,
-          className: hideItem(PermissionKeysType.role_view)
-        }
-      ]
-    },
-    ...customMenuItems
-  ]
+  const resultMenuConfig = [...menuConfig(firstName), ...customMenuItems]
 
   useEffect(() => {
     ConfigProvider.config({
@@ -178,95 +106,10 @@ const LayoutComponent = ({ customRouters }: LayoutComponentPropsType) => {
     }
   }, [status])
 
-  const findCustomRouteWithParents = (
-    key: string,
-    routers: CustomMenuItemType[],
-    parentKeys: string[] = []
-  ): { route: CustomMenuItemType; parentKeys: string[] } | null => {
-    for (const route of routers) {
-      if (route.key === key) {
-        return { route, parentKeys }
-      }
-      if (route) {
-        if (route.children && route.children.length > 0) {
-          const customRouteWithParents = findCustomRouteWithParents(key, route.children, [
-            ...parentKeys,
-            route.key
-          ])
-
-          if (customRouteWithParents) {
-            const { route: childRoute, parentKeys: childParentKeys } = customRouteWithParents
-            if (childRoute) {
-              return { route: childRoute, parentKeys: childParentKeys }
-            }
-          }
-        }
-      }
-    }
-    return null
-  }
-
-  useEffect(() => {
-    const menuKey = location.pathname.split('/')[1]
-    const customRouteWithParents = findCustomRouteWithParents(menuKey, customRouters)
-    if (customRouteWithParents) {
-      const { route, parentKeys } = customRouteWithParents
-      setSelectedMenuKeys([route.key as MenuItemKeysType])
-      setOpenKeys(parentKeys)
-      return
-    }
-
-    const menuItem = menuKeys[menuKey as MenuItemKeysType]
-    if (menuItem) {
-      setSelectedMenuKeys([menuKey as MenuItemKeysType])
-      const parent = menuItem.parent || []
-      setOpenKeys(parent)
-      return
-    }
-  }, [location.pathname])
-
-  const handleCustomRoute = (
-    key: string,
-    routers: CustomMenuItemType[]
-  ): void => {
-    const customRouteWithParents = findCustomRouteWithParents(key, routers)
-
-    if (customRouteWithParents && customRouteWithParents.route) {
-      const { route } = customRouteWithParents
-      navigate(route.path)
-    }
-  }
-
-  const handlerOnClickMenu: MenuProps['onClick'] = ({ key }): void => {
-    switch (key) {
-      case MenuItemKeysType.profile: {
-        navigate(routePaths.profile)
-        break
-      }
-      case MenuItemKeysType.users:
-        navigate(routePaths.users)
-        break
-      case MenuItemKeysType.sessions:
-        navigate(routePaths.sessions)
-        break
-      case MenuItemKeysType.securityLog:
-        navigate(routePaths.securityLog)
-        break
-      case MenuItemKeysType.appAccess:
-        navigate(routePaths.appAccess)
-        break
-      case MenuItemKeysType.roles:
-        navigate(routePaths.roles)
-        break
-      case MenuItemKeysType.modules:
-        navigate(routePaths.modules)
-        break
-      case MenuItemKeysType.applicationsGroup:
-        navigate(routePaths.applicationsGroup)
-        break
-      default:
-        handleCustomRoute(key, customRouters)
-        break
+  const handleItemChange = ({ key }: { key: string }) => {
+    const routeWithParents = findRouteWithParents(key, resultMenuConfig)
+    if (routeWithParents && routeWithParents.route.route) {
+      navigate(routeWithParents.route.route)
     }
   }
 
@@ -277,32 +120,23 @@ const LayoutComponent = ({ customRouters }: LayoutComponentPropsType) => {
   if (status === StateProfileStatus.rejected) {
     return <Navigate to={routePaths.error} replace />
   }
+  const handleCollapsedChange = (value: boolean) => {
+    LocalStorage.set('menu', value)
+    setCollapsed(value)
+  }
 
   return (
     <section>
       <Layout className="layout" data-cy="homePage">
-        <Sider
-          width="250px"
-          data-cy="aside"
-          theme="light"
-          collapsible
-          collapsed={collapsed}
-          onCollapse={(value) => {
-            LocalStorage.set('menu', value)
-            setCollapsed(value)
-          }}
-        >
+        <LayoutSider collapsed={collapsed} onCollapse={handleCollapsedChange}>
           <Header collapsed={collapsed} />
-          <Menu
-            onOpenChange={(keys) => setOpenKeys(keys)}
-            openKeys={openKeys}
-            selectedKeys={selectedMenuKeys}
-            onClick={handlerOnClickMenu}
-            theme="light"
-            mode="inline"
-            items={menuItems}
+          <LayoutMenu
+            onHideMenuItem={onHideMenuItem}
+            currentPath={location.pathname}
+            menuConfig={resultMenuConfig}
+            onClickItem={handleItemChange}
           />
-        </Sider>
+        </LayoutSider>
         <Layout className="site-layout">
           <Content className="site-layout__content">
             <Outlet />
