@@ -19,6 +19,7 @@ import routeApi from '@services/routeService.ts'
 import securityLogServiceApi from '@services/securityLogService.ts'
 import tokensApi from '@services/tokensService.ts'
 import userServiceApi from '@services/userService.ts'
+import sessionServiceApi from '@services/sessionService.ts'
 
 import profileReducer from './redusers/ProfileSlice.ts'
 import UIReducer from './redusers/UISlice.ts'
@@ -53,6 +54,7 @@ export const baseApiServices = {
   tokensApi,
   configServiceApi,
   modulesServiceApi,
+  sessionServiceApi,
   UIReducer,
   profileReducer
 }
