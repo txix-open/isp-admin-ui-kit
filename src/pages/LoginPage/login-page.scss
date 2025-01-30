@@ -1,0 +1,53 @@
+@import "src/constants/style/styleConst";
+
+.login-page {
+  height: 100vh;
+  background: $background-color;
+
+  display: flex;
+
+  .ant-input {
+    width: 300px;
+    text-align: center;
+  }
+
+  .ant-divider-horizontal {
+    margin-top: $basic-margin !important;
+  }
+
+  .ant-form-item-explain-error {
+    margin-bottom: $basic-margin;
+  }
+
+  .color {
+    color: $text-color-gray;
+  }
+
+  &__content {
+    max-width: 360px;
+    margin: auto;
+    display: flex;
+    flex-direction: column;
+
+    &__title {
+      text-align: center;
+      font-family: 'Roboto', sans-serif;
+      font-size: $text-size;
+      line-height: 20px;
+      color: $text-color-gray;
+    }
+
+    &__submit-sudir-btn {
+      background: #0000000f;
+      margin-top: 4 * $basic-margin;
+
+      &:hover {
+        background: rgba(0, 0, 0, 0.09) !important;
+      }
+    }
+  }
+
+  .requiredInput::after {
+    content: "";
+  }
+}

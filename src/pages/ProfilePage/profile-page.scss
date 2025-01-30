@@ -1,0 +1,34 @@
+@import '../../constants/style/styleConst';
+
+.profile-page {
+  height: 100vh;
+  overflow: auto;
+  border: 1px solid var(--ant-color-border);
+  padding: $basic-padding * 2;
+  display: flex;
+  flex-direction: column;
+  align-items: start;
+
+  &__header {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+  }
+
+  &__title {
+    font-size: $text-size-header1;
+  }
+
+  &__user-info {
+    margin-top: $basic-padding;
+
+    span {
+      font-size: $text-size !important;
+    }
+  }
+
+  &__actions {
+    display: flex;
+    gap: $basic-margin
+  }
+}

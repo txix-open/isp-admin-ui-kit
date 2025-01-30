@@ -1,0 +1,39 @@
+@import "src/constants/style/styleConst";
+
+.applications-content {
+  height: 100%;
+  display: grid;
+  grid-template-columns:min-content 1fr;
+  width: 100%;
+
+  .column-content {
+    margin-left: $basic-margin;
+  }
+
+  &__add-btn {
+    display: flex;
+    max-width: 240px;
+    margin-left: auto;
+    margin-bottom: $basic-margin * 2;
+  }
+
+  &__update-btn {
+    margin-right: $basic-margin;
+  }
+
+  &__addToken-btn {
+    display: flex;
+    margin: 0 auto;
+  }
+
+  .link-btn {
+    color: $blue-color;
+
+    &:hover {
+      color: $text-color-blue;
+    }
+  }
+  .column {
+    border-left: 0;
+  }
+}

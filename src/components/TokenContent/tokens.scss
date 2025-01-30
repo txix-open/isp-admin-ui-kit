@@ -1,0 +1,35 @@
+@import "src/constants/style/styleConst";
+
+.token-content {
+  overflow-x: scroll;
+  width: 100%;
+
+  &__table {
+    overflow-x: scroll;
+    height: calc(100vh - 100px);
+  }
+
+  &__wrap {
+    padding: $basic-padding*1.25 $basic-padding*3;
+  }
+
+  &__header {
+    display: flex;
+    justify-content: space-between;
+
+    h3 {
+      margin: 0;
+      padding: 0;
+      font-size: 19px;
+      text-overflow: ellipsis;
+      overflow: hidden;
+      white-space: nowrap;
+      font-family: PT Sans, sans-serif;
+      font-weight: 500;
+    }
+  }
+
+  .copy-btn {
+    cursor: pointer;
+  }
+}

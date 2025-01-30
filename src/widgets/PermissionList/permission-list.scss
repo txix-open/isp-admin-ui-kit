@@ -1,0 +1,16 @@
+@import "src/constants/style/styleConst";
+
+.permission-list {
+  .ant-descriptions-item-label {
+    font-size: $text-size-header2;
+  }
+
+  ul, li {
+    list-style-position: inside
+  }
+
+  li {
+    font-size: $text-size;
+    margin-bottom: $basic-margin * 1.5;
+  }
+}

@@ -1,0 +1,15 @@
+.close-btn {
+  border: none;
+  background: transparent;
+  box-shadow: none;
+  padding: 5px !important;
+  position: absolute;
+  top: 8px;
+  right: 8px;
+
+  svg {
+    path {
+      fill: var(--ant-color-text) !important;
+    }
+  }
+}

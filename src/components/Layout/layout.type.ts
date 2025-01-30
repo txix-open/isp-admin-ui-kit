@@ -1,0 +1,17 @@
+import { ReactNode } from 'react'
+
+export interface LayoutComponentPropsType extends RoutersPropsType {}
+
+export interface CustomMenuItemType {
+  label: string
+  key: string
+  permissions: string[]
+  icon?: ReactNode
+  route?: string
+  element?: any
+  children?: CustomMenuItemType[]
+}
+
+export interface RoutersPropsType {
+  customRouters: CustomMenuItemType[]
+}

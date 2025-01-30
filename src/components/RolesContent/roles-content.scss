@@ -1,0 +1,30 @@
+@import "../../constants/style/styleConst";
+
+.roles-content {
+  padding: $basic-padding*2 $basic-padding*3 0;
+  min-width: 400px;
+  height: 100%;
+
+  &__header {
+    display: flex;
+    justify-content: space-between;
+  }
+
+  &__wrap-input {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+
+  .ant-pagination {
+    margin: 8px 0 !important;
+  }
+
+  .ant-divider-horizontal {
+    margin: 14px 0;
+  }
+
+  .ant-form-item {
+    margin-bottom: 12px;
+  }
+}

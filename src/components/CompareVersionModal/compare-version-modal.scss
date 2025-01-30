@@ -1,0 +1,37 @@
+@import "src/constants/style/styleConst";
+
+.compare-version-modal {
+  .modal__wrap {
+    width: 100%;
+    height: 100%;
+    justify-content: initial;
+  }
+
+  .modal__content {
+    overflow: initial;
+  }
+
+  &__header {
+    margin-top: $basic-margin;
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: $basic-margin;
+
+  }
+
+  &__content {
+    .monaco-diff-editor {
+      overflow-y: scroll;
+      height: calc(90vh - 150px) !important;
+    }
+
+    &__table {
+      overflow-y: auto;
+      height: calc(90vh - 50px);
+
+      &__row {
+        cursor: pointer;
+      }
+    }
+  }
+}

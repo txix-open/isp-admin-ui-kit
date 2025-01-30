@@ -1,0 +1,19 @@
+@import "src/constants/style/styleConst";
+
+.all-version-page {
+  padding: $basic-padding*2 0;
+
+  &__back-btn {
+    margin-bottom: $basic-margin*2;
+  }
+
+  &__table {
+    overflow: auto;
+    height: calc(100vh - 150px);
+  }
+
+  &__actions-field {
+    display: flex;
+    gap: $basic-margin
+  }
+}

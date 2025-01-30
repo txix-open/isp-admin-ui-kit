@@ -1,0 +1,11 @@
+@import "src/constants/style/styleConst";
+
+.config-schema-modal {
+  .modal__wrap {
+    min-width: 880px;
+  }
+
+  .json-schema-view {
+    padding: $basic-padding
+  }
+}

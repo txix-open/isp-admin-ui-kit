@@ -1,0 +1,17 @@
+@import "../../constants/style/styleConst";
+
+.roles-page {
+  height: 100%;
+  display: flex;
+
+  .role-item {
+    &__id {
+      color: $grey;
+    }
+  }
+
+  &__content {
+    overflow-x: scroll;
+    width: 100%
+  }
+}
