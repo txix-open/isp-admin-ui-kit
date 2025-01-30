@@ -5,11 +5,11 @@ import { Route } from 'react-router-dom'
 import { CustomMenuItemType } from '@type/app.type.ts'
 
 export const generateCustomRoutes = (customRouters: CustomMenuItemType[]): JSX.Element[] => {
-  return customRouters.map(({ key, path, element, children }) => (
+  return customRouters.map(({ key, route, element, children }) => (
     <>
       <Route
         key={key}
-        path={path}
+        path={route}
         element={<Suspense fallback={<Spin />}>{element}</Suspense>}
       />
       {children && children.length > 0 && generateCustomRoutes(children)}
