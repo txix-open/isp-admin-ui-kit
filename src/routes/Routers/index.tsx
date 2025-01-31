@@ -11,7 +11,7 @@ import ErrorWrapperPage from '@pages/ErrorWrapperPage'
 
 import PrivateRoute from '@routes/PrivateRoute'
 import { routePaths } from '@routes/routePaths.ts'
-import { RoutersPropsType } from '@type/app.type.ts'
+import { RoutersPropsType } from '@components/Layout/layout.type.ts'
 import { generateCustomRoutes } from '@routes/customRoutes.tsx'
 
 const LoginPage = lazy(() => import('@pages/LoginPage'))
