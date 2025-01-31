@@ -5,6 +5,7 @@ export interface LayoutComponentPropsType extends RoutersPropsType {}
 export interface CustomMenuItemType {
   label: string
   key: string
+  className?: string
   permissions: string[]
   icon?: ReactNode
   route?: string

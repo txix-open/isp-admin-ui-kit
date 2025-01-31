@@ -16,6 +16,7 @@ export const menuConfig = (name: string) => [
     label: name || '',
     key: 'profile',
     icon: <DefaultUser />,
+    className: 'user-item',
     route: routePaths.profile,
     permissions: [PermissionKeysType.read]
   },

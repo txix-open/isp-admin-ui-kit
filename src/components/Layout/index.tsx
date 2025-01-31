@@ -64,6 +64,7 @@ const LayoutComponent = ({ customRouters }: LayoutComponentPropsType) => {
         label: route.label,
         key: route.key,
         route: route.route,
+        className: route.className ? route.className : '',
         permissions: route.permissions,
         icon: route.icon
       }

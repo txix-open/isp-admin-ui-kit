@@ -62,10 +62,10 @@ const store = baseSetupStore(apiServices)
 
 Теперь вы можете импортировать компонент в свой проект, который имеет необязательные параметры:
 
-| Название            | Описание                                                                                  | Пример                                                                                                                                                                    |
-|---------------------|-------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| customRouters       | массив объектов                                                                           | customRouters={ [<br>{<br>  path: string <br> element: any <br> label: string <br> key: string <br> permissions: string[] <br> icon: any <br> children?: []  <br>}<br>] } |
-| configProviderProps | объект, принимающий в себя пропсы для ConfigProvider из библиотеки antd в качестве ключей | configProviderProps={{theme: lightTheme, locale: eng}}                                                                                                                    |
+| Название            | Описание                                                                                  | Пример                                                                                                                                                                                                |
+|---------------------|-------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| customRouters       | массив объектов                                                                           | customRouters={ [<br>{<br>  route?: string <br> element?: any <br> className?: string <br> label: string <br> key: string <br> permissions: string[] <br> icon?: any <br> children?: []  <br>}<br>] } |
+| configProviderProps | объект, принимающий в себя пропсы для ConfigProvider из библиотеки antd в качестве ключей | configProviderProps={{theme: lightTheme, locale: eng}}                                                                                                                                                |
 
 ```js
  <AdminBase/> 
