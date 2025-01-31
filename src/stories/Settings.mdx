@@ -1,0 +1,152 @@
+import { Meta } from "@storybook/blocks";
+
+<Meta title="Настройка" />
+
+# Настройки библиотеки
+
+## Меню
+
+- [Установка библиотеки в другие проекты](#установка-библиотеки-в-другие-проекты)
+- [Работа с компонентом AdminBase](#работа-с-компонентом-AdminBase)
+- [Подключение базового стора](#подключение-базового-стора)
+- [Интеграция с кастомным стором](#интгерация-с-кастомным-стором)
+- [Подключение темы](#подключение-темы)
+- [Настройка роутеров](#настройка-роутеров)
+
+---
+
+## Установка библиотеки в другие проекты
+```npm install isp-admin-ui-kit```
+
+---
+
+## Работа с компонентом AdminBase
+
+Вы можете использовать компонент `AdminBase` в своём проекте с настройкой следующих параметров:
+
+| Название              | Описание                                                                 | Пример                               |
+|-----------------------|--------------------------------------------------------------------------|--------------------------------------|
+| `customRouters`       | Массив объектов, описывающих маршруты.                                   | [См. Настройка Routes](#настройка-роутеров).                     |
+| `configProviderProps` | Объект, содержащий пропсы для `ConfigProvider` из библиотеки Ant Design. | `{ theme: lightTheme, locale: eng }` |
+
+#### Примеры:
+
+- Использование без параметров:
+
+```js
+ <AdminBase/>
+```
+
+- С настройкой роутеров и темы:
+
+```js
+<AdminBase customRouters={customRouters} configProviderProps={{ theme: lightTheme, locale: ru }}/>;
+```
+
+
+## Подключение базового стора
+- Импортируйте `baseSetupStore` из пакета.
+
+``` import { baseSetupStore } from 'isp-admin-ui-kit'```
+
+- Настройте store в вашем проекте:
+
+```tsx
+import { baseSetupStore } from 'isp-admin-ui-kit';
+import { Provider } from 'react-redux';
+import { BrowserRouter } from 'react-router-dom';
+
+const store = baseSetupStore();
+
+<Provider store={store}>
+  <BrowserRouter>
+    <App/>
+  </BrowserRouter>
+</Provider>
+```
+
+- Получение данных из базовых api
+
+  - импортировать `baseApiServices` из `isp-admin-ui-kit`
+  - получить данные с помощью вызова нужного api
+```tsx
+const { data, isLoading, isError } = baseApiServices.[api-name].useGetAllRolesQuery()
+
+```
+#### Пример:
+
+```tsx
+import {baseApiServices} from 'isp-admin-ui-kit'
+const { data, isLoading, isError } = baseApiServices.roleApi.useGetAllRolesQuery()
+```
+
+## Интеграция с кастомным стором
+```baseSetupStore``` принимает необязательный параметр ```apiServices```, который позволяет интегрировать пользовательские редьюсеры и слайсеры.
+
+```apiServices```	Объект кастомных редьюсеров и слайсеров
+
+| Название    | Описание                                | Пример                                                           |
+|-------------|-----------------------------------------|------------------------------------------------------------------|
+| apiServices | Объект кастомных редьюсеров и слайсеров | ```const apiServices = {modulesServiceApi,UIReducer}``` |
+
+#### Пример:
+
+```tsx
+const apiServices = {
+  modulesServiceApi,
+  UIReducer,
+};
+
+
+const store = baseSetupStore(apiServices);
+```
+
+## Подключение темы
+
+Базовая интеграция темы Ant Design встроена. Для добавления динамических стилей для кастомных компонентов используйте переменные Ant Design.
+Дополнительные пропсы для ```ConfigProvider``` можно передать через параметр ```configProviderProps```.
+
+#### Пример:
+
+```tsx
+import AdminBase from 'isp-admin-ui-kit';
+
+<AdminBase configProviderProps={{ theme: lightTheme, locale: eng }} />;
+```
+
+## Настройка роутеров
+
+Компонент `AdminBase` поддерживает настройку пользовательских роутеров через параметр `customRouters`.
+
+**Важный момент**
+
+**Для корректной инициализации пунктов меню, связанных со страницами, необходимо, чтобы значения полей route и key совпадали.**
+
+
+Параметры `customRouters`:
+
+| Название      | Тип         | Описание                                                    |
+|---------------|-------------|-------------------------------------------------------------|
+| `route`        | `string`    | Путь маршрута.                                              |
+| `element`     | `ReactNode` | Компонент, который будет отрисовываться на данном маршруте. |
+| `label`       | `string`    | Название маршрута.                                          |
+| `key`         | `string`    | Уникальный ключ маршрута.                                   |
+| `permissions` | `string[]`  | Список разрешений для доступа к маршруту.                   |
+| `icon`        | `ReactNode` | Иконка маршрута.                                            |
+| `children`    | `Array`     | Вложенные маршруты.                                         |
+
+#### Пример:
+
+```tsx
+const customRouters = [
+  {
+    route: '/dashboard',
+    element: <Dashboard/>,
+    label: 'Dashboard',
+    key: 'dashboard',
+    permissions: ['admin', 'user'],
+    icon: <DashboardIcon/>,
+  },
+];
+<AdminBase customRouters={customRouters} />;
+```
