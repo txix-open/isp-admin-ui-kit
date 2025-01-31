@@ -1,5 +1,6 @@
-import { CustomMenuItemType } from '@type/app.type.ts'
 import { ConfigProviderProps } from 'antd'
+
+import { CustomMenuItemType } from '@components/Layout/layout.type.ts'
 
 export interface AdminBasePropsType {
   customRouters?: CustomMenuItemType[]
