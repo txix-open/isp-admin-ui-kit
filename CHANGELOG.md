@@ -1,3 +1,6 @@
+## 0.3.1
+- Правка импортов и правка README
+- Добавлена поддержка className в CustomMenuItems
 ## 0.3.0
 - Компонент Menu заменен на LayoutMenu из библиотеки isp-ui-kit 
 ## 0.2.2
