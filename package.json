@@ -1,12 +1,14 @@
 {
   "name": "isp-admin-ui-kit",
-  "version": "0.3.1",
+  "version": "0.3.2",
   "main": "dist/index.js",
   "type": "module",
   "scripts": {
     "build": "rollup -c",
     "pub": "rollup -c && npm publish",
-    "prepare": "husky install"
+    "prepare": "husky install",
+    "storybook": "storybook dev -p 6006",
+    "build-storybook": "storybook build"
   },
   "repository": {
     "url": "https://github.com/txix-open/isp-admin-ui-kit"
@@ -30,6 +32,7 @@
     "@babel/eslint-parser": "^7.23.3",
     "@babel/preset-env": "^7.23.6",
     "@babel/preset-react": "^7.23.3",
+    "@babel/preset-typescript": "^7.26.0",
     "@rollup/plugin-alias": "^5.1.1",
     "@rollup/plugin-babel": "^6.0.4",
     "@rollup/plugin-commonjs": "^26.0.1",
@@ -38,6 +41,13 @@
     "@rollup/plugin-node-resolve": "^15.2.3",
     "@rollup/plugin-terser": "^0.4.4",
     "@rollup/plugin-typescript": "^11.1.6",
+    "@storybook/addon-essentials": "^8.5.2",
+    "@storybook/addon-interactions": "^8.5.2",
+    "@storybook/addon-onboarding": "^8.5.2",
+    "@storybook/blocks": "^8.5.2",
+    "@storybook/react": "^8.5.2",
+    "@storybook/react-vite": "^8.5.2",
+    "@storybook/test": "^8.5.2",
     "@trivago/prettier-plugin-sort-imports": "^4.3.0",
     "@types/deep-equal": "^1.0.4",
     "@types/lodash.clonedeep": "^4.5.9",
@@ -56,35 +66,38 @@
     "eslint-plugin-react": "^7.34.1",
     "eslint-plugin-react-hooks": "^4.6.0",
     "eslint-plugin-react-refresh": "^0.4.6",
+    "eslint-plugin-storybook": "^0.11.2",
     "husky": "^9.0.11",
     "prettier": "^3.2.5",
-    "react-redux": "^9.1.0",
-    "@reduxjs/toolkit": "^2.2.3",
-    "react-router-dom": "^6.22.3",
+    "remark-gfm": "^4.0.0",
     "rollup": "^4.18.0",
     "rollup-plugin-delete": "^2.1.0",
     "rollup-plugin-peer-deps-external": "^2.2.4",
     "rollup-plugin-postcss": "^4.0.2",
     "sass": "1.74.1",
+    "storybook": "^8.5.2",
     "terser": "^5.30.3",
     "typescript": "^5.7.2"
   },
   "peerDependencies": {
     "@monaco-editor/react": "^4.6.0",
-    "antd": "^5.12.2",
+    "antd": ">=5.12.2",
+    "axios": "^1.7.7",
+    "dayjs": "^1.11.10",
+    "isp-ui-kit": ">=0.12.2",
     "monaco-editor": "^0.52.0",
     "react": ">=18.2.0",
     "react-dom": ">=18.2.0",
     "react-hook-form": "^7.54.0",
     "react-router-dom": "^6.22.3",
-    "axios": "^1.7.7",
-    "isp-ui-kit": "^0.12.3",
-    "dayjs": "^1.11.10"
+    "react-redux": "^9.1.0",
+    "@reduxjs/toolkit": "^2.2.3"
   },
   "eslintConfig": {
     "extends": [
       "react-app",
-      "react-app/jest"
+      "react-app/jest",
+      "plugin:storybook/recommended"
     ]
   },
   "husky": {
