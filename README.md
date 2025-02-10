@@ -18,12 +18,30 @@
 1. Поднять версию в `package.json`.
 2. Прописать изменения в `CHANGELOG.md`.
 
-## Установка пакета в другие проекты
-
-Для установки пакета выполните:
-
+## Установка библиотеки в другие проекты
 ```bash
 npm install isp-admin-ui-kit
+```
+
+### Дополнительные библиотеки, необходимые для работы `isp-admin-ui-kit`
+```bash
+npm install @monaco-editor/react antd axios dayjs monaco-editor react react-dom react-hook-form react-router-dom react-redux @reduxjs/toolkit
+```
+
+Библиотека isp-admin-ui-kit работает с следующими зависимостями:
+
+```json
+@monaco-editor/react ^4.6.0
+antd >=5.12.2
+axios ^1.7.7
+dayjs ^1.11.10
+monaco-editor ^0.52.0
+react >=18.2.0
+react-dom >=18.2.0
+react-hook-form ^7.54.0
+react-router-dom ^6.22.3
+react-redux ^9.1.0
+@reduxjs/toolkit ^2.2.3
 ```
 
 ---
