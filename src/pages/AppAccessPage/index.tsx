@@ -1,6 +1,5 @@
 import { Spin } from 'antd'
-import { Layout } from 'isp-ui-kit'
-import { ColumnItem } from 'isp-ui-kit/dist/Layout/Column/column.type'
+import { Layout, ColumnItem } from 'isp-ui-kit'
 import { memo, useEffect } from 'react'
 import {
   createSearchParams,

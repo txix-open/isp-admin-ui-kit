@@ -1,6 +1,5 @@
 import { message, Spin } from 'antd'
-import { Layout } from 'isp-ui-kit'
-import { ColumnItem } from 'isp-ui-kit/dist/Layout/Column/column.type'
+import { Layout, ColumnItem } from 'isp-ui-kit'
 import { useEffect, useMemo, useState } from 'react'
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
 
