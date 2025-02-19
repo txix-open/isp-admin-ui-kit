@@ -1,7 +1,7 @@
 import { ArrowLeftOutlined, SaveOutlined } from '@ant-design/icons'
 import { Button, message, Spin } from 'antd'
 import dayjs from 'dayjs'
-import { FormComponents } from 'isp-ui-kit'
+import { FormComponents, LabelItem } from 'isp-ui-kit'
 import { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { useLocation, useNavigate } from 'react-router-dom'
@@ -20,8 +20,6 @@ import { routePaths } from '@routes/routePaths.ts'
 
 import { PermissionKeysType, RoleType } from '@type/roles.type.ts'
 import { UserType } from '@type/user.type.ts'
-
-import { LabelItem } from 'isp-ui-kit/dist/FormComponents/formTypes'
 
 import './user-editor.scss'
 
