@@ -1,4 +1,4 @@
-import { ColumnItem } from 'isp-ui-kit/dist/Layout/Column/column.type'
+import { ColumnItem } from 'isp-ui-kit'
 
 export const filterFirstColumnItems = <T extends NonNullable<unknown>>(
   listItems: ColumnItem<T>[],
