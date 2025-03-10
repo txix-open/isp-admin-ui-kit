@@ -1,0 +1,27 @@
+@import "src/constants/style/styleConst";
+
+.variable-column-search {
+  padding: 8px;
+
+  &__input {
+    margin-bottom: 8px;
+    display: block;
+  }
+
+  &__buttons {
+    display: flex;
+    gap: 8px;
+
+    &__find {
+      width: 90px;
+    }
+
+    &__clear {
+      width: 90px;
+    }
+  }
+}
+
+.variable-column-search__filtered-icon{
+  color: $text-color-blue
+}
