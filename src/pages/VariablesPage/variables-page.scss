@@ -1,0 +1,48 @@
+@import "src/constants/style/styleConst";
+
+.variables-page {
+  height: 100%;
+  border: 1px solid $border-color;
+
+  .ant-btn-group > .ant-btn:first-child {
+    z-index: 2;
+  }
+
+  &__header {
+    border-bottom: 1px solid $border-color;
+    padding: 0 3 * $basic-padding;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    &__title {
+      padding: 3 * $basic-padding 0;
+      display: inline-block;
+      font-weight: 500;
+      font-size: 20px;
+      line-height: 28px;
+    }
+  }
+
+  &__content {
+    padding: 2 * $basic-padding 3 * $basic-padding;
+    overflow-x: scroll;
+
+    &__wrap-table {
+      overflow-x: scroll;
+      height: calc(100vh - 110px);
+    }
+
+    &__table {
+      &__actions {
+        justify-content: flex-end;
+        display: flex;
+        gap: $basic-margin;
+      }
+    }
+
+    &__pagination {
+      margin-top: 20px;
+    }
+  }
+}
