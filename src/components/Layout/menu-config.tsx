@@ -1,6 +1,7 @@
 import {
   AppstoreAddOutlined,
   FileProtectOutlined,
+  FunctionOutlined,
   ProductOutlined,
   ProfileOutlined
 } from '@ant-design/icons'
@@ -32,6 +33,13 @@ export const menuConfig = (name: string) => [
     label: 'Доступы приложений',
     icon: <FileProtectOutlined />,
     route: routePaths.appAccess,
+    permissions: [PermissionKeysType.read]
+  },
+  {
+    key: 'variables',
+    label: 'Переменные',
+    icon: <FunctionOutlined />,
+    route: routePaths.variables,
     permissions: [PermissionKeysType.read]
   },
   {
