@@ -50,6 +50,9 @@ export default [
         }
       }),
       image()
-    ]
+    ],
+    watch: {
+      include: 'src/**' // отслеживать изменения в src
+    }
   }
 ]
