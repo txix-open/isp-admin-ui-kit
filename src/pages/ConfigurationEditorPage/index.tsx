@@ -59,6 +59,9 @@ const ConfigurationEditorPage: FC = () => {
     }
   ]
 
+  const goToConfigurationPage = () =>
+    navigate(`${routePaths.modules}/${moduleId}/${routePaths.configurations}`)
+
   const onSaveBtn: MenuProps['onClick'] = (e, upVersion = undefined) => {
     const isUnsafe = e.key === 'unsafe'
     handleSaveClick(upVersion, isUnsafe, false)
@@ -161,7 +164,7 @@ const ConfigurationEditorPage: FC = () => {
   return (
     <main className="configuration-editor-page">
       <section className="configuration-editor-page__header">
-        <Button onClick={() => navigate(-1)}>
+        <Button onClick={goToConfigurationPage}>
           <RollbackOutlined />
           Назад
         </Button>
