@@ -1,23 +1,33 @@
 import { RollbackOutlined } from '@ant-design/icons'
-import { Button, Dropdown, MenuProps, message, Radio, RadioChangeEvent, Spin } from 'antd'
-import { FC, useEffect, useRef, useState} from 'react'
+import {
+  Button,
+  Dropdown,
+  MenuProps,
+  message,
+  Radio,
+  RadioChangeEvent,
+  Spin
+} from 'antd'
+import { FC, useEffect, useRef, useState } from 'react'
 import { useLocation, useNavigate, useParams } from 'react-router-dom'
 
+import ConfigSchemaModal from '@components/ConfigSchemaModal'
 import ConfigurationEditorCode from '@components/ConfigurationEditorCode'
+import ConfigurationEditorForm from '@components/ConfigurationEditorForm'
 import ConfigurationEditorJson from '@components/ConfigurationEditorJson'
+import ConfirmConfigModal from '@components/ConfirmConfigModal/ConfirmConfigModal.tsx'
+import ErrorConfigModal from '@components/ErrorConfigModal/ErrorConfigModal.tsx'
+
+import { ConfigType } from '@pages/ModulesPage/module.type.ts'
+
+import { cleanEmptyParamsObject, sortObject } from '@utils/objectUtils.ts'
 
 import configServiceApi from '@services/configService.ts'
 import modulesServiceApi from '@services/modulesService.ts'
 
+import { routePaths } from '@routes/routePaths.ts'
+
 import './configuration-editor-page.scss'
-import ConfigSchemaModal from '@components/ConfigSchemaModal'
-import { cleanEmptyParamsObject, sortObject } from '@utils/objectUtils.ts'
-import { ConfigType } from '@pages/ModulesPage/module.type.ts'
-import ConfirmConfigModal from '@components/ConfirmConfigModal/ConfirmConfigModal.tsx'
-import ErrorConfigModal from '@components/ErrorConfigModal/ErrorConfigModal.tsx'
-import ConfigurationEditorForm from '@components/ConfigurationEditorForm'
-
-
 
 const ConfigurationEditorPage: FC = () => {
   const navigate = useNavigate()
@@ -26,17 +36,18 @@ const ConfigurationEditorPage: FC = () => {
   const isNew = id === 'new'
   const { data: jsonSchema, isLoading: isLoadingJsonSchema } =
     modulesServiceApi.useGetByModuleIdQuery(moduleId)
-  const {
-    data: currentConfig,
-    isLoading: isCurrentConfigLoading,
-  } = configServiceApi.useGetConfigByIdQuery(id)
+  const { data: currentConfig, isLoading: isCurrentConfigLoading } =
+    configServiceApi.useGetConfigByIdQuery(id)
   const [createUpdateConfig] = configServiceApi.useCreateUpdateConfigMutation()
   const { state } = useLocation()
   const [showConfirmModal, setShowConfirmModal] = useState(false)
   const [showSchemeModal, setShowSchemeModal] = useState(false)
   const [radioValue, setRadioValue] = useState('json')
   const [bufConfig, setBufConfig] = useState<ConfigType>()
-  const [detailsErrors, setDetailsError] = useState({ details: {}, isOpenDetailsErrorModal: false })
+  const [detailsErrors, setDetailsError] = useState({
+    details: {},
+    isOpenDetailsErrorModal: false
+  })
   const [disableBtn, setDisableBtn] = useState(false)
   const submitRef = useRef<any>(null)
 
@@ -65,7 +76,6 @@ const ConfigurationEditorPage: FC = () => {
   const onSaveBtn: MenuProps['onClick'] = (e, upVersion = undefined) => {
     const isUnsafe = e.key === 'unsafe'
     handleSaveClick(upVersion, isUnsafe, false)
-
   }
 
   const onRadioChange = (e: RadioChangeEvent) => {
@@ -76,7 +86,11 @@ const ConfigurationEditorPage: FC = () => {
     setRadioValue(e.target.value)
   }
 
-  const handleSaveClick = (upVersion?: number, unsafe?: boolean, isGoBack?: boolean) => {
+  const handleSaveClick = (
+    upVersion?: number,
+    unsafe?: boolean,
+    isGoBack?: boolean
+  ) => {
     let newData = {}
     const sentData =
       radioValue === formRadio
@@ -113,7 +127,10 @@ const ConfigurationEditorPage: FC = () => {
           setShowConfirmModal(true)
         }
         if (e.data.errorCode === 2003) {
-          setDetailsError({ details: e.data.details, isOpenDetailsErrorModal: true })
+          setDetailsError({
+            details: e.data.details,
+            isOpenDetailsErrorModal: true
+          })
         }
         if (e.data.errorCode === 400) {
           message.error('Невалидный JSON объект')
@@ -125,9 +142,7 @@ const ConfigurationEditorPage: FC = () => {
     return <Spin className="spin" />
   }
 
-
   const renderContent = () => {
-
     switch (radioValue) {
       case formRadio:
         return (
@@ -160,7 +175,6 @@ const ConfigurationEditorPage: FC = () => {
     }
   }
 
-
   return (
     <main className="configuration-editor-page">
       <section className="configuration-editor-page__header">
@@ -187,10 +201,14 @@ const ConfigurationEditorPage: FC = () => {
             Сохранить и выйти
           </Dropdown.Button>
         </div>
-
       </section>
       <div className="configuration-editor-page__content">
-        <Radio.Group defaultValue={jsonRadio} disabled={disableBtn} size="large" onChange={onRadioChange}>
+        <Radio.Group
+          defaultValue={jsonRadio}
+          disabled={disableBtn}
+          size="large"
+          onChange={onRadioChange}
+        >
           <Radio.Button value={formRadio}>Форма</Radio.Button>
           <Radio.Button disabled={disableBtn} value={jsonRadio}>
             JSON
@@ -200,7 +218,6 @@ const ConfigurationEditorPage: FC = () => {
 
         {renderContent()}
       </div>
-
 
       <ConfigSchemaModal
         schema={jsonSchema?.schema}
@@ -213,11 +230,16 @@ const ConfigurationEditorPage: FC = () => {
         setBufConfig={setBufConfig}
         open={showConfirmModal}
         handleSaveClick={handleSaveClick}
-        onClose={() => setShowConfirmModal(false)} />
+        onClose={() => setShowConfirmModal(false)}
+      />
 
-      <ErrorConfigModal details={detailsErrors.details} open={detailsErrors.isOpenDetailsErrorModal}
-                        onClose={() => setDetailsError({details: {}, isOpenDetailsErrorModal: false })} />
-
+      <ErrorConfigModal
+        details={detailsErrors.details}
+        open={detailsErrors.isOpenDetailsErrorModal}
+        onClose={() =>
+          setDetailsError({ details: {}, isOpenDetailsErrorModal: false })
+        }
+      />
     </main>
   )
 }
