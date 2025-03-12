@@ -71,7 +71,7 @@ const VariablesPage = () => {
           Переменные
         </span>
         <Button
-          data-cy="variables-page__header__addButton"
+          data-testid="variables-page__header__addButton"
           type="primary"
           icon={<PlusSquareOutlined />}
           onClick={() => navigate(`${routePaths.variables}/new`)}
