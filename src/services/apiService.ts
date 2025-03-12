@@ -38,7 +38,6 @@ const localClear = () => {
 apiService.interceptors.response.use(
   async (response: any) => response,
   (error: AxiosError<MSPError>) => {
-    console.error(error)
     if (error.response && error.response.status === 401) {
       localClear()
       const prevRoute = sessionStorage.getItem('prevRoute') || ''

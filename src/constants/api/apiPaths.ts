@@ -54,6 +54,12 @@ type PathKeys =
   | 'getUI'
   | 'getByModuleId'
   | 'changePassword'
+  | 'getAllVariables'
+  | 'createVariable'
+  | 'deleteVariable'
+  | 'getVariableByName'
+  | 'updateVariable'
+  | 'upsertVariables'
 
 export const apiPaths: Record<PathKeys, string> = {
   baseUrl: '/api/kkd-configuration-service',
@@ -122,5 +128,12 @@ export const apiPaths: Record<PathKeys, string> = {
   createUpdateConfig: '/config/create_update_config',
   deleteVersion: '/config/delete_version',
   deleteConfig: '/config/delete_config',
-  markConfigAsActive: '/config/mark_config_as_active'
+  markConfigAsActive: '/config/mark_config_as_active',
+  // ======= VARIABLES ======
+  getAllVariables: '/variable/all',
+  getVariableByName: '/variable/get_by_name',
+  createVariable: '/variable/create',
+  deleteVariable: '/variable/delete',
+  updateVariable: '/variable/update',
+  upsertVariables: '/variable/upsert'
 }

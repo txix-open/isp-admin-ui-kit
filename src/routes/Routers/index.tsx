@@ -3,6 +3,7 @@ import { lazy, Suspense } from 'react'
 import { Navigate, Route, Routes } from 'react-router-dom'
 
 import LayoutComponent from '@components/Layout'
+import { RoutersPropsType } from '@components/Layout/layout.type.ts'
 
 //  Составная часть основной страницы, поэтому без lazy
 import Configurations from '@pages/ConfigurationsPage'
@@ -10,9 +11,8 @@ import Connections from '@pages/ConnectionsPage'
 import ErrorWrapperPage from '@pages/ErrorWrapperPage'
 
 import PrivateRoute from '@routes/PrivateRoute'
-import { routePaths } from '@routes/routePaths.ts'
-import { RoutersPropsType } from '@components/Layout/layout.type.ts'
 import { generateCustomRoutes } from '@routes/customRoutes.tsx'
+import { routePaths } from '@routes/routePaths.ts'
 
 const LoginPage = lazy(() => import('@pages/LoginPage'))
 const ProfilePage = lazy(() => import('@pages/ProfilePage'))
@@ -29,12 +29,16 @@ const ConfigurationEditorPage = lazy(
   () => import('@pages/ConfigurationEditorPage')
 )
 const NotFound = lazy(() => import('@pages/NotFound'))
-
+const VariablesPage = lazy(() => import('@pages/VariablesPage'))
+const VariableEditor = lazy(() => import('@pages/VariableEditor'))
 const Routers = ({ customRouters }: RoutersPropsType) => {
   return (
     <Routes>
       <Route element={<PrivateRoute />}>
-        <Route path={routePaths.home} element={<LayoutComponent customRouters={customRouters}/>}>
+        <Route
+          path={routePaths.home}
+          element={<LayoutComponent customRouters={customRouters} />}
+        >
           <Route
             index
             element={
@@ -197,6 +201,22 @@ const Routers = ({ customRouters }: RoutersPropsType) => {
               />
             </Route>
           </Route>
+          <Route
+            path={routePaths.variables}
+            element={
+              <Suspense fallback={<Spin />}>
+                <VariablesPage />
+              </Suspense>
+            }
+          />
+          <Route
+            path={`${routePaths.variables}/:id`}
+            element={
+              <Suspense fallback={<Spin />}>
+                <VariableEditor />
+              </Suspense>
+            }
+          />
           {generateCustomRoutes(customRouters)}
         </Route>
       </Route>
