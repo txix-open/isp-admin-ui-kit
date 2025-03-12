@@ -38,6 +38,7 @@ const VariablesTable = ({
   return (
     <section className="variables-table">
       <Button
+        data-testid="variables-table__clear-all-btn"
         className="variables-table__clear-all-btn"
         disabled={isClearDisabled}
         onClick={clearAll}
