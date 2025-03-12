@@ -10,7 +10,8 @@ import './variable-editor-header.scss'
 const VariableEditorHeader = ({
   title,
   onSubmit,
-  isLoading
+  isLoading,
+  isDirty
 }: VariableEditorHeaderPropsType) => {
   const navigate = useNavigate()
 
@@ -30,6 +31,7 @@ const VariableEditorHeader = ({
         type="primary"
         loading={isLoading}
         onClick={onSubmit}
+        disabled={!isDirty}
       >
         Сохранить
       </Button>

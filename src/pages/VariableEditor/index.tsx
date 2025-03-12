@@ -28,10 +28,16 @@ const VariableEditor = () => {
     isError,
     error
   } = variablesApi.useGetVariableByNameQuery(id, { skip: isNewVariable })
-  const { control, watch, reset, handleSubmit, setError } =
-    useForm<VariableType>({
-      defaultValues: { type: 'TEXT' }
-    })
+  const {
+    control,
+    watch,
+    reset,
+    handleSubmit,
+    setError,
+    formState: { isDirty }
+  } = useForm<VariableType>({
+    defaultValues: { type: 'TEXT' }
+  })
   const typeWatch = watch('type')
 
   const [createVariable, { isLoading: isCreateMethodLoading }] =
@@ -89,7 +95,7 @@ const VariableEditor = () => {
     updateVariable(sendData)
       .unwrap()
       .then(() => {
-        message.success('Переменная успешно обновлена!')
+        message.success('Переменная успешно обновлена')
         goToVariablePage()
       })
       .catch((error: AxiosError<MSPError>) => {
@@ -111,6 +117,7 @@ const VariableEditor = () => {
   return (
     <form className="variable-editor">
       <VariableEditorHeader
+        isDirty={isDirty}
         isLoading={isSomeMethodLoading}
         title={isNewVariable ? 'Новая переменная' : variable!.name}
         onSubmit={handleSubmit(handleSubmitForm)}
