@@ -17,10 +17,20 @@ const VariableEditorHeader = ({
   return (
     <header className="variable-editor-header">
       <div className="variable-editor-header__title-wrapper">
-        <Button onClick={() => navigate(routePaths.variables)}>Назад</Button>
+        <Button
+          data-testid="variable-editor-header__back-btn"
+          onClick={() => navigate(routePaths.variables)}
+        >
+          Назад
+        </Button>
         <h2>{title}</h2>
       </div>
-      <Button type="primary" loading={isLoading} onClick={onSubmit}>
+      <Button
+        data-testid="variable-editor-header__save-btn"
+        type="primary"
+        loading={isLoading}
+        onClick={onSubmit}
+      >
         Сохранить
       </Button>
     </header>
