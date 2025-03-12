@@ -8,6 +8,7 @@ import {
   RadioChangeEvent,
   Spin
 } from 'antd'
+import { AxiosError, AxiosResponse } from 'axios'
 import { FC, useEffect, useRef, useState } from 'react'
 import { useLocation, useNavigate, useParams } from 'react-router-dom'
 
@@ -26,6 +27,8 @@ import configServiceApi from '@services/configService.ts'
 import modulesServiceApi from '@services/modulesService.ts'
 
 import { routePaths } from '@routes/routePaths.ts'
+
+import { MSPError } from '@type/index.ts'
 
 import './configuration-editor-page.scss'
 
@@ -122,17 +125,20 @@ const ConfigurationEditorPage: FC = () => {
         isGoBack && navigate(`/modules/${moduleId}/configurations`)
         message.success('Конфигурация успешно сохранена')
       })
-      .catch((e) => {
-        if (e.data.errorCode === 2004) {
+      .catch((e: AxiosError<MSPError>) => {
+        const { response } = e
+        const { data } = response as AxiosResponse<MSPError>
+        const errorCode = parseInt(data.errorCode)
+        if (errorCode === 2004) {
           setShowConfirmModal(true)
         }
-        if (e.data.errorCode === 2003) {
+        if (errorCode === 2003) {
           setDetailsError({
-            details: e.data.details,
+            details: data.details,
             isOpenDetailsErrorModal: true
           })
         }
-        if (e.data.errorCode === 400) {
+        if (errorCode === 400) {
           message.error('Невалидный JSON объект')
         }
         message.error('Ошибка обновления элемента')
