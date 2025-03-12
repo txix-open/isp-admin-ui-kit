@@ -48,7 +48,14 @@ export const getColumns = (
       sortOrder: sortedInfo.columnKey === 'type' ? sortedInfo.order : null,
       render: (value) => {
         const label = value === 'TEXT' ? 'ТЕКСТ' : 'СЕКРЕТ'
-        return <Tag color={value === 'TEXT' ? 'green' : 'orange'}>{label}</Tag>
+        return (
+          <Tag
+            data-testid="variables-table__clear-all-btn"
+            color={value === 'TEXT' ? 'green' : 'orange'}
+          >
+            {label}
+          </Tag>
+        )
       }
     },
     {
@@ -75,6 +82,7 @@ export const getColumns = (
             {configs.map(
               (config: VariableType['containsInConfigs'][number]) => (
                 <li
+                  data-testid="variable-table-columns__list-element"
                   className="variable-table-columns__list-element"
                   key={config.id}
                 >
@@ -126,6 +134,7 @@ export const getColumns = (
           <Button.Group>
             <Tooltip title="Редактировать переменную">
               <Button
+                data-testid="variables-table__edit-config-btn"
                 icon={<EditOutlined />}
                 onClick={() =>
                   navigate(`${routePaths.variables}/${record.name}`)
@@ -143,7 +152,11 @@ export const getColumns = (
                     : 'Удалить'
                 }
               >
-                <Button icon={<DeleteOutlined />} disabled={isUsedInConfigs} />
+                <Button
+                  data-testid="variables-table__delete-config-btn"
+                  icon={<DeleteOutlined />}
+                  disabled={isUsedInConfigs}
+                />
               </Tooltip>
             </Popconfirm>
           </Button.Group>
