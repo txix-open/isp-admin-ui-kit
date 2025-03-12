@@ -11,7 +11,8 @@ const VariableEditorHeader = ({
   title,
   onSubmit,
   isLoading,
-  isDirty
+  isDirty,
+  isEditPermission
 }: VariableEditorHeaderPropsType) => {
   const navigate = useNavigate()
 
@@ -26,15 +27,17 @@ const VariableEditorHeader = ({
         </Button>
         <h2>{title}</h2>
       </div>
-      <Button
-        data-testid="variable-editor-header__save-btn"
-        type="primary"
-        loading={isLoading}
-        onClick={onSubmit}
-        disabled={!isDirty}
-      >
-        Сохранить
-      </Button>
+      {isEditPermission && (
+        <Button
+          data-testid="variable-editor-header__save-btn"
+          type="primary"
+          loading={isLoading}
+          onClick={onSubmit}
+          disabled={!isDirty}
+        >
+          Сохранить
+        </Button>
+      )}
     </header>
   )
 }

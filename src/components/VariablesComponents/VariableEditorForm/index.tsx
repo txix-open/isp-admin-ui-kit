@@ -16,6 +16,7 @@ const radioGroupOptions: LabelItem[] = [
 const VariableEditorForm = ({
   control,
   isNewVariable,
+  isEditPermission,
   typeWatch
 }: VariableEditorFormPropsType) => {
   const getRulesProps = () => ({
@@ -31,7 +32,7 @@ const VariableEditorForm = ({
         label="Наименование"
         control={control}
         name="name"
-        disabled={!isNewVariable}
+        disabled={!isNewVariable || !isEditPermission}
         {...getRulesProps()}
       />
       <FormTextArea
@@ -40,6 +41,7 @@ const VariableEditorForm = ({
         control={control}
         name="description"
         autoSize={{ minRows: 2, maxRows: 6 }}
+        disabled={!isEditPermission}
       />
       <FormRadioGroup
         data-testid="variable-editor-form__type-input"
@@ -49,7 +51,7 @@ const VariableEditorForm = ({
         name="type"
         items={radioGroupOptions}
         control={control}
-        disabled={!isNewVariable}
+        disabled={!isNewVariable || !isEditPermission}
       />
       {typeWatch === 'SECRET' ? (
         <FormSecretTextArea
@@ -58,6 +60,7 @@ const VariableEditorForm = ({
           control={control}
           name="value"
           autoSize={{ minRows: 2, maxRows: 6 }}
+          disabled={!isEditPermission}
           {...getRulesProps()}
         />
       ) : (
@@ -67,6 +70,7 @@ const VariableEditorForm = ({
           control={control}
           name="value"
           autoSize={{ minRows: 2, maxRows: 6 }}
+          disabled={!isEditPermission}
           {...getRulesProps()}
         />
       )}

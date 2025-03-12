@@ -9,11 +9,14 @@ import VariableEditorHeader from '@components/VariablesComponents/VariableEditor
 
 import { handleVariableApiError } from '@utils/variableUtils.ts'
 
+import useRole from '@hooks/useRole.tsx'
+
 import variablesApi from '@services/variablesService.ts'
 
 import { routePaths } from '@routes/routePaths'
 
 import { MSPError } from '@type/index.ts'
+import { PermissionKeysType } from '@type/roles.type.ts'
 
 import './variable-editor.scss'
 
@@ -46,6 +49,21 @@ const VariableEditor = () => {
     variablesApi.useUpdateVariableMutation()
 
   const isSomeMethodLoading = isUpdateMethodLoading || isCreateMethodLoading
+
+  const { role, hasPermission } = useRole()
+  const isEditPermission = hasPermission(PermissionKeysType.write)
+
+  useEffect(() => {
+    if (!isEditPermission) {
+      navigate(routePaths.variables)
+    }
+  }, [isEditPermission])
+
+  useEffect(() => {
+    if (!role) {
+      navigate(routePaths.error)
+    }
+  }, [role])
 
   useEffect(() => {
     if (variable) reset(variable)
@@ -117,6 +135,7 @@ const VariableEditor = () => {
   return (
     <form className="variable-editor">
       <VariableEditorHeader
+        isEditPermission={isEditPermission}
         isDirty={isDirty}
         isLoading={isSomeMethodLoading}
         title={isNewVariable ? 'Новая переменная' : variable!.name}
@@ -125,6 +144,7 @@ const VariableEditor = () => {
       <VariableEditorForm
         control={control}
         isNewVariable={isNewVariable}
+        isEditPermission={isEditPermission}
         typeWatch={typeWatch}
       />
     </form>

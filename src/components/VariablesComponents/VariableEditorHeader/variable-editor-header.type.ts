@@ -3,4 +3,5 @@ export interface VariableEditorHeaderPropsType {
   onSubmit: () => void
   isLoading: boolean
   isDirty: boolean
+  isEditPermission: boolean
 }

@@ -9,8 +9,11 @@ import {
 } from '@components/VariablesComponents/VariablesTable/variables-table.type.ts'
 
 import { useColumnSearch } from '@hooks/useColumnsSearch'
+import useRole from '@hooks/useRole.tsx'
 
 import { routePaths } from '@routes/routePaths'
+
+import { PermissionKeysType } from '@type/roles.type.ts'
 
 export const getColumns = (
   sortedInfo: Sorts,
@@ -18,7 +21,9 @@ export const getColumns = (
   onRemoveVariable: (name: string) => void
 ): TableColumnType<VariableType>[] => {
   const navigate = useNavigate()
+  const { role: _, hasPermission } = useRole()
   const { getColumnSearchProps } = useColumnSearch<VariableType>()
+  const isEditPermission = hasPermission(PermissionKeysType.write)
 
   return [
     {
@@ -129,6 +134,9 @@ export const getColumns = (
       width: 150,
       align: 'center',
       render: (_, record) => {
+        if (!isEditPermission) {
+          return null
+        }
         const isUsedInConfigs = record.containsInConfigs.length > 0
         return (
           <Button.Group>
