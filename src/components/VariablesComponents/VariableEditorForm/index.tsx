@@ -27,6 +27,7 @@ const VariableEditorForm = ({
   return (
     <main className="variable-editor-form">
       <FormInput
+        data-testid="variable-editor-form__name-input"
         label="Наименование"
         control={control}
         name="name"
@@ -34,12 +35,14 @@ const VariableEditorForm = ({
         {...getRulesProps()}
       />
       <FormTextArea
+        data-testid="variable-editor-form__description-input"
         label="Описание"
         control={control}
         name="description"
         autoSize={{ minRows: 2, maxRows: 6 }}
       />
       <FormRadioGroup
+        data-testid="variable-editor-form__type-input"
         type="button"
         buttonStyle="solid"
         label="Тип"
@@ -50,6 +53,7 @@ const VariableEditorForm = ({
       />
       {typeWatch === 'SECRET' ? (
         <FormSecretTextArea
+          data-testid="variable-editor-form__value-input"
           label="Значение"
           control={control}
           name="value"
@@ -58,6 +62,7 @@ const VariableEditorForm = ({
         />
       ) : (
         <FormTextArea
+          data-testid="variable-editor-form__value-input"
           label="Значение"
           control={control}
           name="value"
