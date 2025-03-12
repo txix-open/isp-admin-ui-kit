@@ -29,9 +29,7 @@ export const axiosBaseQuery =
       return { data: result.data }
     } catch (axiosError) {
       const err = axiosError as AxiosError<MSPError>
-      return {
-        error: { ...err.response }
-      }
+      return { error: err }
     }
   }
 

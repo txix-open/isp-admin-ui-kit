@@ -1,0 +1,15 @@
+@import "src/constants/style/styleConst";
+
+.variables-table {
+  display: flex;
+  flex-direction: column;
+  gap: $basic-margin;
+
+  &__clear-all-btn {
+    align-self: flex-end;
+  }
+
+  .variable-table-columns__list-element {
+    list-style: none;
+  }
+}
