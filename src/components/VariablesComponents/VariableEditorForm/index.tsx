@@ -61,6 +61,9 @@ const VariableEditorForm = ({
           name="value"
           autoSize={{ minRows: 2, maxRows: 6 }}
           disabled={!isEditPermission}
+          formItemProps={{
+            help: 'Значение секрета недоступно для чтения после сохранения переменной. Сохраните или запомните значение.'
+          }}
           {...getRulesProps()}
         />
       ) : (
