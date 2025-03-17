@@ -1,4 +1,5 @@
 import { FormComponents, LabelItem } from 'isp-ui-kit'
+import { Path } from 'react-hook-form'
 
 import { ValidationRules } from '@constants/form/validationRules.ts'
 
@@ -19,9 +20,16 @@ const VariableEditorForm = ({
   isEditPermission,
   typeWatch
 }: VariableEditorFormPropsType) => {
-  const getRulesProps = () => ({
+  const getRulesProps = (fieldName: Path<VariableType>) => ({
     rules: {
-      required: ValidationRules.required
+      required: ValidationRules.required,
+      ...(fieldName === 'name' && {
+        pattern: {
+          value: /^[a-zA-Z_][a-zA-Z0-9_]*$/,
+          message:
+            'Имя переменной должно начинаться с буквы или `_` и содержать только буквы, цифры и `_`.'
+        }
+      })
     }
   })
 
@@ -33,7 +41,7 @@ const VariableEditorForm = ({
         control={control}
         name="name"
         disabled={!isNewVariable || !isEditPermission}
-        {...getRulesProps()}
+        {...getRulesProps('name')}
       />
       <FormTextArea
         data-testid="variable-editor-form__description-input"
@@ -64,7 +72,7 @@ const VariableEditorForm = ({
           formItemProps={{
             help: 'Значение секрета недоступно для чтения после сохранения переменной. Сохраните или запомните значение.'
           }}
-          {...getRulesProps()}
+          {...getRulesProps('value')}
         />
       ) : (
         <FormTextArea
@@ -74,7 +82,7 @@ const VariableEditorForm = ({
           name="value"
           autoSize={{ minRows: 2, maxRows: 6 }}
           disabled={!isEditPermission}
-          {...getRulesProps()}
+          {...getRulesProps('value')}
         />
       )}
     </main>
