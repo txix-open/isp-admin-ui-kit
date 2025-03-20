@@ -23,6 +23,8 @@ import { StateProfileStatus } from '@stores/redusers/ProfileSlice.ts'
 
 import { routePaths } from '@routes/routePaths.ts'
 
+import { PermissionKeysType } from '@type/roles.type.ts'
+
 import './layout.scss'
 
 const { Content } = Layout
@@ -46,14 +48,13 @@ const LayoutComponent = ({ customRouters }: LayoutComponentPropsType) => {
   const userToken = LocalStorage.get(localStorageKeys.USER_TOKEN)
 
   const onHideMenuItem = (permission: string | string[]) => {
-    if (Array.isArray(permission)) {
-      const result = permission.reduce((acc, currentValue: string) => {
-        const hasPermissionFunc = hasPermission(currentValue)
-        return hasPermissionFunc || acc
-      }, false)
-      return result ? '' : 'hide-item'
+    if (permission === PermissionKeysType.ALWAYS_VIEW) {
+      return false
     }
-    return hasPermission(permission) ? '' : 'hide-item'
+    if (Array.isArray(permission)) {
+      return !permission.some((perm) => hasPermission(perm))
+    }
+    return !hasPermission(permission)
   }
 
   const getCustomMenuItems = (
