@@ -46,7 +46,7 @@ const AppAccessPage = () => {
   const { id: selectedItemId = '' } = useParams()
   const [searchParams, setSearchParams] = useSearchParams()
   const searchValue = searchParams.get(firstColumnSearchParam) || ''
-  const canRead = hasPermission(PermissionKeysType.read)
+  const canRead = hasPermission(PermissionKeysType.app_access_view)
 
   useEffect(() => {
     if (!canRead) {

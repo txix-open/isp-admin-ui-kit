@@ -31,7 +31,7 @@ const AppAccessContent: FC<AppAccessContentPropsType> = ({
   const [messageApi, contextHolder] = message.useMessage()
   const { hasPermission } = useRole()
 
-  const canWrite = hasPermission(PermissionKeysType.write)
+  const canWrite = hasPermission(PermissionKeysType.app_access_edit)
 
   const {
     data: methods = [],

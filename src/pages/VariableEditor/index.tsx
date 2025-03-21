@@ -51,7 +51,7 @@ const VariableEditor = () => {
   const isSomeMethodLoading = isUpdateMethodLoading || isCreateMethodLoading
 
   const { role, hasPermission } = useRole()
-  const isEditPermission = hasPermission(PermissionKeysType.write)
+  const isEditPermission = hasPermission(PermissionKeysType.variable_edit)
 
   useEffect(() => {
     if (!isEditPermission) {

@@ -23,7 +23,8 @@ export const getColumns = (
   const navigate = useNavigate()
   const { role: _, hasPermission } = useRole()
   const { getColumnSearchProps } = useColumnSearch<VariableType>()
-  const isEditPermission = hasPermission(PermissionKeysType.write)
+  const isEditPermission = hasPermission(PermissionKeysType.variable_edit)
+  const isRemovePermission = hasPermission(PermissionKeysType.variable_delete)
 
   return [
     {

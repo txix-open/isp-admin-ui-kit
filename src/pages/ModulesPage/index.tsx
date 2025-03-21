@@ -44,8 +44,8 @@ const ModulesPage = () => {
   const location = useLocation()
 
   const searchValue = searchParams.get('search') || ''
-  const isPageAvailable = hasPermission(PermissionKeysType.read)
-  const isRemoveModule = hasPermission(PermissionKeysType.write)
+  const isPageAvailable = hasPermission(PermissionKeysType.module_view)
+  const isRemoveModule = hasPermission(PermissionKeysType.module_delete)
   const isLoading = isModulesLoading
 
   useEffect(() => {

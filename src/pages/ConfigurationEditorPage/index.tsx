@@ -31,8 +31,11 @@ import { routePaths } from '@routes/routePaths.ts'
 import { MSPError } from '@type/index.ts'
 
 import './configuration-editor-page.scss'
+import useRole from '@hooks/useRole.tsx'
+import { PermissionKeysType } from '@type/roles.type.ts'
 
 const ConfigurationEditorPage: FC = () => {
+  const { hasPermission } = useRole()
   const navigate = useNavigate()
   const { moduleId = '' } = useParams()
   const { id = '' } = useParams()
@@ -53,6 +56,8 @@ const ConfigurationEditorPage: FC = () => {
   })
   const [disableBtn, setDisableBtn] = useState(false)
   const submitRef = useRef<any>(null)
+
+  const isUnsafeConfig = hasPermission(PermissionKeysType.module_configuration_save_unsafe)
 
   const formRadio = 'form'
   const codeRadio = 'code'

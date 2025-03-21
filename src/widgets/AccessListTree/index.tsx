@@ -126,7 +126,7 @@ const AccessListTree: FC<AccessListTreePropsType> = ({
     <div className="access-list-tree">
       <Tree
         className="app-access-content__main__tree"
-        checkable={hasPermission(PermissionKeysType.write)}
+        checkable={hasPermission(PermissionKeysType.app_access_edit)}
         checkedKeys={filteredKeys}
         expandedKeys={expandedKeys}
         onExpand={(keys) => setExpandedKeys(keys as string[])}

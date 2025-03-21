@@ -20,20 +20,17 @@ import modulesServiceApi from '@services/modulesService.ts'
 
 import { routePaths } from '@routes/routePaths.ts'
 
-import { PermissionKeysType } from '@type/roles.type.ts'
-
 import './connections.scss'
 
 const Connections = () => {
   const { data: ConnectionsList = [], isLoading: isModulesLoading } =
     modulesServiceApi.useGetModulesQuery('modules')
-  const { role, hasPermission } = useRole()
+  const { role } = useRole()
   const navigate = useNavigate()
   const { id } = useParams()
   const [obj, setObj] = useState<ModuleStatusType[] | []>([])
 
   const isLoading = isModulesLoading
-  const isPageAvailable = hasPermission(PermissionKeysType.read)
 
   useEffect(() => {
     const filterId = ConnectionsList.find((item: ModuleType) => item.id === id)
@@ -42,11 +39,6 @@ const Connections = () => {
     }
   }, [ConnectionsList, id])
 
-  useEffect(() => {
-    if (!isPageAvailable) {
-      navigate(routePaths.home)
-    }
-  }, [isPageAvailable])
   useEffect(() => {
     if (!role) {
       navigate(routePaths.error)

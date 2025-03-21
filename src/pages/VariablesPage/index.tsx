@@ -33,8 +33,8 @@ const VariablesPage = () => {
   const navigate = useNavigate()
 
   const { role, hasPermission } = useRole()
-  const isPageAvailable = hasPermission(PermissionKeysType.read)
-  const isEditPermission = hasPermission(PermissionKeysType.write)
+  const isPageAvailable = hasPermission(PermissionKeysType.variable_view)
+  const isAddPermission = hasPermission(PermissionKeysType.variable_add)
 
   useEffect(() => {
     if (!isPageAvailable) {
@@ -90,7 +90,7 @@ const VariablesPage = () => {
         >
           Переменные
         </span>
-        {isEditPermission && (
+        {isAddPermission && (
           <Button
             data-testid="variables-page__header__addButton"
             type="primary"

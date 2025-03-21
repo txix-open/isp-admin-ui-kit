@@ -8,16 +8,24 @@ import RoleList from '@components/RoleList'
 
 import { useAppSelector } from '@hooks/redux.ts'
 import useLogout from '@hooks/useLogout.tsx'
+import useRole from '@hooks/useRole.tsx'
 
 import { Context } from '@stores/index.tsx'
+
+import { PermissionKeysType } from '@type/roles.type.ts'
 
 import './profile-page.scss'
 
 const ProfilePage = () => {
+  const { hasPermission } = useRole()
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false)
   const { profile } = useAppSelector((state) => state.profileReducer)
   const { logoutUser, isLoading } = useLogout()
   const { changeTheme, setChangeTheme } = useContext(Context)
+
+  const isChangePassword = hasPermission(
+    PermissionKeysType.profile_change_password
+  )
 
   const onChangeTheme = () => {
     setChangeTheme((prev: any) => !prev)
@@ -61,12 +69,14 @@ const ProfilePage = () => {
             Выход
           </Button>
         </Popconfirm>
-        <Button
-          className="profile-page__actions__change-pass-btn"
-          onClick={() => setIsModalOpen(true)}
-        >
-          Сменить пароль
-        </Button>
+        {isChangePassword && (
+          <Button
+            className="profile-page__actions__change-pass-btn"
+            onClick={() => setIsModalOpen(true)}
+          >
+            Сменить пароль
+          </Button>
+        )}
       </div>
     </section>
   )

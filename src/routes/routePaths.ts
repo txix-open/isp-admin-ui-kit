@@ -27,16 +27,16 @@ export const routePaths: Record<RoutePaths, string> = {
   profile: '/profile',
   users: '/users',
   sessions: '/sessions',
-  securityLog: '/securityLog',
+  securityLog: '/security_logs',
   roles: '/roles',
-  appAccess: '/appAccess',
-  applicationsGroup: '/applications_group',
+  appAccess: '/app_access',
+  applicationsGroup: '/application_groups',
   configuration: '/configuration',
   modules: '/modules',
-  application: 'application',
-  connections: 'connections',
-  configurations: 'configurations',
+  application: 'application', //applications_group
+  connections: 'connections', //modules
+  configurations: 'configurations', //modules
   allVersions: ':configId/all_versions',
-  configEditor: 'configEditor',
+  configEditor: 'configEditor', //modules
   variables: '/variables'
 }

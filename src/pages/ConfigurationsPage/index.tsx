@@ -16,8 +16,6 @@ import modulesServiceApi from '@services/modulesService.ts'
 
 import { routePaths } from '@routes/routePaths.ts'
 
-import { PermissionKeysType } from '@type/roles.type.ts'
-
 import './configurations.scss'
 
 const Configurations = () => {
@@ -33,7 +31,7 @@ const Configurations = () => {
     isError: isConfigsError
   } = configServiceApi.useGetConfigsByModuleIdQuery(selectedItemId)
 
-  const { role, hasPermission } = useRole()
+  const { role } = useRole()
   const navigate = useNavigate()
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [isShowModalOpen, setisShowModalOpen] = useState(false)
@@ -49,13 +47,7 @@ const Configurations = () => {
   )
   const isLoading = isModulesLoading || isConfigsLoading
   const isError = isModulesError || isConfigsError
-  const isPageAvailable = hasPermission(PermissionKeysType.read)
 
-  useEffect(() => {
-    if (!isPageAvailable) {
-      navigate(routePaths.home)
-    }
-  }, [isPageAvailable])
   useEffect(() => {
     if (!role) {
       navigate(routePaths.error)
