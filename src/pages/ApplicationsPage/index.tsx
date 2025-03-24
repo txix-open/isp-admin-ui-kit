@@ -51,8 +51,14 @@ const ApplicationsPage = () => {
   const [deleteApplicationsGroup] =
     applicationsGroupApi.useRemoveApplicationsGroupMutation()
 
-  const isPageAvailable = hasPermission(PermissionKeysType.read)
-  // const hasRevokePermission = hasPermission(PermissionKeysType.write)
+  const isPageAvailable = hasPermission(
+    PermissionKeysType.application_group_view
+  )
+  const canAddGroup = hasPermission(PermissionKeysType.application_group_add)
+  const canUpdateGroup = hasPermission(PermissionKeysType.application_group_edit)
+  const canRemoveGroup = hasPermission(
+    PermissionKeysType.application_group_delete
+  )
 
   useEffect(() => {
     if (!isPageAvailable) {
@@ -170,7 +176,9 @@ const ApplicationsPage = () => {
         title="Группы приложений"
         searchPlaceholder="Введите имя или id"
         onUpdateItem={updateApplicationModal}
-        showUpdateBtn={true}
+        showUpdateBtn={canUpdateGroup}
+        showRemoveBtn={canRemoveGroup}
+        showAddBtn={canAddGroup}
         onAddItem={addApplicationModal}
         onRemoveItem={handleRemoveApplicationsGtoup}
         items={filterFirstColumnItems(

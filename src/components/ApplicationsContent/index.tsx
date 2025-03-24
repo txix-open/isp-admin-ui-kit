@@ -17,9 +17,13 @@ import {
 import { setSearchValue, setSelectedItemId } from '@utils/columnLayoutUtils.ts'
 import { filterFirstColumnItems } from '@utils/firstColumnUtils.ts'
 
+import useRole from '@hooks/useRole.tsx'
+
 import applicationsApi from '@services/applicationsService.ts'
 
 import { routePaths } from '@routes/routePaths.ts'
+
+import { PermissionKeysType } from '@type/roles.type.ts'
 
 import './applications-content.scss'
 
@@ -35,6 +39,7 @@ const ApplicationsContent: FC<ApplicationsContentPropTypes> = ({
   selectedItemId,
   setCurrentApplicationsApp
 }) => {
+  const { hasPermission } = useRole()
   const {
     data: applications = [],
     isLoading: isLoadingApplicationsContent = []
@@ -56,6 +61,21 @@ const ApplicationsContent: FC<ApplicationsContentPropTypes> = ({
   const searchAppValue = searchParams.get('appSearch') || ''
   const navigate = useNavigate()
   const { appId = '' } = useParams()
+
+  const canAddApp = hasPermission(PermissionKeysType.application_group_app_add)
+  const canUpdateApp = hasPermission(
+    PermissionKeysType.application_group_app_edit
+  )
+  const canRemoveApp = hasPermission(
+    PermissionKeysType.application_group_app_delete
+  )
+  const isTokenPageAvailable = hasPermission(
+    PermissionKeysType.application_group_token_view
+  )
+
+  const isAppAccessPageAvailable = hasPermission(
+    PermissionKeysType.app_access_view
+  )
 
   const currentApp = useMemo(() => {
     const element = applications.find(
@@ -79,6 +99,14 @@ const ApplicationsContent: FC<ApplicationsContentPropTypes> = ({
   const renderTokenContent = () => {
     if (!appId) {
       return <EmptyData />
+    }
+
+    if (!isTokenPageAvailable) {
+      return (
+        <div className="empty-data">
+          <h1>Нет доступа к разделу</h1>
+        </div>
+      )
     }
 
     return <TokenContent key={appId} id={Number(appId)} />
@@ -146,17 +174,19 @@ const ApplicationsContent: FC<ApplicationsContentPropTypes> = ({
             title={item.name}
             description={<span>id: {item.id}</span>}
           />
-          <div
-            className="link-btn"
-            onClick={(e) => {
-              e.stopPropagation()
-              navigate(`/appAccess/${item.id}`)
-            }}
-          >
-            <Tooltip title="Доступы приложений">
-              <FileProtectOutlined />
-            </Tooltip>
-          </div>
+          {isAppAccessPageAvailable && (
+            <div
+              className="link-btn"
+              onClick={(e) => {
+                e.stopPropagation()
+                navigate(`${routePaths.appAccess}/${item.id}`)
+              }}
+            >
+              <Tooltip title="Доступы приложений">
+                <FileProtectOutlined />
+              </Tooltip>
+            </div>
+          )}
         </Tooltip>
       </List.Item>
     )
@@ -176,7 +206,9 @@ const ApplicationsContent: FC<ApplicationsContentPropTypes> = ({
         title="Приложения"
         searchPlaceholder="Введите имя или id"
         onUpdateItem={updateApplicationModal}
-        showUpdateBtn={true}
+        showUpdateBtn={canUpdateApp}
+        showRemoveBtn={canRemoveApp}
+        showAddBtn={canAddApp}
         onAddItem={addApplicationModal}
         onRemoveItem={() => handleRemoveApplicationApp(Number(appId))}
         items={filterFirstColumnItems(
