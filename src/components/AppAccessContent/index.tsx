@@ -31,7 +31,7 @@ const AppAccessContent: FC<AppAccessContentPropsType> = ({
   const [messageApi, contextHolder] = message.useMessage()
   const { hasPermission } = useRole()
 
-  const canWrite = hasPermission(PermissionKeysType.write)
+  const canWrite = hasPermission(PermissionKeysType.app_access_edit)
 
   const {
     data: methods = [],
@@ -169,24 +169,26 @@ const AppAccessContent: FC<AppAccessContentPropsType> = ({
           placeholder="Найти метод"
           onChange={onChange}
         />
-        <div className="app-access-content__header__action-buttons">
-          <Button
-            disabled={!canWrite}
-            onClick={() => {
-              setAllMethods(false)
-            }}
-          >
-            Запретить все
-          </Button>
-          <Button
-            disabled={!canWrite}
-            onClick={() => {
-              setAllMethods(true)
-            }}
-          >
-            Выбрать все
-          </Button>
-        </div>
+        {canWrite && (
+          <div className="app-access-content__header__action-buttons">
+            <Button
+              disabled={!canWrite}
+              onClick={() => {
+                setAllMethods(false)
+              }}
+            >
+              Запретить все
+            </Button>
+            <Button
+              disabled={!canWrite}
+              onClick={() => {
+                setAllMethods(true)
+              }}
+            >
+              Выбрать все
+            </Button>
+          </div>
+        )}
       </div>
       <div className="app-access-content__main">
         <AccessListTree
