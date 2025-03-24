@@ -1,5 +1,6 @@
 import { Button, Descriptions, Popconfirm } from 'antd'
 import { useContext, useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 
 import PermissionList from '@widgets/PermissionList'
 
@@ -8,20 +9,44 @@ import RoleList from '@components/RoleList'
 
 import { useAppSelector } from '@hooks/redux.ts'
 import useLogout from '@hooks/useLogout.tsx'
+import useRole from '@hooks/useRole.tsx'
 
 import { Context } from '@stores/index.tsx'
+
+import { routePaths } from '@routes/routePaths.ts'
+
+import { PermissionKeysType } from '@type/roles.type.ts'
 
 import './profile-page.scss'
 
 const ProfilePage = () => {
+  const { role, hasPermission } = useRole()
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false)
   const { profile } = useAppSelector((state) => state.profileReducer)
   const { logoutUser, isLoading } = useLogout()
   const { changeTheme, setChangeTheme } = useContext(Context)
+  const navigate = useNavigate()
+
+  const isPageAvailable = hasPermission(PermissionKeysType.profile_view)
+  const canChangePassword = hasPermission(
+    PermissionKeysType.profile_change_password
+  )
 
   const onChangeTheme = () => {
     setChangeTheme((prev: any) => !prev)
   }
+
+  useEffect(() => {
+    if (!role) {
+      navigate(routePaths.error)
+    }
+  }, [role])
+
+  useEffect(() => {
+    if (!isPageAvailable) {
+      navigate(routePaths.error)
+    }
+  }, [isPageAvailable])
 
   useEffect(() => {
     localStorage.setItem('theme', JSON.stringify(changeTheme))
@@ -61,12 +86,14 @@ const ProfilePage = () => {
             Выход
           </Button>
         </Popconfirm>
-        <Button
-          className="profile-page__actions__change-pass-btn"
-          onClick={() => setIsModalOpen(true)}
-        >
-          Сменить пароль
-        </Button>
+        {canChangePassword && (
+          <Button
+            className="profile-page__actions__change-pass-btn"
+            onClick={() => setIsModalOpen(true)}
+          >
+            Сменить пароль
+          </Button>
+        )}
       </div>
     </section>
   )
