@@ -51,13 +51,13 @@ const VariableEditor = () => {
   const isSomeMethodLoading = isUpdateMethodLoading || isCreateMethodLoading
 
   const { role, hasPermission } = useRole()
-  const isEditPermission = hasPermission(PermissionKeysType.write)
+  const canEditPermission = hasPermission(PermissionKeysType.variable_edit)
 
   useEffect(() => {
-    if (!isEditPermission) {
+    if (!canEditPermission) {
       navigate(routePaths.variables)
     }
-  }, [isEditPermission])
+  }, [canEditPermission])
 
   useEffect(() => {
     if (!role) {
@@ -135,7 +135,7 @@ const VariableEditor = () => {
   return (
     <form className="variable-editor">
       <VariableEditorHeader
-        isEditPermission={isEditPermission}
+        isEditPermission={canEditPermission}
         isDirty={isDirty}
         isLoading={isSomeMethodLoading}
         title={isNewVariable ? 'Новая переменная' : variable!.name}
@@ -144,7 +144,7 @@ const VariableEditor = () => {
       <VariableEditorForm
         control={control}
         isNewVariable={isNewVariable}
-        isEditPermission={isEditPermission}
+        isEditPermission={canEditPermission}
         typeWatch={typeWatch}
       />
     </form>
