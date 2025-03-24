@@ -23,16 +23,20 @@ import { ConfigType } from '@pages/ModulesPage/module.type.ts'
 
 import { cleanEmptyParamsObject, sortObject } from '@utils/objectUtils.ts'
 
+import useRole from '@hooks/useRole.tsx'
+
 import configServiceApi from '@services/configService.ts'
 import modulesServiceApi from '@services/modulesService.ts'
 
 import { routePaths } from '@routes/routePaths.ts'
 
 import { MSPError } from '@type/index.ts'
+import { PermissionKeysType } from '@type/roles.type.ts'
 
 import './configuration-editor-page.scss'
 
 const ConfigurationEditorPage: FC = () => {
+  const { hasPermission } = useRole()
   const navigate = useNavigate()
   const { moduleId = '' } = useParams()
   const { id = '' } = useParams()
@@ -54,9 +58,22 @@ const ConfigurationEditorPage: FC = () => {
   const [disableBtn, setDisableBtn] = useState(false)
   const submitRef = useRef<any>(null)
 
+  const isPageAvailable = hasPermission(
+    PermissionKeysType.module_configuration_edit
+  )
+  const isUnsafeButton = hasPermission(
+    PermissionKeysType.module_configuration_save_unsafe
+  )
+
   const formRadio = 'form'
   const codeRadio = 'code'
   const jsonRadio = 'json'
+
+  useEffect(() => {
+    if (!isPageAvailable) {
+      navigate(routePaths.home)
+    }
+  }, [isPageAvailable])
 
   useEffect(() => {
     setBufConfig(isNew ? {} : sortObject(currentConfig))
@@ -72,6 +89,10 @@ const ConfigurationEditorPage: FC = () => {
       label: 'Сохранить небезопасно'
     }
   ]
+
+  const filteredItemsSaveBtn = !isUnsafeButton
+    ? itemsSaveBtn.filter((item) => item.key !== 'unsafe')
+    : itemsSaveBtn
 
   const goToConfigurationPage = () =>
     navigate(`${routePaths.modules}/${moduleId}/${routePaths.configurations}`)
@@ -202,7 +223,7 @@ const ConfigurationEditorPage: FC = () => {
             disabled={disableBtn}
             type="primary"
             className="configuration-editor-page__save-btn"
-            menu={{ items: itemsSaveBtn, onClick: onSaveBtn }}
+            menu={{ items: filteredItemsSaveBtn, onClick: onSaveBtn }}
           >
             Сохранить и выйти
           </Dropdown.Button>

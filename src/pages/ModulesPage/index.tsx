@@ -44,8 +44,8 @@ const ModulesPage = () => {
   const location = useLocation()
 
   const searchValue = searchParams.get('search') || ''
-  const isPageAvailable = hasPermission(PermissionKeysType.read)
-  const isRemoveModule = hasPermission(PermissionKeysType.write)
+  const isPageAvailable = hasPermission(PermissionKeysType.module_view)
+  const canRemoveModule = hasPermission(PermissionKeysType.module_delete)
   const isLoading = isModulesLoading
 
   useEffect(() => {
@@ -194,7 +194,7 @@ const ModulesPage = () => {
         items={filterFirstColumnItems(ModulesList, searchValue)}
         showAddBtn={false}
         showUpdateBtn={false}
-        showRemoveBtn={isRemoveModule}
+        showRemoveBtn={canRemoveModule}
         onRemoveItem={handleRemoveModule}
         onChangeSearchValue={handleOnChangeSearchValue}
         renderItems={renderItems}

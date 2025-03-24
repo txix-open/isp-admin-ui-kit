@@ -12,7 +12,6 @@ import { Navigate, useNavigate, useParams } from 'react-router-dom'
 
 import { dateFormats } from '@constants/date.ts'
 
-import CanEdit from '@components/CanEdit'
 import CompareVersionModal from '@components/CompareVersionModal'
 import ConfigurationPreviewModal from '@components/ConfigurationPreviewModal'
 
@@ -64,7 +63,11 @@ const AllVersionsPage = () => {
 
   const isLoading = isVersionLoading || isCurrentConfigLoading || isUsersLoading
   const isError = isVersionError || isCurrentConfigError || isUsersError
-  const isPageAvailable = hasPermission(PermissionKeysType.read)
+  const isPageAvailable = hasPermission(PermissionKeysType.module_view)
+  const canSetVersion = hasPermission(PermissionKeysType.module_history_set)
+  const canRemoveVersion = hasPermission(
+    PermissionKeysType.module_history_delete_version
+  )
 
   useEffect(() => {
     if (!isPageAvailable) {
@@ -109,7 +112,7 @@ const AllVersionsPage = () => {
     return (
       <div className="all-version-page__actions-field">
         <Button.Group className="button_group">
-          <CanEdit>
+          {canSetVersion && (
             <Tooltip title="Установить выбранную версию">
               <Popconfirm
                 title="Вы действительно хотите установить выбранную версию ?"
@@ -118,7 +121,7 @@ const AllVersionsPage = () => {
                 <Button icon={<ReloadOutlined />} />
               </Popconfirm>
             </Tooltip>
-          </CanEdit>
+          )}
           <Tooltip title="Просмотр версии">
             <Button
               onClick={() => {
@@ -137,14 +140,14 @@ const AllVersionsPage = () => {
               icon={<SwapOutlined />}
             />
           </Tooltip>
-          <CanEdit>
+          {canRemoveVersion && (
             <Popconfirm
               title="Вы действительно хотите удалить выбранную версию ?"
               onConfirm={() => handeRemoveVersion(record.id)}
             >
               <Button danger icon={<DeleteOutlined />} />
             </Popconfirm>
-          </CanEdit>
+          )}
         </Button.Group>
       </div>
     )

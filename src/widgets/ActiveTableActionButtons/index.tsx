@@ -12,13 +12,15 @@ import { Button, Dropdown, message, Popconfirm, Tooltip } from 'antd'
 import { FC } from 'react'
 import { useNavigate } from 'react-router-dom'
 
-import CanEdit from '@components/CanEdit'
-
 import { ConfigType } from '@pages/ModulesPage/module.type.ts'
+
+import useRole from '@hooks/useRole.tsx'
 
 import configServiceApi from '@services/configService.ts'
 
 import { routePaths } from '@routes/routePaths.ts'
+
+import { PermissionKeysType } from '@type/roles.type.ts'
 
 import { ActiveTableActionButtonsPropsType } from './active-table-action-buttons.type.ts'
 
@@ -32,8 +34,14 @@ const ActiveTableActionButtons: FC<ActiveTableActionButtonsPropsType> = ({
   handleDeleteConfig,
   handleMarkConfigActive
 }) => {
+  const { hasPermission } = useRole()
   const navigate = useNavigate()
   const [createUpdateConfig] = configServiceApi.useCreateUpdateConfigMutation()
+
+  const canUpdateConfig = hasPermission(
+    PermissionKeysType.module_configuration_edit
+  )
+  const canSetActiveVersion = hasPermission(PermissionKeysType.module_configuration_set_active)
 
   const navigateToAllVersion = () => navigate(`${record.id}/all_versions`)
 
@@ -63,19 +71,17 @@ const ActiveTableActionButtons: FC<ActiveTableActionButtonsPropsType> = ({
         <Tooltip key="2" title="Просмотр истории">
           <Button onClick={navigateToAllVersion} icon={<HistoryOutlined />} />
         </Tooltip>
-        <CanEdit>
-          <Tooltip key="4" title="Копировать конфиг">
-            <Button icon={<CopyOutlined />} onClick={copyConfig} />
+        <Tooltip key="4" title="Копировать конфиг">
+          <Button icon={<CopyOutlined />} onClick={copyConfig} />
+        </Tooltip>
+        <Popconfirm
+          title="Вы действительно хотите удалить выбранный конфиг?"
+          onConfirm={() => handleDeleteConfig(record)}
+        >
+          <Tooltip key="3" title="Удалить конфиг">
+            <Button danger icon={<DeleteOutlined />} />
           </Tooltip>
-          <Popconfirm
-            title="Вы действительно хотите удалить выбранный конфиг?"
-            onConfirm={() => handleDeleteConfig(record)}
-          >
-            <Tooltip key="3" title="Удалить конфиг">
-              <Button danger icon={<DeleteOutlined />} />
-            </Tooltip>
-          </Popconfirm>
-        </CanEdit>
+        </Popconfirm>
       </div>
     )
   }
@@ -92,11 +98,9 @@ const ActiveTableActionButtons: FC<ActiveTableActionButtonsPropsType> = ({
         <Tooltip key="2" title="Просмотр истории">
           <Button onClick={navigateToAllVersion} icon={<HistoryOutlined />} />
         </Tooltip>
-        <CanEdit>
-          <Tooltip key="4" title="Копировать конфиг">
-            <Button icon={<CopyOutlined />} onClick={copyConfig} />
-          </Tooltip>
-        </CanEdit>
+        <Tooltip key="4" title="Копировать конфиг">
+          <Button icon={<CopyOutlined />} onClick={copyConfig} />
+        </Tooltip>
       </div>
     )
   }
@@ -112,14 +116,14 @@ const ActiveTableActionButtons: FC<ActiveTableActionButtonsPropsType> = ({
 
     return (
       <>
-        <CanEdit>
+        {canSetActiveVersion && (
           <Tooltip key="3" title="Сделать активной">
             <Button
               onClick={() => handleMarkConfigActive(record)}
               icon={<AlertOutlined />}
             />
           </Tooltip>
-        </CanEdit>
+        )}
         <Dropdown dropdownRender={() => renderDropDownNoActive(record)}>
           <Button icon={<EllipsisOutlined />} />
         </Dropdown>
@@ -135,7 +139,7 @@ const ActiveTableActionButtons: FC<ActiveTableActionButtonsPropsType> = ({
             icon={<EyeOutlined />}
           />
         </Tooltip>
-        <CanEdit>
+        {canUpdateConfig && (
           <Tooltip title="Редактировать">
             <Button
               onClick={() => {
@@ -147,7 +151,7 @@ const ActiveTableActionButtons: FC<ActiveTableActionButtonsPropsType> = ({
               icon={<FormOutlined />}
             />
           </Tooltip>
-        </CanEdit>
+        )}
         {renderAdditionalButtons()}
       </Button.Group>
     </div>
