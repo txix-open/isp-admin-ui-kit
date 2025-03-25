@@ -219,17 +219,19 @@ const UsersPage = () => {
         >
           Пользователи
         </span>
-        <Button
-          disabled={!hasCreateUserPermission}
-          onClick={() =>
-            navigate(`${routePaths.users}/new`, { state: { fromApp: true } })
-          }
-          data-cy="users-page__header__addButton"
-          type="primary"
-          icon={<PlusSquareOutlined />}
-        >
-          Добавить
-        </Button>
+        {hasCreateUserPermission && (
+          <Button
+            disabled={!hasCreateUserPermission}
+            onClick={() =>
+              navigate(`${routePaths.users}/new`, { state: { fromApp: true } })
+            }
+            data-cy="users-page__header__addButton"
+            type="primary"
+            icon={<PlusSquareOutlined />}
+          >
+            Добавить
+          </Button>
+        )}
       </header>
       <section className="users-page__content">
         <div className="users-page__content__wrap-table">

@@ -25,7 +25,9 @@ export const getColumns = (
   const { getColumnSearchProps } = useColumnSearch<VariableType>()
   const canEditPermission = hasPermission(PermissionKeysType.variable_edit)
   const canRemovePermission = hasPermission(PermissionKeysType.variable_delete)
-
+  const isModulesPageAvailable = hasPermission(
+    PermissionKeysType.module_configuration_edit
+  )
   return [
     {
       title: 'Наименование',
@@ -92,13 +94,17 @@ export const getColumns = (
                   className="variable-table-columns__list-element"
                   key={config.id}
                 >
-                  <a
-                    href={`${config.moduleId}/configEditor/${config.id}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    {config.name}
-                  </a>
+                  {isModulesPageAvailable ? (
+                    <a
+                      href={`${config.moduleId}/configEditor/${config.id}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      {config.name}
+                    </a>
+                  ) : (
+                    config.name
+                  )}
                 </li>
               )
             )}

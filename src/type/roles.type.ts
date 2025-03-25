@@ -9,6 +9,7 @@ export enum PermissionKeysType {
   application_group_app_add = 'application_group_app_add', // Добавление нового приложения
   application_group_app_edit = 'application_group_app_edit', // Редактирование существующего приложения
   application_group_app_delete = 'application_group_app_delete', // Удаление приложения
+  application_group_token_view = 'application_group_token_view', // Просмотр раздела "Токены"
   application_group_token_add = 'application_group_token_add', // Добавление нового токена
   application_group_token_delete = 'application_group_token_delete', // Удаление нового токена
 

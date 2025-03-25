@@ -68,7 +68,7 @@ export const menuConfig = (name: string) => [
       },
       {
         key: 'security_logs',
-        label: 'Просмотр журналов ИБ',
+        label: 'Журнал событий',
         route: routePaths.securityLog,
         permissions: [PermissionKeysType.security_log_view]
       },

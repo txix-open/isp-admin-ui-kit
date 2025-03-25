@@ -69,6 +69,13 @@ const ApplicationsContent: FC<ApplicationsContentPropTypes> = ({
   const canRemoveApp = hasPermission(
     PermissionKeysType.application_group_app_delete
   )
+  const isTokenPageAvailable = hasPermission(
+    PermissionKeysType.application_group_token_view
+  )
+
+  const isAppAccessPageAvailable = hasPermission(
+    PermissionKeysType.app_access_view
+  )
 
   const currentApp = useMemo(() => {
     const element = applications.find(
@@ -92,6 +99,14 @@ const ApplicationsContent: FC<ApplicationsContentPropTypes> = ({
   const renderTokenContent = () => {
     if (!appId) {
       return <EmptyData />
+    }
+
+    if (!isTokenPageAvailable) {
+      return (
+        <div className="empty-data">
+          <h1>Нет доступа к разделу</h1>
+        </div>
+      )
     }
 
     return <TokenContent key={appId} id={Number(appId)} />
@@ -159,17 +174,19 @@ const ApplicationsContent: FC<ApplicationsContentPropTypes> = ({
             title={item.name}
             description={<span>id: {item.id}</span>}
           />
-          <div
-            className="link-btn"
-            onClick={(e) => {
-              e.stopPropagation()
-              navigate(`/appAccess/${item.id}`)
-            }}
-          >
-            <Tooltip title="Доступы приложений">
-              <FileProtectOutlined />
-            </Tooltip>
-          </div>
+          {isAppAccessPageAvailable && (
+            <div
+              className="link-btn"
+              onClick={(e) => {
+                e.stopPropagation()
+                navigate(`${routePaths.appAccess}/${item.id}`)
+              }}
+            >
+              <Tooltip title="Доступы приложений">
+                <FileProtectOutlined />
+              </Tooltip>
+            </div>
+          )}
         </Tooltip>
       </List.Item>
     )
