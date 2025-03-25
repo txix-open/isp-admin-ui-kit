@@ -19,35 +19,35 @@ export const menuConfig = (name: string) => [
     icon: <DefaultUser />,
     className: 'user-item',
     route: routePaths.profile,
-    permissions: [PermissionKeysType.read]
+    permissions: [PermissionKeysType.profile_view]
   },
   {
-    key: 'applications_group',
+    key: 'application_groups',
     label: 'Приложения',
     icon: <AppstoreAddOutlined />,
     route: routePaths.applicationsGroup,
-    permissions: [PermissionKeysType.read]
+    permissions: [PermissionKeysType.application_group_view]
   },
   {
-    key: 'appAccess',
+    key: 'app_access',
     label: 'Доступы приложений',
     icon: <FileProtectOutlined />,
     route: routePaths.appAccess,
-    permissions: [PermissionKeysType.read]
+    permissions: [PermissionKeysType.app_access_view]
   },
   {
     key: 'variables',
     label: 'Переменные',
     icon: <FunctionOutlined />,
     route: routePaths.variables,
-    permissions: [PermissionKeysType.read]
+    permissions: [PermissionKeysType.variable_view]
   },
   {
     key: 'modules',
     label: 'Модули',
     icon: <ProductOutlined />,
     route: routePaths.modules,
-    permissions: [PermissionKeysType.read]
+    permissions: [PermissionKeysType.module_view]
   },
   {
     key: 'sessionManagement',
@@ -67,7 +67,7 @@ export const menuConfig = (name: string) => [
         permissions: [PermissionKeysType.session_view]
       },
       {
-        key: 'securityLog',
+        key: 'security_logs',
         label: 'Просмотр журналов ИБ',
         route: routePaths.securityLog,
         permissions: [PermissionKeysType.security_log_view]

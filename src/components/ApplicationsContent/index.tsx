@@ -17,9 +17,13 @@ import {
 import { setSearchValue, setSelectedItemId } from '@utils/columnLayoutUtils.ts'
 import { filterFirstColumnItems } from '@utils/firstColumnUtils.ts'
 
+import useRole from '@hooks/useRole.tsx'
+
 import applicationsApi from '@services/applicationsService.ts'
 
 import { routePaths } from '@routes/routePaths.ts'
+
+import { PermissionKeysType } from '@type/roles.type.ts'
 
 import './applications-content.scss'
 
@@ -35,6 +39,7 @@ const ApplicationsContent: FC<ApplicationsContentPropTypes> = ({
   selectedItemId,
   setCurrentApplicationsApp
 }) => {
+  const { hasPermission } = useRole()
   const {
     data: applications = [],
     isLoading: isLoadingApplicationsContent = []
@@ -56,6 +61,14 @@ const ApplicationsContent: FC<ApplicationsContentPropTypes> = ({
   const searchAppValue = searchParams.get('appSearch') || ''
   const navigate = useNavigate()
   const { appId = '' } = useParams()
+
+  const canAddApp = hasPermission(PermissionKeysType.application_group_app_add)
+  const canUpdateApp = hasPermission(
+    PermissionKeysType.application_group_app_edit
+  )
+  const canRemoveApp = hasPermission(
+    PermissionKeysType.application_group_app_delete
+  )
 
   const currentApp = useMemo(() => {
     const element = applications.find(
@@ -176,7 +189,9 @@ const ApplicationsContent: FC<ApplicationsContentPropTypes> = ({
         title="Приложения"
         searchPlaceholder="Введите имя или id"
         onUpdateItem={updateApplicationModal}
-        showUpdateBtn={true}
+        showUpdateBtn={canUpdateApp}
+        showRemoveBtn={canRemoveApp}
+        showAddBtn={canAddApp}
         onAddItem={addApplicationModal}
         onRemoveItem={() => handleRemoveApplicationApp(Number(appId))}
         items={filterFirstColumnItems(

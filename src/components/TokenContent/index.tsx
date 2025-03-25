@@ -15,14 +15,16 @@ import { ValidationRules } from '@constants/form/validationRules.ts'
 
 import Modal from '@widgets/Modal'
 
-import CanEdit from '@components/CanEdit'
-
 import {
   ApplicationTokenType,
   NewApplicationTokenType
 } from '@pages/ApplicationsPage/applications.type.ts'
 
+import useRole from '@hooks/useRole.tsx'
+
 import tokensApi from '@services/tokensService.ts'
+
+import { PermissionKeysType } from '@type/roles.type.ts'
 
 import './tokens.scss'
 
@@ -39,6 +41,7 @@ dayjs.extend(duration)
 dayjs.extend(relativeTime)
 
 const TokenContent = ({ id }: TokenPropTypes) => {
+  const { hasPermission } = useRole()
   const [showApplicationsModal, setShowApplicationsModal] = useState(false)
   const {
     handleSubmit: handleSubmitTokens,
@@ -51,6 +54,13 @@ const TokenContent = ({ id }: TokenPropTypes) => {
   const { data, isLoading } = tokensApi.useGetTokensByAppIdQuery({ id })
   const [createToken] = tokensApi.useCreateTokenMutation()
   const [revokeToken] = tokensApi.useRevokeTokensMutation()
+
+  const canAddToken = hasPermission(
+    PermissionKeysType.application_group_token_add
+  )
+  const canRemoveToken = hasPermission(
+    PermissionKeysType.application_group_token_delete
+  )
 
   useEffect(() => {
     const clipboard = new ClipboardJS('.copy-btn')
@@ -158,14 +168,16 @@ const TokenContent = ({ id }: TokenPropTypes) => {
                 data-clipboard-text={value}
               />
             </Tooltip>
-            <Tooltip title="Удалить">
-              <Popconfirm
-                title="Закончить эту сессию?"
-                onConfirm={() => handleRevokeToken(record)}
-              >
-                <Button icon={<DeleteOutlined />} />
-              </Popconfirm>
-            </Tooltip>
+            {canRemoveToken && (
+              <Tooltip title="Удалить">
+                <Popconfirm
+                  title="Закончить эту сессию?"
+                  onConfirm={() => handleRevokeToken(record)}
+                >
+                  <Button icon={<DeleteOutlined />} />
+                </Popconfirm>
+              </Tooltip>
+            )}
           </Button.Group>
         )
       }
@@ -214,7 +226,7 @@ const TokenContent = ({ id }: TokenPropTypes) => {
       <div className="token-content__wrap">
         <header className="token-content__header">
           <h3>Токены</h3>
-          <CanEdit>
+          {canAddToken && (
             <Button
               className="applications-content__add-btn"
               type="primary"
@@ -222,7 +234,7 @@ const TokenContent = ({ id }: TokenPropTypes) => {
             >
               Добавить токен
             </Button>
-          </CanEdit>
+          )}
         </header>
         <div className="token-content__table">
           <Table

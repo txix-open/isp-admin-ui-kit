@@ -31,8 +31,8 @@ const UserEditor = () => {
   const fromApp = location.state?.fromApp || false
   const { hasPermission } = useRole()
 
-  const hasCreateUserPermission = hasPermission(PermissionKeysType.write)
-  const hasUpdateUserPermission = hasPermission(PermissionKeysType.write)
+  const canCreateUser = hasPermission(PermissionKeysType.user_create)
+  const canUpdateUser = hasPermission(PermissionKeysType.user_update)
 
   const [createUser] = userServiceApi.useCreateUserMutation()
   const { data: roles = [], isLoading } = roleApi.useGetAllRolesQuery()
@@ -40,8 +40,8 @@ const UserEditor = () => {
   const [updateUser] = userServiceApi.useUpdateUserMutation()
 
   const isSaveBtnAvailable = isNew
-    ? hasCreateUserPermission
-    : hasUpdateUserPermission
+    ? canCreateUser
+    : canUpdateUser
 
   const {
     control,
@@ -237,7 +237,7 @@ const UserEditor = () => {
               mode="multiple"
               label="Роли"
               optionFilterProp="label"
-              disabled={!hasPermission(PermissionKeysType.write)}
+              disabled={!hasPermission(PermissionKeysType.user_update)}
               control={control}
               name="roles"
               options={createSelectOptions(roles)}

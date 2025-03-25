@@ -23,7 +23,8 @@ export const getColumns = (
   const navigate = useNavigate()
   const { role: _, hasPermission } = useRole()
   const { getColumnSearchProps } = useColumnSearch<VariableType>()
-  const isEditPermission = hasPermission(PermissionKeysType.write)
+  const canEditPermission = hasPermission(PermissionKeysType.variable_edit)
+  const canRemovePermission = hasPermission(PermissionKeysType.variable_delete)
 
   return [
     {
@@ -134,7 +135,7 @@ export const getColumns = (
       width: 150,
       align: 'center',
       render: (_, record) => {
-        if (!isEditPermission) {
+        if (!canEditPermission) {
           return null
         }
         const isUsedInConfigs = record.containsInConfigs.length > 0
@@ -149,24 +150,26 @@ export const getColumns = (
                 }
               />
             </Tooltip>
-            <Popconfirm
-              title="Вы уверены, что хотите удалить эту переменную?"
-              onConfirm={() => onRemoveVariable(record.name)}
-            >
-              <Tooltip
-                title={
-                  isUsedInConfigs
-                    ? 'Переменная используется в конфигурациях'
-                    : 'Удалить'
-                }
+            {canRemovePermission && (
+              <Popconfirm
+                title="Вы уверены, что хотите удалить эту переменную?"
+                onConfirm={() => onRemoveVariable(record.name)}
               >
-                <Button
-                  data-testid="variables-table__delete-config-btn"
-                  icon={<DeleteOutlined />}
-                  disabled={isUsedInConfigs}
-                />
-              </Tooltip>
-            </Popconfirm>
+                <Tooltip
+                  title={
+                    isUsedInConfigs
+                      ? 'Переменная используется в конфигурациях'
+                      : 'Удалить'
+                  }
+                >
+                  <Button
+                    data-testid="variables-table__delete-config-btn"
+                    icon={<DeleteOutlined />}
+                    disabled={isUsedInConfigs}
+                  />
+                </Tooltip>
+              </Popconfirm>
+            )}
           </Button.Group>
         )
       }

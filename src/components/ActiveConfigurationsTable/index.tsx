@@ -10,13 +10,16 @@ import { dateFormats } from '@constants/date.ts'
 import ActiveTableActionButtons from '@widgets/ActiveTableActionButtons'
 
 import { ActiveConfigurationsTablePropsType } from '@components/ActiveConfigurationsTable/active-configurations-table.type.ts'
-import CanEdit from '@components/CanEdit'
 
 import { ConfigType } from '@pages/ModulesPage/module.type.ts'
+
+import useRole from '@hooks/useRole.tsx'
 
 import configApi from '@services/configService.ts'
 
 import { routePaths } from '@routes/routePaths.ts'
+
+import { PermissionKeysType } from '@type/roles.type.ts'
 
 import './active-configurations-table.scss'
 
@@ -27,6 +30,7 @@ const ActiveConfigurationsTable: FC<ActiveConfigurationsTablePropsType> = ({
   data,
   currentModule = {}
 }) => {
+  const { hasPermission } = useRole()
   const [editKeyConfig, setEditKeyConfig] = useState<string>('')
   const [tempEditValues, setTempEditValues] = useState<any>()
   const inputRefs = useRef<Record<string, HTMLInputElement | null>>({})
@@ -35,6 +39,8 @@ const ActiveConfigurationsTable: FC<ActiveConfigurationsTablePropsType> = ({
   const [deleteConfig] = configApi.useDeleteConfigMutation()
   const navigate = useNavigate()
   const { id: moduleId } = useParams()
+
+  const canAddConfig = hasPermission(PermissionKeysType.module_configuration_add)
 
   useEffect(() => {
     if (inputRefs.current[editKeyConfig]) {
@@ -125,14 +131,12 @@ const ActiveConfigurationsTable: FC<ActiveConfigurationsTablePropsType> = ({
             </Tooltip>
           </div>
         ) : (
-          <CanEdit>
-            <Tooltip title="Редактировать название">
-              <Button
-                onClick={() => handleEditStart(record)}
-                icon={<EditOutlined />}
-              />
-            </Tooltip>
-          </CanEdit>
+          <Tooltip title="Редактировать название">
+            <Button
+              onClick={() => handleEditStart(record)}
+              icon={<EditOutlined />}
+            />
+          </Tooltip>
         )}
       </div>
     )
@@ -197,8 +201,8 @@ const ActiveConfigurationsTable: FC<ActiveConfigurationsTablePropsType> = ({
         <h2 className="active-configurations-table__title">
           {isActiveTable ? 'Активная' : 'Остальные'}
         </h2>
-        {!isActiveTable && (
-          <CanEdit>
+        {!isActiveTable &&
+          canAddConfig && (
             <Button
               className="configurations__buttons__new-config-brn"
               onClick={() =>
@@ -209,8 +213,7 @@ const ActiveConfigurationsTable: FC<ActiveConfigurationsTablePropsType> = ({
             >
               Создать
             </Button>
-          </CanEdit>
-        )}
+          )}
       </div>
       <Table
         rowHoverable={false}
