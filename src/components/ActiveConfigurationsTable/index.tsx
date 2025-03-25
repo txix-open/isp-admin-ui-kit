@@ -40,7 +40,12 @@ const ActiveConfigurationsTable: FC<ActiveConfigurationsTablePropsType> = ({
   const navigate = useNavigate()
   const { id: moduleId } = useParams()
 
-  const canAddConfig = hasPermission(PermissionKeysType.module_configuration_add)
+  const canAddConfig = hasPermission(
+    PermissionKeysType.module_configuration_add
+  )
+  const canEditConfig = hasPermission(
+    PermissionKeysType.module_configuration_edit
+  )
 
   useEffect(() => {
     if (inputRefs.current[editKeyConfig]) {
@@ -131,12 +136,14 @@ const ActiveConfigurationsTable: FC<ActiveConfigurationsTablePropsType> = ({
             </Tooltip>
           </div>
         ) : (
-          <Tooltip title="Редактировать название">
-            <Button
-              onClick={() => handleEditStart(record)}
-              icon={<EditOutlined />}
-            />
-          </Tooltip>
+          canEditConfig && (
+            <Tooltip title="Редактировать название">
+              <Button
+                onClick={() => handleEditStart(record)}
+                icon={<EditOutlined />}
+              />
+            </Tooltip>
+          )
         )}
       </div>
     )
@@ -201,19 +208,18 @@ const ActiveConfigurationsTable: FC<ActiveConfigurationsTablePropsType> = ({
         <h2 className="active-configurations-table__title">
           {isActiveTable ? 'Активная' : 'Остальные'}
         </h2>
-        {!isActiveTable &&
-          canAddConfig && (
-            <Button
-              className="configurations__buttons__new-config-brn"
-              onClick={() =>
-                navigate(`/${moduleId}/${routePaths.configEditor}/new`, {
-                  state: currentModule
-                })
-              }
-            >
-              Создать
-            </Button>
-          )}
+        {!isActiveTable && canAddConfig && (
+          <Button
+            className="configurations__buttons__new-config-brn"
+            onClick={() =>
+              navigate(`/${moduleId}/${routePaths.configEditor}/new`, {
+                state: currentModule
+              })
+            }
+          >
+            Создать
+          </Button>
+        )}
       </div>
       <Table
         rowHoverable={false}
