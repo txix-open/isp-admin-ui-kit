@@ -99,7 +99,7 @@ const SecurityLogPage = () => {
           data-cy="security-log-page__header__title"
           className="security-log-page__header__title"
         >
-          Просмотр журналов ИБ
+          Журнал событий
         </span>
       </header>
       <section className="security-log-page__content">
