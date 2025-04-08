@@ -196,6 +196,7 @@ const ConfigurationEditorPage: FC = () => {
             setDisableBtn={setDisableBtn}
             bufConfig={bufConfig as ConfigType}
             setBufConfig={setBufConfig}
+            jsonSchema={jsonSchema}
             isCurrentConfigLoading={isCurrentConfigLoading}
           />
         )
