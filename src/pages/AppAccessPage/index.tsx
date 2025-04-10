@@ -18,7 +18,6 @@ import { filterFirstColumnItems } from '@utils/firstColumnUtils.ts'
 
 import useRole from '@hooks/useRole.tsx'
 
-import appApi from '@services/appService.ts'
 
 import { routePaths } from '@routes/routePaths.ts'
 
@@ -26,6 +25,7 @@ import { SystemTreeAppType } from '@type/app.type.ts'
 import { PermissionKeysType } from '@type/roles.type.ts'
 
 import './app-access-page.scss'
+import applicationsApi from '@services/applicationsService.ts'
 
 const { Column, EmptyData } = Layout
 
@@ -33,13 +33,6 @@ const firstColumnSearchParam = 'search'
 const findMethodParam = 'method'
 
 const AppAccessPage = () => {
-  const {
-    data = { originalResponse: [], appList: [] },
-    isLoading,
-    isError
-  } = appApi.useGetSystemTreeQuery()
-
-  const { appList } = data
   const navigate = useNavigate()
   const { hasPermission } = useRole()
 
@@ -47,6 +40,12 @@ const AppAccessPage = () => {
   const [searchParams, setSearchParams] = useSearchParams()
   const searchValue = searchParams.get(firstColumnSearchParam) || ''
   const canRead = hasPermission(PermissionKeysType.app_access_view)
+
+  const {
+    data ,
+    isLoading,
+    isError
+  } = applicationsApi.useGetAllApplicationsServiceQuery({id: selectedItemId})
 
   useEffect(() => {
     if (!canRead) {
@@ -85,7 +84,7 @@ const AppAccessPage = () => {
         showAddBtn={false}
         showRemoveBtn={false}
         items={filterFirstColumnItems(
-          appList as ColumnItem<SystemTreeAppType>,
+          data as ColumnItem<SystemTreeAppType>,
           searchValue
         )}
         renderItems={(item) => <ListItem item={item} />}
