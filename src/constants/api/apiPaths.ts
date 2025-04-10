@@ -35,11 +35,13 @@ type PathKeys =
   | 'getAllService'
   | 'getServiceById'
   | 'getServicesByDomainId'
-  | 'createUpdateApplication'
+  | 'createApplication'
+  | 'updateApplication'
   | 'deleteApplication'
   | 'getApplicationById'
   | 'getAllApplications'
   | 'getApplicationsByServiceId'
+  | 'getNextAppId'
   | 'createToken'
   | 'getTokensByAppId'
   | 'revokeTokens'
@@ -60,6 +62,11 @@ type PathKeys =
   | 'getVariableByName'
   | 'updateVariable'
   | 'upsertVariables'
+  | 'createApplicationGroup'
+  | 'deleteListApplicationGroup'
+  | 'getAllApplicationGroup'
+  | 'getByIdListApplicationGroup'
+  | 'updateApplicationGroup'
 
 export const apiPaths: Record<PathKeys, string> = {
   baseUrl: '/api/kkd-configuration-service',
@@ -96,11 +103,19 @@ export const apiPaths: Record<PathKeys, string> = {
   setLogEvents: '/log/set_events',
   // ======= APPLICATIONS ======
   getSystemTree: '/application/get_system_tree',
-  getAllApplications: '/application/get_applications',
-  createUpdateApplication: '/application/create_update_application',
+  getAllApplications: '/application/get_all',
+  createApplication: '/application/create_application',
+  updateApplication: '/application/update_application',
   getApplicationsByServiceId: '/application/get_applications_by_service_id',
   deleteApplication: '/application/delete_applications',
   getApplicationById: '/application/get_application_by_id',
+  getNextAppId: '/application/next_id',
+  // ======= APPLICATION GROUP  ======
+  createApplicationGroup: '/application_group/create',
+  deleteListApplicationGroup: '/application_group/delete_list',
+  getAllApplicationGroup: '/application_group/get_all',
+  getByIdListApplicationGroup: '/application_group/get_by_id_list',
+  updateApplicationGroup: '/application_group/update',
   // ======= ACCESS_LIST ======
   getById: '/access_list/get_by_id',
   setList: '/access_list/set_list',
