@@ -30,7 +30,7 @@ const applicationsApi = createApi({
       NewApplicationAppType
     >({
       query: (NewApplicationsService) => ({
-        url: apiPaths.createUpdateApplication,
+        url: apiPaths.createApplication,
         data: NewApplicationsService
       }),
       invalidatesTags: ['Applications']
@@ -61,7 +61,7 @@ const applicationsApi = createApi({
     updateApplicationsService: builder.mutation<void, UpdateApplicationAppType>(
       {
         query: (updateApplications) => ({
-          url: apiPaths.createUpdateApplication,
+          url: apiPaths.updateApplication,
           data: updateApplications
         }),
         invalidatesTags: ['Applications']
@@ -72,6 +72,12 @@ const applicationsApi = createApi({
       query: ([id]) => ({
         url: apiPaths.deleteApplication,
         data: [id]
+      }),
+      invalidatesTags: ['Applications']
+    }),
+    getNextAppId: builder.mutation<void, void>({
+      query: () => ({
+        url: apiPaths.getNextAppId,
       }),
       invalidatesTags: ['Applications']
     })

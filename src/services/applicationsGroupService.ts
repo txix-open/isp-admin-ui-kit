@@ -27,6 +27,17 @@ const applicationsGroupApi = createApi({
       providesTags: () => ['ApplicationsGroup']
     }),
 
+    getApplicationGroupGetByIdList: builder.query<
+      ApplicationsGroupType[],
+      { id: number }
+    >({
+      query: (id) => ({
+        url: apiPaths.getByIdListApplicationGroup,
+        data: id
+      }),
+      providesTags: () => ['ApplicationsGroup']
+    }),
+
     getApplicationsGroupByServiceId: builder.query<
       ApplicationsGroupType[],
       { id: number }
@@ -40,9 +51,9 @@ const applicationsGroupApi = createApi({
 
     getAllApplicationsGroup: builder.query<
       ApplicationsGroupType[],
-      { id: string }
+      void
     >({
-      query: () => ({ url: apiPaths.getAllService }),
+      query: () => ({ url: apiPaths.getAllApplicationGroup }),
       providesTags: () => ['ApplicationsGroup']
     }),
 
@@ -51,7 +62,7 @@ const applicationsGroupApi = createApi({
       NewApplicationsGroupType
     >({
       query: (newApplicationsGroup) => ({
-        url: apiPaths.createUpdateService,
+        url: apiPaths.createApplicationGroup,
         data: newApplicationsGroup
       }),
       invalidatesTags: ['ApplicationsGroup']
@@ -62,19 +73,19 @@ const applicationsGroupApi = createApi({
       UpdateApplicationsGroupType
     >({
       query: (updateApplicationsGroup) => ({
-        url: apiPaths.createUpdateService,
+        url: apiPaths.updateApplicationGroup,
         data: updateApplicationsGroup
       }),
       invalidatesTags: ['ApplicationsGroup']
     }),
 
-    removeApplicationsGroup: builder.mutation<void, number[]>({
-      query: ([id]) => ({
-        url: apiPaths.deleteService,
-        data: [id]
+    removeApplicationsGroup: builder.mutation<void,  { idList: number[] }>({
+      query: (id) => ({
+        url: apiPaths.deleteListApplicationGroup,
+        data: id
       }),
       invalidatesTags: ['ApplicationsGroup']
-    })
+    }),
   })
 })
 

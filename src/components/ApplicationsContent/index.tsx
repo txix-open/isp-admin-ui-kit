@@ -40,6 +40,11 @@ const ApplicationsContent: FC<ApplicationsContentPropTypes> = ({
   setCurrentApplicationsApp
 }) => {
   const { hasPermission } = useRole()
+  const [isExistsId, setIsExistsId] = useState<{
+    field: keyof ApplicationAppType
+    message: string
+  } | null>(null)
+
   const {
     data: applications = [],
     isLoading: isLoadingApplicationsContent = []
@@ -115,15 +120,14 @@ const ApplicationsContent: FC<ApplicationsContentPropTypes> = ({
   const handleUpdateApplicationApp = (data: ApplicationAppType) => {
     if (currentApp) {
       const updateApplications: UpdateApplicationAppType = {
-        id: currentApp.id,
+        newId: data.id,
+        oldId: currentApp.id,
         name: data.name,
         description: data.description
           ? data.description
           : currentApp.description,
-        serviceId: selectedItemId,
-        type: 'SYSTEM'
       }
-      updateApplication({ ...currentApp, ...updateApplications })
+      updateApplication(updateApplications)
         .unwrap()
         .then(() => {
           setShowApplicationsModal({
@@ -131,16 +135,29 @@ const ApplicationsContent: FC<ApplicationsContentPropTypes> = ({
             updateModal: false
           })
           message.success('Элемент сохранен')
+          setIsExistsId(null)
         })
-        .catch(() => message.error('Ошибка обновления элемента'))
+        .catch((e) => {
+          if(e.response.data.errorCode === 604) {
+            setIsExistsId({
+              field: 'id',
+              message: 'Приложение с таким идентификатором уже существует'
+            })
+          } else {
+            message.error('Ошибка обновления элемента')
+            setIsExistsId(null)
+          }
+        })
     }
   }
 
   const handleCreateApplicationApp = (data: ApplicationAppType) => {
+
     const newApplicationApp: NewApplicationAppType = {
       name: data.name,
+      id: data.id,
       description: data.description,
-      serviceId: selectedItemId,
+      applicationGroupId: selectedItemId,
       type: 'SYSTEM'
     }
 
@@ -153,8 +170,18 @@ const ApplicationsContent: FC<ApplicationsContentPropTypes> = ({
           addModal: false
         })
       })
-      .catch(() => message.error('Ошибка добавления элемента'))
+      .catch((e) => {
+        if(e.response.data.errorCode === 604) {
+          setIsExistsId({
+            field: 'id',
+            message: 'Приложение с таким идентификатором уже существует'
+          })
+        } else {
+          message.error('Ошибка создания элемента')
+        }
+      })
   }
+
   const handleRemoveApplicationApp = (id: number) =>
     removeApplicationsService([id])
       .unwrap()
@@ -239,6 +266,7 @@ const ApplicationsContent: FC<ApplicationsContentPropTypes> = ({
       />
       {renderTokenContent()}
       <AppModal
+        isExistsId={isExistsId}
         app={currentApp}
         onOk={handleUpdateApplicationApp}
         title="Редактировать приложение"
@@ -251,6 +279,8 @@ const ApplicationsContent: FC<ApplicationsContentPropTypes> = ({
         }
       />
       <AppModal
+        isExistsId={isExistsId}
+        isNew
         onOk={handleCreateApplicationApp}
         title="Добавить приложение"
         open={showApplicationsModal.addModal}

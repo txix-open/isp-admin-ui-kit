@@ -1,0 +1,10 @@
+.generate_id {
+  display: flex;
+  align-items: center;
+  .requiredInput {
+    width: 200px;
+  }
+  .ant-input-number-group-addon {
+    padding: 0;
+  }
+}
