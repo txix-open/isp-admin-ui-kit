@@ -31,18 +31,21 @@ export interface ApplicationAppType {
   description: string
   id: number
   name: string
-  serviceId: number
+  applicationGroupId: number
   type: string
   updatedAt: string
 }
 
-export type UpdateApplicationAppType = Omit<
-  ApplicationAppType,
-  'createdAt' | 'updatedAt'
->
+export interface UpdateApplicationAppType {
+  description: string,
+  name: string,
+  newId: number,
+  oldId: number
+}
+
 export type NewApplicationAppType = Omit<
   ApplicationAppType,
-  'id' | 'createdAt' | 'updatedAt'
+  'createdAt' | 'updatedAt'
 >
 export type RevokeTokenType = {
   appId: number

@@ -41,7 +41,7 @@ const ApplicationsPage = () => {
     data: applicationsGroup = [],
     isError: isErrorApplicationsGroup,
     isLoading: isLoadingApplicationsGroup
-  } = applicationsGroupApi.useGetApplicationsGroupByDomainIdQuery({ id: 1 })
+  } = applicationsGroupApi.useGetAllApplicationsGroupQuery()
 
   const [createApplicationsGroup] =
     applicationsGroupApi.useCreateApplicationsGroupMutation()
@@ -147,7 +147,7 @@ const ApplicationsPage = () => {
   }
 
   const handleRemoveApplicationsGtoup = () => {
-    deleteApplicationsGroup([Number(selectedItemId)])
+    deleteApplicationsGroup({idList:[ Number(selectedItemId)]})
       .unwrap()
       .then(() => {
         message.success('Элемент удален')
