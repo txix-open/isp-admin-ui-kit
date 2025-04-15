@@ -3,28 +3,15 @@ import { List, message, Spin, Tooltip } from 'antd'
 import { Layout, ColumnItem } from 'isp-ui-kit'
 import { Dispatch, FC, SetStateAction, useMemo, useState } from 'react'
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
-
 import AppModal from '@components/AppModal'
 import TokenContent from '@components/TokenContent'
-
-import {
-  ApplicationAppType,
-  ApplicationsServiceType,
-  NewApplicationAppType,
-  UpdateApplicationAppType
-} from '@pages/ApplicationsPage/applications.type.ts'
-
+import { ApplicationAppType, ApplicationsServiceType, NewApplicationAppType, UpdateApplicationAppType } from '@pages/ApplicationsPage/applications.type.ts'
 import { setSearchValue, setSelectedItemId } from '@utils/columnLayoutUtils.ts'
 import { filterFirstColumnItems } from '@utils/firstColumnUtils.ts'
-
 import useRole from '@hooks/useRole.tsx'
-
 import applicationsApi from '@services/applicationsService.ts'
-
 import { routePaths } from '@routes/routePaths.ts'
-
 import { PermissionKeysType } from '@type/roles.type.ts'
-
 import './applications-content.scss'
 
 const { EmptyData, Column } = Layout
@@ -124,8 +111,6 @@ const ApplicationsContent: FC<ApplicationsContentPropTypes> = ({
         oldId: currentApp.id,
         name: data.name,
         description: data.description
-          ? data.description
-          : currentApp.description,
       }
       updateApplication(updateApplications)
         .unwrap()
@@ -134,8 +119,9 @@ const ApplicationsContent: FC<ApplicationsContentPropTypes> = ({
             ...showApplicationsModal,
             updateModal: false
           })
-          message.success('Элемент сохранен')
+          navigate(`${routePaths.applicationsGroup}/${selectedItemId}/${routePaths.application}/${data.id}`)
           setIsExistsId(null)
+          message.success('Элемент сохранен')
         })
         .catch((e) => {
           if(e.response.data.errorCode === 604) {
