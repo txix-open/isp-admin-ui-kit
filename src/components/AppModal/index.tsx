@@ -13,8 +13,7 @@ import './app-modal.scss'
 const { FormInput, FormTextArea, FormInputNumber } = FormComponents
 
 const AppModal: FC<AppModalType> = ({ title, onOk, onClose, open, app, isNew = false, isExistsId }) => {
-  const [getNextAppId] = applicationsApi.useGetNextAppIdMutation()
-
+  const [getNextAppId, {isLoading}] = applicationsApi.useGetNextAppIdMutation()
   const { handleSubmit, control, reset, setValue, setError, clearErrors } =
     useForm<ApplicationAppType>({
       mode: 'onChange',
@@ -25,7 +24,11 @@ const AppModal: FC<AppModalType> = ({ title, onOk, onClose, open, app, isNew = f
       if (open) {
         reset(app)
       }
-    }, [open])
+
+      if(isNew) {
+        reset()
+      }
+    }, [open, isNew])
 
   useEffect(() => {
     if (isExistsId?.field && isExistsId?.message) {
@@ -55,6 +58,7 @@ const AppModal: FC<AppModalType> = ({ title, onOk, onClose, open, app, isNew = f
       onOk={handleSubmit(onOk)}
       title={title}
       open={open}
+      loading={isLoading}
       footer={{ onCanselText: 'Отмена', onOkText: 'Сохранить' }}
       onClose={() => {
         if (onClose) {
@@ -64,6 +68,19 @@ const AppModal: FC<AppModalType> = ({ title, onOk, onClose, open, app, isNew = f
       }}
     >
       <form>
+        <div className="generate_id">
+          <FormInputNumber
+            control={control}
+            name="id"
+            label="Идентификатор"
+            rules={{ required: ValidationRules.required }}
+            addonAfter={isNew && (
+              <Tooltip title="Сгенерировать">
+                <Button icon={<SyncOutlined />} onClick={handleGetNextAppId} loading={isLoading} />
+              </Tooltip>
+            )}
+          />
+        </div>
         <FormInput
           control={control}
           name="name"
@@ -77,19 +94,6 @@ const AppModal: FC<AppModalType> = ({ title, onOk, onClose, open, app, isNew = f
           name="description"
         />
 
-        <div className="generate_id">
-          <FormInputNumber
-            control={control}
-            name="id"
-            label="Идентификатор"
-            rules={{ required: ValidationRules.required }}
-            addonAfter={isNew && (
-              <Tooltip title="Генерация ключа">
-                <Button icon={<SyncOutlined />} onClick={handleGetNextAppId} />
-              </Tooltip>
-            )}
-          />
-        </div>
       </form>
     </Modal>
   )
