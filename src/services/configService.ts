@@ -2,7 +2,7 @@ import { createApi } from '@reduxjs/toolkit/query/react'
 
 import { apiPaths } from '@constants/api/apiPaths.ts'
 
-import { ConfigResponse, ConfigType } from '@pages/ModulesPage/module.type.ts'
+import { ConfigNameType, ConfigResponse, ConfigType } from '@pages/ModulesPage/module.type.ts'
 
 import { axiosBaseQuery } from '@utils/apiUtils.ts'
 
@@ -55,6 +55,10 @@ const configServiceApi = createApi({
     }),
     createUpdateConfig: builder.mutation<ConfigType, ConfigType>({
       query: (data) => ({ url: apiPaths.createUpdateConfig, data }),
+      invalidatesTags: () => ['configs', 'versions', 'config']
+    }),
+    updateConfigName: builder.mutation<void, ConfigNameType>({
+      query: (data) => ({ url: apiPaths.updateConfigName, data }),
       invalidatesTags: () => ['configs', 'versions', 'config']
     }),
     deleteVersion: builder.mutation<void, string>({
