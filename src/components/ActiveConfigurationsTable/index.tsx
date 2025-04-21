@@ -34,7 +34,7 @@ const ActiveConfigurationsTable: FC<ActiveConfigurationsTablePropsType> = ({
   const [editKeyConfig, setEditKeyConfig] = useState<string>('')
   const [tempEditValues, setTempEditValues] = useState<any>()
   const inputRefs = useRef<Record<string, HTMLInputElement | null>>({})
-  const [createUpdateConfig] = configApi.useCreateUpdateConfigMutation()
+  const [updateConfigName] = configApi.useUpdateConfigNameMutation()
   const [markConfigAsActive] = configApi.useMarkConfigAsActiveMutation()
   const [deleteConfig] = configApi.useDeleteConfigMutation()
   const navigate = useNavigate()
@@ -69,8 +69,8 @@ const ActiveConfigurationsTable: FC<ActiveConfigurationsTablePropsType> = ({
   }
 
   const handleSaveEdit = (record: ConfigType) => {
-    const sendData = { ...record, name: tempEditValues[record.id] }
-    createUpdateConfig(sendData)
+    const sendData = { id: record.id, newConfigName: tempEditValues[record.id] }
+    updateConfigName(sendData)
       .unwrap()
       .then(() => {
         message.success('Элемент успешно сохранен')
