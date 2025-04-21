@@ -4,7 +4,7 @@ import {
   ReloadOutlined,
   SwapOutlined
 } from '@ant-design/icons'
-import { Button, message, Popconfirm, Spin, Table, Tooltip } from 'antd'
+import { Button, message, Popconfirm, Spin, Table, Tag, Tooltip } from 'antd'
 import { ColumnsType } from 'antd/es/table'
 import dayjs from 'dayjs'
 import { useEffect, useState } from 'react'
@@ -108,11 +108,11 @@ const AllVersionsPage = () => {
         message.error('Не удалось восстановить версию')
       })
   }
-  const renderActionsField = (_: unknown, record: VersionType) => {
+  const renderActionsField = (_: unknown, record: VersionType, index: number) => {
     return (
       <div className="all-version-page__actions-field">
         <Button.Group className="button_group">
-          {canSetVersion && (
+          {canSetVersion && index !== 0 && (
             <Tooltip title="Установить выбранную версию">
               <Popconfirm
                 title="Вы действительно хотите установить выбранную версию ?"
@@ -156,7 +156,18 @@ const AllVersionsPage = () => {
     {
       key: 'configVersion',
       title: 'Версия',
-      dataIndex: 'configVersion'
+      dataIndex: 'configVersion',
+      render: (value: string, _, index) => {
+        if (index === 0) {
+          return (
+            <div className="all-version-page__table__current-version-cell">
+              <span>{value}</span>
+              <Tag color="blue">Текущая версия</Tag>
+            </div>
+          )
+        }
+        return value
+      }
     },
     {
       key: 'createdAt',
