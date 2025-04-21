@@ -29,6 +29,12 @@
       overflow-y: auto;
       height: calc(90vh - 50px);
 
+      &__current-version-cell {
+        display: flex;
+        justify-content: space-between;
+        gap: 10px;
+      }
+
       &__row {
         cursor: pointer;
       }

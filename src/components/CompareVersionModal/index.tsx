@@ -1,5 +1,5 @@
 import { DiffEditor } from '@monaco-editor/react'
-import { Button, Spin, Table } from 'antd'
+import { Button, Spin, Table, Tag } from 'antd'
 import { ColumnsType } from 'antd/es/table'
 import dayjs from 'dayjs'
 import { FC, memo, useContext, useState } from 'react'
@@ -45,7 +45,18 @@ const CompareVersionModal: FC<CompareVersionModalPropsType> = ({
     {
       key: 'configVersion',
       title: 'Версия',
-      dataIndex: 'configVersion'
+      dataIndex: 'configVersion',
+      render: (value: string, _, index) => {
+        if (index === 0) {
+          return (
+            <div className="compare-version-modal__content__table__current-version-cell">
+              <span>{value}</span>
+              <Tag color="blue">Текущая версия</Tag>
+            </div>
+          )
+        }
+        return value
+      }
     },
     {
       key: 'createdAt',
@@ -106,7 +117,10 @@ const CompareVersionModal: FC<CompareVersionModalPropsType> = ({
               pagination={{ pageSize: 30 }}
               dataSource={versions}
               rowKey={(record) => record.id}
-              onRow={(record) => {
+              onRow={(record, i) => {
+                if(i === 0) {
+                  return {}
+                }
                 return {
                   onClick: () => setSelectedItem(record)
                 }
