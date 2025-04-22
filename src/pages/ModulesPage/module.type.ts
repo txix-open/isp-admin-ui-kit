@@ -39,6 +39,11 @@ export interface ConfigType {
   unsafe?: boolean
 }
 
+export interface ConfigNameType {
+  id: string
+  newConfigName: string
+}
+
 export interface JSONSchema {
   $ref?: string
   $schema?: string
