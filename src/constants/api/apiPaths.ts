@@ -50,6 +50,7 @@ type PathKeys =
   | 'getConfigById'
   | 'getAllVersions'
   | 'createUpdateConfig'
+  | 'updateConfigName'
   | 'deleteVersion'
   | 'deleteConfig'
   | 'markConfigAsActive'
@@ -141,6 +142,7 @@ export const apiPaths: Record<PathKeys, string> = {
   getConfigById: '/config/get_config_by_id',
   getAllVersions: '/config/get_all_version',
   createUpdateConfig: '/config/create_update_config',
+  updateConfigName: '/config/update_config_name',
   deleteVersion: '/config/delete_version',
   deleteConfig: '/config/delete_config',
   markConfigAsActive: '/config/mark_config_as_active',

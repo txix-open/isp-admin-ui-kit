@@ -10,10 +10,18 @@
   &__table {
     overflow: auto;
     height: calc(100vh - 150px);
+
+    &__current-version-cell {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+    }
   }
 
   &__actions-field {
     display: flex;
-    gap: $basic-margin
+    gap: $basic-margin;
+    justify-content: end;
+    width: 125px;
   }
 }

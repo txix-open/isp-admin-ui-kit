@@ -4,7 +4,6 @@ import {
   FormOutlined,
   EyeOutlined,
   HistoryOutlined,
-  SwapOutlined,
   EllipsisOutlined,
   CopyOutlined
 } from '@ant-design/icons'
@@ -29,7 +28,6 @@ import './active-table-action-buttons.scss'
 const ActiveTableActionButtons: FC<ActiveTableActionButtonsPropsType> = ({
   isActive,
   record,
-  handleShowCompareModal,
   handleShowConfig,
   handleDeleteConfig,
   handleMarkConfigActive
@@ -62,12 +60,6 @@ const ActiveTableActionButtons: FC<ActiveTableActionButtonsPropsType> = ({
   const renderDropDownNoActive = (record: any) => {
     return (
       <div className="dropdown">
-        <Tooltip key="1" title="Сравнение версий">
-          <Button
-            onClick={() => handleShowCompareModal(record)}
-            icon={<SwapOutlined />}
-          />
-        </Tooltip>
         <Tooltip key="2" title="Просмотр истории">
           <Button onClick={navigateToAllVersion} icon={<HistoryOutlined />} />
         </Tooltip>
@@ -86,15 +78,9 @@ const ActiveTableActionButtons: FC<ActiveTableActionButtonsPropsType> = ({
     )
   }
 
-  const renderDropDownActive = (record: any) => {
+  const renderDropDownActive = () => {
     return (
       <div className="dropdown">
-        <Tooltip key="1" title="Сравнение версий">
-          <Button
-            onClick={() => handleShowCompareModal(record)}
-            icon={<SwapOutlined />}
-          />
-        </Tooltip>
         <Tooltip key="2" title="Просмотр истории">
           <Button onClick={navigateToAllVersion} icon={<HistoryOutlined />} />
         </Tooltip>
@@ -108,7 +94,7 @@ const ActiveTableActionButtons: FC<ActiveTableActionButtonsPropsType> = ({
   const renderAdditionalButtons = () => {
     if (isActive) {
       return (
-        <Dropdown dropdownRender={() => renderDropDownActive(record)}>
+        <Dropdown dropdownRender={renderDropDownActive}>
           <Button icon={<EllipsisOutlined />} />
         </Dropdown>
       )
