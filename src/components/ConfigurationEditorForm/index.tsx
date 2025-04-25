@@ -1,7 +1,7 @@
 import { DeleteOutlined, PlusOutlined } from '@ant-design/icons'
 import { Theme as AntDTheme } from '@rjsf/antd'
-import { withTheme } from '@rjsf/core'
-import { UiSchema } from '@rjsf/utils'
+import { IChangeEvent, withTheme } from '@rjsf/core'
+import { RJSFSchema, UiSchema } from '@rjsf/utils'
 import validator from '@rjsf/validator-ajv8'
 import {
   Badge,
@@ -12,9 +12,9 @@ import {
   Typography,
   Space
 } from 'antd'
-import equal from 'deep-equal'
-import { createRef, FC, memo, useEffect, useState } from 'react'
+import { createRef, FC, memo, useEffect, useMemo, useRef, useState } from 'react'
 import { useParams } from 'react-router-dom'
+
 
 import {
   ArrayFieldTemplatePropsType,
@@ -28,34 +28,93 @@ import {
 } from '@pages/ConfigurationEditorPage/ConfigurationEditor.type.ts'
 import { ResponseSchemaType } from '@pages/ModulesPage/module.type.ts'
 
-import { cleanEmptyParamsObject } from '@utils/objectUtils.ts'
+import { cleanEmptyParamsObject, sortObject, fastDeepEqualLite } from '@utils/objectUtils.ts'
 
 const { Text: AntdText } = Typography
 
 const ConfigurationEditorForm: FC<ConfigurationEditorPropsType> = ({
-  bufConfig = {},
-  jsonSchema = {},
-  submitRef
-}) => {
+                                                                     bufConfig = {},
+                                                                     jsonSchema = {},
+                                                                     submitRef,
+                                                                     setDisableSendBtn = () => {},
+                                                                     currentConfig
+                                                                   }) => {
   const Form = withTheme(AntDTheme)
   const sortProps = (a: SortPropType, b: SortPropType) =>
     a.name.localeCompare(b.name)
 
   const [formState, setFormState] = useState(bufConfig.data)
+
+  const cleanedCurrentConfigDataString = useMemo(() => {
+    const cleaned = cleanEmptyParamsObject(currentConfig?.data || {})
+    const sorted = sortObject(cleaned)
+    return JSON.stringify(sorted)
+  }, [currentConfig?.data])
+
   const { id } = useParams()
   const formRef = createRef<any>()
 
   useEffect(() => {
-    if (!equal(formState, bufConfig.data)) {
+    if (!fastDeepEqualLite(formState, bufConfig.data)) {
       setFormState(bufConfig.data)
     }
-  }, [bufConfig.data])
+  }, [bufConfig])
+
+  useEffect(() => {
+    return () => {
+      debouncedValidateAndCompare.cancel()
+    }
+  }, [])
 
   const uiSchema: UiSchema = {
     'ui:submitButtonOptions': {
       norender: true
     }
   }
+
+  function debounce<T extends (...args: any[]) => void>(func: T, wait: number) {
+    let timeout: ReturnType<typeof setTimeout> | null
+
+    const debounced = (...args: Parameters<T>) => {
+      if (timeout) {
+        clearTimeout(timeout)
+      }
+      timeout = setTimeout(() => {
+        func(...args)
+      }, wait)
+    }
+
+    debounced.cancel = () => {
+      if (timeout) {
+        clearTimeout(timeout)
+        timeout = null
+      }
+    }
+
+    return debounced
+  }
+
+
+  const debouncedValidateAndCompare = useRef(
+    debounce((formData: any) => {
+      const cleanedFormData = cleanEmptyParamsObject(formData)
+      const sortedFormData = sortObject(cleanedFormData)
+      const cleanedFormDataString = JSON.stringify(sortedFormData)
+
+      if (cleanedFormDataString !== cleanedCurrentConfigDataString) {
+        setDisableSendBtn(false)
+      } else {
+        setDisableSendBtn(true)
+      }
+
+      if (formRef.current?.validateFormWithFormData(formRef.current.state.formData)) {
+        formRef?.current?.submit()
+      } else {
+        forceSubmit()
+      }
+    }, 300)
+  ).current
+
 
   const onSubmit = (data: any) => {
     if (!submitRef) return
@@ -71,20 +130,12 @@ const ConfigurationEditorForm: FC<ConfigurationEditorPropsType> = ({
   const forceSubmit = () => {
     if (formRef.current) {
       const formData = formRef.current.state.formData
-
       onSubmit(cleanEmptyParamsObject(formData))
     }
   }
 
-  const onFormChange = () => {
-    if (!formRef.current) return
-    if (
-      formRef.current.validateFormWithFormData(formRef.current.state.formData)
-    ) {
-      formRef?.current?.submit()
-    } else {
-      forceSubmit()
-    }
+  const onFormChange = (e: IChangeEvent<any, RJSFSchema, any>) => {
+    debouncedValidateAndCompare(e.formData)
   }
 
   const Description: FC<DescriptionPropsType> = ({ description }) =>
@@ -103,12 +154,12 @@ const ConfigurationEditorForm: FC<ConfigurationEditorPropsType> = ({
   }
 
   const ArrayFieldTemplate: FC<ArrayFieldTemplatePropsType> = ({
-    items,
-    onAddClick,
-    canAdd,
-    title,
-    idSchema
-  }) => {
+                                                                 items,
+                                                                 onAddClick,
+                                                                 canAdd,
+                                                                 title,
+                                                                 idSchema
+                                                               }) => {
     return (
       <Collapse defaultActiveKey={idSchema.$id}>
         <Collapse.Panel
@@ -121,7 +172,7 @@ const ConfigurationEditorForm: FC<ConfigurationEditorPropsType> = ({
             >
               <Space direction="horizontal">
                 <Tooltip title={title}>
-                <AntdText>{title}</AntdText>
+                  <AntdText>{title}</AntdText>
                 </Tooltip>
                 <Badge count={items ? items.length : 0} showZero />
                 <Description description={title} />
@@ -160,11 +211,7 @@ const ConfigurationEditorForm: FC<ConfigurationEditorPropsType> = ({
   const RemoveButton = (props: RemoveButtonProps) => {
     const { icon, iconType, ...btnProps } = props
     return (
-      <Button
-        type="link"
-        icon={<DeleteOutlined />}
-        {...btnProps}
-      />
+      <Button type="link" icon={<DeleteOutlined />} {...btnProps} />
     )
   }
 
@@ -173,19 +220,17 @@ const ConfigurationEditorForm: FC<ConfigurationEditorPropsType> = ({
     const depth = getDepth(idSchema.$id)
 
     const renderComplexTabs = (propsComplex: any[]) => {
-      return (
-        propsComplex.map((element) => ({
-          label: schema.properties[element.name]?.title || element.name,
-          key: element.name,
-          children: schema.additionalProperties
-            ? (properties.map((element: any) => (
-              <div key={element.content.key} className="collapseArray_item">
-                <div className="collapseArray_item_content">{element.content}</div>
-              </div>
-            )))
-            : <>{element.content}</>
-        }))
-      )
+      return propsComplex.map((element) => ({
+        label: schema.properties[element.name]?.title || element.name,
+        key: element.name,
+        children: schema.additionalProperties
+          ? properties.map((element: any) => (
+            <div key={element.content.key} className="collapseArray_item">
+              <div className="collapseArray_item_content">{element.content}</div>
+            </div>
+          ))
+          : <>{element.content}</>
+      }))
     }
 
     const propsComplex: ObjectFieldTemplatePropertyType[] = []
@@ -215,11 +260,13 @@ const ConfigurationEditorForm: FC<ConfigurationEditorPropsType> = ({
           tabPosition="right"
           onChange={handleTabsChange}
           items={[
-            ...(propsSimple.length ? [{
-              label: 'Остальные',
-              key: 'General',
-              children: propsSimple.map((element) => element.content)
-            }] : []),
+            ...(propsSimple.length
+              ? [{
+                label: 'Остальные',
+                key: 'General',
+                children: propsSimple.map((element) => element.content)
+              }]
+              : []),
             ...renderComplexTabs(propsComplex)
           ]}
         />
@@ -236,7 +283,7 @@ const ConfigurationEditorForm: FC<ConfigurationEditorPropsType> = ({
               <Space direction="horizontal" style={{ justifyContent: 'space-between', width: '100%' }}>
                 <Space direction="horizontal">
                   <Tooltip title={title}>
-                  <AntdText>{title}</AntdText>
+                    <AntdText>{title}</AntdText>
                   </Tooltip>
                 </Space>
                 <Button
@@ -266,7 +313,7 @@ const ConfigurationEditorForm: FC<ConfigurationEditorPropsType> = ({
           <Collapse.Panel
             key={idSchema.$id}
             className="configEditor_collapseObject"
-            header={<><Tooltip title={title}>{title}</Tooltip></>}
+            header={<Tooltip title={title}>{title}</Tooltip>}
           >
             <>{properties.map((element) => element.content)}</>
           </Collapse.Panel>
@@ -283,7 +330,6 @@ const ConfigurationEditorForm: FC<ConfigurationEditorPropsType> = ({
         error.message = 'Поле является обязательным'
       })
     }
-
     return errors
   }
 

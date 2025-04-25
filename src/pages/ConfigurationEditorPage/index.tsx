@@ -5,7 +5,7 @@ import {
   MenuProps,
   message,
   Radio,
-  RadioChangeEvent,
+  RadioChangeEvent, Space,
   Spin
 } from 'antd'
 import { AxiosError, AxiosResponse } from 'axios'
@@ -21,7 +21,7 @@ import ErrorConfigModal from '@components/ErrorConfigModal/ErrorConfigModal.tsx'
 
 import { ConfigType } from '@pages/ModulesPage/module.type.ts'
 
-import { cleanEmptyParamsObject, sortObject } from '@utils/objectUtils.ts'
+import { cleanEmptyParamsObject, sortObject, fastDeepEqualLite } from '@utils/objectUtils.ts'
 
 import useRole from '@hooks/useRole.tsx'
 
@@ -56,6 +56,7 @@ const ConfigurationEditorPage: FC = () => {
     isOpenDetailsErrorModal: false
   })
   const [disableBtn, setDisableBtn] = useState(false)
+  const [disableSendBtn, setDisableSendBtn] = useState(true)
   const submitRef = useRef<any>(null)
 
   const isPageAvailable = hasPermission(
@@ -76,8 +77,33 @@ const ConfigurationEditorPage: FC = () => {
   }, [isPageAvailable])
 
   useEffect(() => {
+    if (!bufConfig || !currentConfig) return
+
+    const isConfigsEqual = fastDeepEqualLite(bufConfig, currentConfig)
+    setDisableSendBtn(!isConfigsEqual)
+  }, [bufConfig, currentConfig])
+
+
+  useEffect(() => {
+    if (!bufConfig || !currentConfig) return
+
+    const cleanedBufConfig = cleanEmptyParamsObject(bufConfig)
+    const cleanedCurrentConfig = cleanEmptyParamsObject(currentConfig)
+
+    const sortedBuf = sortObject(cleanedBufConfig)
+    const sortedCurrent = sortObject(cleanedCurrentConfig)
+
+    const isConfigsEqual =
+      JSON.stringify(sortedBuf) === JSON.stringify(sortedCurrent)
+
+    setDisableSendBtn(isConfigsEqual)
+  }, [bufConfig, currentConfig])
+
+
+  useEffect(() => {
     setBufConfig(isNew ? {} : sortObject(currentConfig))
   }, [isCurrentConfigLoading])
+
 
   const itemsSaveBtn = [
     {
@@ -165,6 +191,7 @@ const ConfigurationEditorPage: FC = () => {
         message.error('Ошибка обновления элемента')
       })
   }
+
   if (isLoadingJsonSchema || isCurrentConfigLoading) {
     return <Spin className="spin" />
   }
@@ -174,12 +201,14 @@ const ConfigurationEditorPage: FC = () => {
       case formRadio:
         return (
           <ConfigurationEditorForm
+            currentConfig={currentConfig}
             submitRef={submitRef}
             bufConfig={bufConfig as ConfigType}
             setBufConfig={setBufConfig}
             jsonSchema={jsonSchema}
             isCurrentConfigLoading={isCurrentConfigLoading}
             setDisableBtn={setDisableBtn}
+            setDisableSendBtn={setDisableSendBtn}
           />
         )
       case jsonRadio:
@@ -210,7 +239,15 @@ const ConfigurationEditorPage: FC = () => {
           <RollbackOutlined />
           Назад
         </Button>
-        <h1>{bufConfig?.name}</h1>
+        <Space>
+          <h1>{bufConfig?.name}</h1>
+          <p className="change-status">({disableSendBtn ? 'нет изменений' : 'есть измнения'})
+            <span
+              className={`change-status-circle ${disableSendBtn ? 'change-status_red' : 'change-status_green'}`}
+            />
+          </p>
+        </Space>
+
         <div className="configuration-editor-page__controll">
           <Button
             disabled={!jsonSchema}
@@ -221,7 +258,7 @@ const ConfigurationEditorPage: FC = () => {
           </Button>
           <Dropdown.Button
             onClick={() => handleSaveClick(undefined, undefined, true)}
-            disabled={disableBtn}
+            disabled={disableBtn || disableSendBtn}
             type="primary"
             className="configuration-editor-page__save-btn"
             menu={{ items: filteredItemsSaveBtn, onClick: onSaveBtn }}

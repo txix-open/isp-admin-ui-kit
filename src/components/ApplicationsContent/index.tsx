@@ -119,7 +119,7 @@ const ApplicationsContent: FC<ApplicationsContentPropTypes> = ({
             ...showApplicationsModal,
             updateModal: false
           })
-          navigate(`${routePaths.applicationsGroup}/${selectedItemId}/${routePaths.application}/${data.id}`)
+          navigate(`${routePaths.applicationsGroup}/${selectedItemId}/${routePaths.application}/${data.id}`, { replace: true })
           setIsExistsId(null)
           message.success('Элемент сохранен')
         })

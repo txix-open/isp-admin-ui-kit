@@ -207,3 +207,21 @@
     font-size: 16px;
   }
 }
+
+.change-status {
+  font-size: 12px;
+  &-circle {
+    display: inline-block;
+    border-radius: 50%;
+    height: 4px;
+    width: 4px;
+    margin-left: 2px;
+    margin-bottom: 6px;
+  }
+  &_green {
+    background-color: green;
+  }
+  &_red {
+    background-color: red;
+  }
+}
