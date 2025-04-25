@@ -18,7 +18,9 @@ export interface ConfigurationEditorPropsType {
   setBufConfig: Dispatch<SetStateAction<ConfigType | undefined>>
   isCurrentConfigLoading: boolean
   setDisableBtn?: Dispatch<SetStateAction<boolean>>
+  setDisableSendBtn?: Dispatch<SetStateAction<boolean>>
   submitRef?: MutableRefObject<null>
+  currentConfig?: ConfigType
 }
 
 export interface DescriptionPropsType {

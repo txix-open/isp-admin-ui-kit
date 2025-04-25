@@ -20,7 +20,7 @@ function isEmpty(value: unknown): boolean {
   return (
     value === undefined ||
     value === null ||
-    (typeof value === 'string' && value.trim() === '') || // Пустые строки
+    (typeof value === 'string' && value.trim() === '') ||
     (Array.isArray(value) && value.length === 0) ||
     (typeof value === 'object' &&
       true &&
@@ -35,16 +35,16 @@ function cleanEmptyParamsObject(obj: any): any {
   }
 
   if (Array.isArray(obj)) {
-    return obj.map(cleanEmptyParamsObject).filter((item) => !isEmpty(item)) // Удаление пустых элементов в массиве
+    return obj.map(cleanEmptyParamsObject).filter((item) => !isEmpty(item))
   }
 
   return Object.keys(obj).reduce(
     (acc, key) => {
-      const value = cleanEmptyParamsObject(obj[key]) // Рекурсивная обработка объектов
+      const value = cleanEmptyParamsObject(obj[key])
 
       if (!isEmpty(value)) {
-        // Проверяем пустоту значения после рекурсивной обработки
-        acc[key] = value // Сохраняем только непустые значения
+
+        acc[key] = value
       }
 
       return acc
@@ -53,4 +53,37 @@ function cleanEmptyParamsObject(obj: any): any {
   )
 }
 
-export { sortObject, cleanEmptyParamsObject }
+ function fastDeepEqualLite(a: any, b: any): boolean {
+  if (a === b) return true
+
+  if (typeof a !== 'object' || typeof b !== 'object' || a === null || b === null) {
+    return false
+  }
+
+  const aKeys = Object.keys(a)
+  const bKeys = Object.keys(b)
+  if (aKeys.length !== bKeys.length) return false
+
+  for (const key of aKeys) {
+    if (!Object.prototype.hasOwnProperty.call(b, key)) return false
+
+    const valA = a[key]
+    const valB = b[key]
+
+    const areObjects =
+      typeof valA === 'object' &&
+      valA !== null &&
+      typeof valB === 'object' &&
+      valB !== null
+
+    if (areObjects) {
+      if (!fastDeepEqualLite(valA, valB)) return false
+    } else if (valA !== valB) {
+      return false
+    }
+  }
+
+  return true
+}
+
+export { sortObject, cleanEmptyParamsObject, fastDeepEqualLite }
