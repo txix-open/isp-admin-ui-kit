@@ -17,10 +17,10 @@ const AccessListTree: FC<AccessListTreePropsType> = ({
   searchValue,
   defaultAllRoutes,
   methods,
+  selectedMethod = [],
   onCheck = []
 }) => {
   const { hasPermission } = useRole()
-  const [checkedKeys, setCheckedKeys] = useState<string[]>([])
   const [expandedKeys, setExpandedKeys] = useState<string[]>([])
 
   const createTreeData = (data: Record<string, EndpointType[]>) => {
@@ -84,6 +84,26 @@ const AccessListTree: FC<AccessListTreePropsType> = ({
 
   const treeData = createTreeData(filteredRoute())
 
+  const getCheckedKeys = () => {
+    const checkedKeys = new Set<string>()
+
+    methods.forEach(({ method, value }) => {
+      if (value) {
+        checkedKeys.add(method)
+      }
+    })
+
+    selectedMethod.forEach(({ method, value }: any) => {
+      if (value) {
+        checkedKeys.add(method)
+      } else {
+        checkedKeys.delete(method)
+      }
+    })
+
+    return Array.from(checkedKeys)
+  }
+
   const filteredCheckedKeys = () => {
     const isStringPresent = (string: string) => {
       for (const service of treeData) {
@@ -96,22 +116,11 @@ const AccessListTree: FC<AccessListTreePropsType> = ({
       return false
     }
 
-    return checkedKeys.filter((string) => isStringPresent(string))
+    const keys = getCheckedKeys()
+    return keys.filter((string) => isStringPresent(string))
   }
 
   const filteredKeys = filteredCheckedKeys()
-
-  useEffect(() => {
-    const checkedKeys = new Set<string>()
-    methods.forEach(({ method, value }) => {
-      if (value) {
-        checkedKeys.add(method)
-      }
-    })
-
-    const arrayCheckedKeys = Array.from(checkedKeys)
-    setCheckedKeys(arrayCheckedKeys)
-  }, [methods])
 
   useEffect(() => {
     if (!searchValue) {

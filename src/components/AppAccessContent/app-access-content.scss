@@ -12,6 +12,7 @@
     display: flex;
     justify-content: space-between;
     margin-bottom: $basic-margin * 2;
+    gap: $basic-margin * 2.5;
 
     &__action-buttons {
       display: flex;

@@ -7,6 +7,7 @@ import AccessListTree from '@widgets/AccessListTree'
 import SelectedAccessMethod from '@widgets/SelectedAccessMethod'
 
 import { AppAccessContentPropsType } from '@components/AppAccessContent/app-access-content.type.ts'
+import SaveModal from '@components/SaveModal/SaveModal'
 
 import { setSearchValue } from '@utils/columnLayoutUtils.ts'
 
@@ -28,6 +29,7 @@ const AppAccessContent: FC<AppAccessContentPropsType> = ({
   id,
   paramPrefix
 }) => {
+  const [showSaveModal, setShowSaveModal] = useState<boolean>(false)
   const [messageApi, contextHolder] = message.useMessage()
   const { hasPermission } = useRole()
 
@@ -40,7 +42,6 @@ const AppAccessContent: FC<AppAccessContentPropsType> = ({
     isSuccess: isMethodsSuccess
   } = accessListApi.useGetByIdQuery({ id })
   const [setList] = accessListApi.useSetListMutation()
-  const [setOne] = accessListApi.useSetOneMutation()
 
   const {
     data: routes = {
@@ -56,6 +57,9 @@ const AppAccessContent: FC<AppAccessContentPropsType> = ({
   const [defaultAllRoutes, setDefaultAllRoutes] = useState<
     Record<string, EndpointType[]>
   >({})
+  const [selectedMethod, setSelectedMethod] = useState<AccessListMethodType[]>(
+    []
+  )
 
   const [searchParams, setSearchParams] = useSearchParams()
   const searchValue = searchParams.get(paramPrefix) || ''
@@ -84,26 +88,24 @@ const AppAccessContent: FC<AppAccessContentPropsType> = ({
   const onCheck: TreeProps['onCheck'] = (_, info): void | never[] => {
     const { node } = info
     if (!node.children) {
-      const sendData = {
-        appId: id,
-        method: node.key as string,
-        value: !node.checked
-      }
-      setOne(sendData)
-        .then(() => {
-          openSuccessMessage('Статус метода успешно изменен')
-        })
-        .catch(() => {
-          openErrorMessage('Не удалось изменить статус метода')
-        })
+      setSelectedMethod((prev) => [
+        ...prev.filter((item) => item.method !== node.key),
+        { method: node.key as string, value: !node.checked }
+      ])
       return
     }
 
-    const newCheckedKeys = node.children.map((child) => ({
+    const newChanges = node.children.map((child) => ({
       method: child.key as string,
       value: !node.checked
     }))
-    setListMethods(newCheckedKeys)
+
+    setSelectedMethod((prev) => [
+      ...prev.filter(
+        (item) => !node.children?.some((child) => child.key === item.method)
+      ),
+      ...newChanges
+    ])
   }
 
   const onChange = (e: ChangeEvent<HTMLInputElement>) => {
@@ -111,22 +113,30 @@ const AppAccessContent: FC<AppAccessContentPropsType> = ({
     setSearchValue(value.trim().toLowerCase(), setSearchParams, paramPrefix)
   }
 
-  const setListMethods = (methods: AccessListMethodType[]) => {
+  const saveChanges = () => {
+    if (selectedMethod.length === 0) {
+      openSuccessMessage('Нет изменений для сохранения')
+      return
+    }
+
     setList({
       appId: id,
-      methods: methods
+      methods: selectedMethod
     })
       .then(() => {
         openSuccessMessage('Статус методов успешно изменен')
+        setSelectedMethod([])
+        setShowSaveModal(false)
       })
       .catch(() => {
         openErrorMessage('Не удалось изменить статус методов')
+        setShowSaveModal(false)
       })
   }
 
   const setAllMethods = (status: boolean) => {
     const methods = createAllMethodList(status)
-    setListMethods(methods)
+    setSelectedMethod(methods)
   }
 
   const getAllRoutes = () => {
@@ -150,6 +160,26 @@ const AppAccessContent: FC<AppAccessContentPropsType> = ({
     setDefaultAllRoutes(allRoutes)
   }, [isSuccess])
 
+  const currentMethodStatus = methods.reduce(
+    (acc, method) => {
+      acc[method.method] = method.value
+      return acc
+    },
+    {} as Record<string, boolean>
+  )
+
+  const changes = {
+    allowed: selectedMethod
+      .filter((method) => method.value && !currentMethodStatus[method.method])
+      .map((method) => method.method),
+    denied: selectedMethod
+      .filter((method) => !method.value && currentMethodStatus[method.method])
+      .map((method) => method.method)
+  }
+
+  const isNoChanges =
+    changes.allowed.length === 0 && changes.denied.length === 0
+
   if (isLoading) {
     return <Spin className="spin" />
   }
@@ -160,6 +190,14 @@ const AppAccessContent: FC<AppAccessContentPropsType> = ({
   return (
     <div className="app-access-content">
       {contextHolder}
+      {showSaveModal && (
+        <SaveModal
+          onOk={saveChanges}
+          open={showSaveModal}
+          onClose={() => setShowSaveModal(false)}
+          changes={changes}
+        />
+      )}
       <div className="app-access-content__header">
         <Input
           prefix={<SearchOutlined />}
@@ -187,6 +225,15 @@ const AppAccessContent: FC<AppAccessContentPropsType> = ({
             >
               Выбрать все
             </Button>
+            <Button
+              type="primary"
+              disabled={isNoChanges}
+              onClick={() => {
+                setShowSaveModal(true)
+              }}
+            >
+              Сохранить
+            </Button>
           </div>
         )}
       </div>
@@ -196,6 +243,7 @@ const AppAccessContent: FC<AppAccessContentPropsType> = ({
           onCheck={onCheck}
           defaultAllRoutes={defaultAllRoutes}
           methods={methods}
+          selectedMethod={selectedMethod}
         />
         <SelectedAccessMethod
           unknownMethodKey={unknownMethodKey}
