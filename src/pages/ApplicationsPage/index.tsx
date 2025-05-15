@@ -2,31 +2,20 @@ import { message, Spin } from 'antd'
 import { Layout, ColumnItem } from 'isp-ui-kit'
 import { useEffect, useMemo, useState } from 'react'
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
-
 import ListItem from '@widgets/ListItem'
-
 import ApplicationsContent from '@components/ApplicationsContent'
-
-import {
-  ApplicationsGroupType,
-  NewApplicationsGroupType,
-  UpdateApplicationsGroupType
-} from '@pages/ApplicationsPage/applications.type.ts'
-
+import { ApplicationsGroupType, NewApplicationsGroupType, UpdateApplicationsGroupType } from '@pages/ApplicationsPage/applications.type.ts'
 import { setSearchValue, setSelectedItemId } from '@utils/columnLayoutUtils.ts'
 import { filterFirstColumnItems } from '@utils/firstColumnUtils.ts'
-
 import useRole from '@hooks/useRole.tsx'
-
 import applicationsGroupApi from '@services/applicationsGroupService.ts'
-
 import { routePaths } from '@routes/routePaths.ts'
-
 import { PermissionKeysType } from '@type/roles.type.ts'
-
 import AppGroupModal from 'src/components/AppGroupModal'
 
 import './applications-page.scss'
+import SearchAppByToken from '@ui/SearchAppByToken'
+
 
 const { Column, EmptyData } = Layout
 
@@ -58,6 +47,9 @@ const ApplicationsPage = () => {
   const canUpdateGroup = hasPermission(PermissionKeysType.application_group_edit)
   const canRemoveGroup = hasPermission(
     PermissionKeysType.application_group_delete
+  )
+  const canViewToken = hasPermission(
+    PermissionKeysType.application_group_token_view
   )
 
   useEffect(() => {
@@ -158,7 +150,12 @@ const ApplicationsPage = () => {
 
   const renderMainContent = () => {
     if (!selectedItemId) {
-      return <EmptyData />
+      return (
+        <div className="empty-data__wrap">
+          {canViewToken && <SearchAppByToken />}
+          <EmptyData />
+        </div>
+      )
     }
 
     return (

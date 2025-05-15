@@ -13,6 +13,7 @@ import applicationsApi from '@services/applicationsService.ts'
 import { routePaths } from '@routes/routePaths.ts'
 import { PermissionKeysType } from '@type/roles.type.ts'
 import './applications-content.scss'
+import SearchAppByToken from '@ui/SearchAppByToken'
 
 const { EmptyData, Column } = Layout
 
@@ -64,7 +65,9 @@ const ApplicationsContent: FC<ApplicationsContentPropTypes> = ({
   const isTokenPageAvailable = hasPermission(
     PermissionKeysType.application_group_token_view
   )
-
+  const canViewToken = hasPermission(
+    PermissionKeysType.application_group_token_view
+  )
   const isAppAccessPageAvailable = hasPermission(
     PermissionKeysType.app_access_view
   )
@@ -90,7 +93,12 @@ const ApplicationsContent: FC<ApplicationsContentPropTypes> = ({
   }
   const renderTokenContent = () => {
     if (!appId) {
-      return <EmptyData />
+      return (
+        <div className="empty-data__wrap">
+          {canViewToken && <SearchAppByToken />}
+          <EmptyData />
+        </div>
+      )
     }
 
     if (!isTokenPageAvailable) {
