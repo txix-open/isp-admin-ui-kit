@@ -5,7 +5,6 @@
   display: grid;
   grid-template-columns:min-content 1fr;
   width: 100%;
-
   .column-content {
     margin-left: $basic-margin;
   }
@@ -14,7 +13,8 @@
     display: flex;
     max-width: 240px;
     margin-left: auto;
-    margin-bottom: $basic-margin * 2;
+    margin-right: auto;
+    margin-top: 16px;
   }
 
   &__update-btn {

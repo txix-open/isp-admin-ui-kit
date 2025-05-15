@@ -1,6 +1,5 @@
 .search-app-by-token {
-  position: absolute;
-  width: 400px;
-  top: 0;
-  right: 0
+  max-width: 400px;
+  min-width: 200px;
+  margin: 0 0 8px auto;
 }
