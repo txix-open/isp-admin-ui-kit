@@ -41,6 +41,7 @@ type PathKeys =
   | 'getApplicationById'
   | 'getAllApplications'
   | 'getApplicationsByServiceId'
+  | 'getApplicationGetApplicationByToken'
   | 'getNextAppId'
   | 'createToken'
   | 'getTokensByAppId'
@@ -117,6 +118,7 @@ export const apiPaths: Record<PathKeys, string> = {
   getAllApplicationGroup: '/application_group/get_all',
   getByIdListApplicationGroup: '/application_group/get_by_id_list',
   updateApplicationGroup: '/application_group/update',
+  getApplicationGetApplicationByToken: '/application/get_application_by_token',
   // ======= ACCESS_LIST ======
   getById: '/access_list/get_by_id',
   setList: '/access_list/set_list',
