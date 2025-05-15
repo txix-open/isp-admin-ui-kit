@@ -15,7 +15,8 @@
 
   &__header {
     display: flex;
-    justify-content: space-between;
+    position: relative;
+    margin-bottom: $basic-margin * 4;
 
     h3 {
       margin: 0;
@@ -31,5 +32,13 @@
 
   .copy-btn {
     cursor: pointer;
+  }
+}
+
+.empty-data__wrap {
+  width: 100%;
+  .search-app-by-token {
+    top: 10px;
+    right: 24px;
   }
 }
