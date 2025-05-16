@@ -1,0 +1,30 @@
+.save-modal {
+  &__changes-list {
+    max-height: 400px;
+    overflow-y: auto;
+    margin-bottom: 16px;
+    display: flex;
+    gap: 50px;
+    padding: 20px;
+
+    &__changes-section {
+      margin-bottom: 16px;
+
+      ul {
+        list-style-position: inside;
+      }
+
+      .text-allowed {
+        color: var(--ant-color-success-text);
+      }
+
+      .text-denied {
+        color: var(--ant-color-error-text);
+      }
+
+      h3 {
+        margin-bottom: 8px;
+      }
+    }
+  }
+}
