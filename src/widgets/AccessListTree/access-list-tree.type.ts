@@ -7,4 +7,5 @@ export interface AccessListTreePropsType {
   defaultAllRoutes: Record<string, EndpointType[]>
   methods: AccessListMethodType[]
   onCheck: TreeProps['onCheck']
+  selectedMethod: AccessListMethodType[]
 }
