@@ -9,24 +9,18 @@ import relativeTime from 'dayjs/plugin/relativeTime'
 import { FormComponents, Layout } from 'isp-ui-kit'
 import { useEffect, useMemo, useState } from 'react'
 import { useForm } from 'react-hook-form'
-
 import { dateFormats } from '@constants/date.ts'
 import { ValidationRules } from '@constants/form/validationRules.ts'
-
 import Modal from '@widgets/Modal'
-
 import {
   ApplicationTokenType,
   NewApplicationTokenType
 } from '@pages/ApplicationsPage/applications.type.ts'
-
 import useRole from '@hooks/useRole.tsx'
-
 import tokensApi from '@services/tokensService.ts'
-
 import { PermissionKeysType } from '@type/roles.type.ts'
-
 import './tokens.scss'
+import SearchAppByToken from '@ui/SearchAppByToken'
 
 const { FormSelect } = FormComponents
 const { EmptyData } = Layout
@@ -52,6 +46,7 @@ const TokenContent = ({ id }: TokenPropTypes) => {
   })
 
   const { data, isLoading } = tokensApi.useGetTokensByAppIdQuery({ id })
+
   const [createToken] = tokensApi.useCreateTokenMutation()
   const [revokeToken] = tokensApi.useRevokeTokensMutation()
 
@@ -60,6 +55,9 @@ const TokenContent = ({ id }: TokenPropTypes) => {
   )
   const canRemoveToken = hasPermission(
     PermissionKeysType.application_group_token_delete
+  )
+  const canViewToken = hasPermission(
+    PermissionKeysType.application_group_token_view
   )
 
   useEffect(() => {
@@ -210,7 +208,10 @@ const TokenContent = ({ id }: TokenPropTypes) => {
     []
   )
   if (!id) {
-    return <EmptyData />
+    return <div className="empty-data__wrap">
+      {canViewToken && <SearchAppByToken />}
+      <EmptyData />
+    </div>
   }
 
   if (isLoading) {
@@ -226,15 +227,7 @@ const TokenContent = ({ id }: TokenPropTypes) => {
       <div className="token-content__wrap">
         <header className="token-content__header">
           <h3>Токены</h3>
-          {canAddToken && (
-            <Button
-              className="applications-content__add-btn"
-              type="primary"
-              onClick={handleShowAddModalToken}
-            >
-              Добавить токен
-            </Button>
-          )}
+          <SearchAppByToken />
         </header>
         <div className="token-content__table">
           <Table
@@ -244,6 +237,15 @@ const TokenContent = ({ id }: TokenPropTypes) => {
             columns={columns}
             dataSource={data}
           />
+          {canAddToken && (
+            <Button
+              className="applications-content__add-btn"
+              type="primary"
+              onClick={handleShowAddModalToken}
+            >
+              Выпустить токен
+            </Button>
+          )}
         </div>
         <Modal
           onOk={handleSubmitTokens(handleCreateToken)}

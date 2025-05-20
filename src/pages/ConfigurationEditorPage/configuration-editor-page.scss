@@ -7,7 +7,7 @@
   scrollbar-width: none;
   border-left: 1px solid $border-color;
   height: 100vh;
-  overflow: scroll;
+  overflow: auto;
   padding-bottom: 80px;
 
   .ant-tabs-nav {
