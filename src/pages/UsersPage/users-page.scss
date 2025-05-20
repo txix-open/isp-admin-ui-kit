@@ -24,10 +24,10 @@
 
   &__content {
     padding: 2 * $basic-padding 3 * $basic-padding;
-    overflow-x: scroll;
+    overflow-x: auto;
 
     &__wrap-table {
-      overflow-x: scroll;
+      overflow-x: auto;
       height: calc(100vh - 110px);
     }
 

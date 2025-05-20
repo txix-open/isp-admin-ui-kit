@@ -21,7 +21,7 @@
 
   &__content {
     .monaco-diff-editor {
-      overflow-y: scroll;
+      overflow-y: auto;
       height: calc(90vh - 150px) !important;
     }
 
