@@ -1,23 +1,11 @@
 @import "src/constants/style/styleConst";
 
 .token-content {
-  overflow-x: scroll;
+  overflow-x: auto;
   width: 100%;
-  -ms-overflow-style: none;
-  scrollbar-width: none;
-  &::-webkit-scrollbar {
-    width: 0;
-    height: 0;
-  }
   &__table {
-    overflow-x: scroll;
+    overflow-x: auto;
     height: calc(100vh - 100px);
-    -ms-overflow-style: none;
-    scrollbar-width: none;
-    &::-webkit-scrollbar {
-      width: 0;
-      height: 0;
-    }
   }
 
   &__wrap {
