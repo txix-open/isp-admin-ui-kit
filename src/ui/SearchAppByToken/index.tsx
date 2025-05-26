@@ -1,45 +1,56 @@
-import { Input, message } from 'antd'
-import { useState } from 'react'
 import { SearchOutlined } from '@ant-design/icons'
-import applicationsApi from '@services/applicationsService.ts'
+import { Input, message } from 'antd'
+import { SearchProps } from 'antd/es/input'
 import { useNavigate } from 'react-router-dom'
-const { Search } = Input
+
+import applicationsApi from '@services/applicationsService.ts'
+
+import { routePaths } from '@routes/routePaths.ts'
 
 import './search-app-by-token.scss'
 
-export interface SearchAppByTokenType  {
+const { Search } = Input
+
+export interface SearchAppByTokenType {
   applicationId: number
   applicationGroupId: number
 }
+
 const SearchAppByToken = () => {
-  const [token, setToken] = useState('')
-
   const navigate = useNavigate()
-
-  const [useGetApplicationGetApplicationByTokenMutation, { isLoading }] =
+  const [getApplicationByToken, { isLoading }] =
     applicationsApi.useGetApplicationGetApplicationByTokenMutation()
 
-  const handleSearch = async () => {
+  const handleSearch: SearchProps['onSearch'] = (value, _, info) => {
+    if (info?.source === 'clear') {
+      return
+    }
+    const trimmedToken = value.trim()
+    if (!trimmedToken) {
+      message.warning('Введите токен перед поиском')
+      return
+    }
 
-    useGetApplicationGetApplicationByTokenMutation({ token }).unwrap().then(data => {
-      const {applicationId, applicationGroupId} = data
-          navigate( `/application_groups/${applicationGroupId}/application/${applicationId}`)
-    }).catch(e => {
-
-      if(e.status === 404) {
-        message.error('Приложение с таким токеном не найдено')
-        return
-      }
-
-      message.error('Что то пошло не так')
-    })
+    getApplicationByToken({ token: trimmedToken })
+      .unwrap()
+      .then((data) => {
+        const { applicationId, applicationGroupId } = data
+        navigate(
+          `${routePaths.applicationsGroup}/${applicationGroupId}/${routePaths.application}/${applicationId}`
+        )
+      })
+      .catch((e) => {
+        if (e?.status === 404) {
+          message.error('Приложение с таким токеном не найдено')
+          return
+        }
+        message.error('Что-то пошло не так')
+      })
   }
 
   return (
     <Search
       className="search-app-by-token"
-      value={token}
-      onChange={(e) => setToken(e.target.value)}
       onSearch={handleSearch}
       placeholder="Введите токен приложения"
       enterButton={<SearchOutlined />}
