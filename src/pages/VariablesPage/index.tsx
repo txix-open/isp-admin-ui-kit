@@ -49,7 +49,7 @@ const VariablesPage = () => {
   }, [role])
 
   if (isLoading) {
-    return <Spin fullscreen />
+    return <Spin />
   }
 
   if (isError) {
