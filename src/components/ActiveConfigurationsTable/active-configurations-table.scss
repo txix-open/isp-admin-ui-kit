@@ -10,7 +10,7 @@
   &__table {
     &__name-field {
       input {
-        color: #606060;
+        color: var(--ant-color-text);
         border: none;
         background-color: transparent;
         width: 100%;
