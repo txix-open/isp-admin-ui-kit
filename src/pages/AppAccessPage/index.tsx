@@ -1,5 +1,5 @@
 import { Spin } from 'antd'
-import { Layout, ColumnItem } from 'isp-ui-kit'
+import { Layout } from 'isp-ui-kit'
 import { memo, useEffect } from 'react'
 import {
   createSearchParams,
@@ -18,14 +18,13 @@ import { filterFirstColumnItems } from '@utils/firstColumnUtils.ts'
 
 import useRole from '@hooks/useRole.tsx'
 
+import applicationsApi from '@services/applicationsService.ts'
 
 import { routePaths } from '@routes/routePaths.ts'
 
-import { SystemTreeAppType } from '@type/app.type.ts'
 import { PermissionKeysType } from '@type/roles.type.ts'
 
 import './app-access-page.scss'
-import applicationsApi from '@services/applicationsService.ts'
 
 const { Column, EmptyData } = Layout
 
@@ -42,10 +41,10 @@ const AppAccessPage = () => {
   const canRead = hasPermission(PermissionKeysType.app_access_view)
 
   const {
-    data ,
+    data = [],
     isLoading,
     isError
-  } = applicationsApi.useGetAllApplicationsServiceQuery({id: selectedItemId})
+  } = applicationsApi.useGetAllApplicationsServiceQuery({ id: selectedItemId })
 
   useEffect(() => {
     if (!canRead) {
@@ -83,10 +82,7 @@ const AppAccessPage = () => {
         showUpdateBtn={false}
         showAddBtn={false}
         showRemoveBtn={false}
-        items={filterFirstColumnItems(
-          data as ColumnItem<SystemTreeAppType>,
-          searchValue
-        )}
+        items={filterFirstColumnItems(data, searchValue)}
         renderItems={(item) => <ListItem item={item} />}
         searchValue={searchValue}
         selectedItemId={selectedItemId}
