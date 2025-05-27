@@ -1,31 +1,39 @@
+@import "src/constants/style/styleConst";
+
 .header {
   display: flex;
   align-items: center;
+  justify-content: center;
   width: 100%;
   height: 65px;
-  justify-content: center;
-  box-sizing: border-box;
   line-height: 18px;
+  box-sizing: border-box;
+
+  &__container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: $basic-margin;
+    font-family: 'PT Sans', sans-serif;
+
+    &__project-version {
+      font-size: 12px;
+      font-weight: 400;
+      color: var(--ant-color-text-description)
+    }
+  }
 
   &__text {
-    margin: auto;
-    background: inherit;
-    -webkit-background-clip: text;
-    color: transparent;
-    filter: invert(1) grayscale(1);
     font-size: 19px;
     font-weight: 600;
-    font-family: 'PT Sans', sans-serif;
-    width: 100%;
     padding-left: 28px;
+    width: 100%;
+    -webkit-font-smoothing: antialiased;
   }
+
   &__text-closed {
-    margin: auto;
-    background: inherit;
-    -webkit-background-clip: text;
-    color: transparent;
-    filter: invert(1) grayscale(1);
     font-weight: 600;
-    font-family: 'PT Sans', sans-serif;
+    -webkit-font-smoothing: antialiased;
   }
+;
 }
