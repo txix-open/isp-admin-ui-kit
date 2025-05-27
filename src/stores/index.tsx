@@ -9,7 +9,6 @@ import { MapToken, SeedToken } from 'antd/es/theme/interface'
 import { createContext, Dispatch, SetStateAction } from 'react'
 
 import accessListApi from '@services/accessListService.ts'
-import appApi from '@services/appService.ts'
 import applicationsGroupApi from '@services/applicationsGroupService.ts'
 import applicationsApi from '@services/applicationsService.ts'
 import configServiceApi from '@services/configService.ts'
@@ -47,7 +46,6 @@ export const baseApiServices = {
   roleApi,
   userServiceApi,
   securityLogServiceApi,
-  appApi,
   accessListApi,
   routeApi,
   applicationsGroupApi,
