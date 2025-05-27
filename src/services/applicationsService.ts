@@ -1,8 +1,17 @@
-import {createApi } from '@reduxjs/toolkit/query/react'
+import { createApi } from '@reduxjs/toolkit/query/react'
+
 import { apiPaths } from '@constants/api/apiPaths.ts'
-import { ApplicationAppType, ApplicationsServiceType, NewApplicationAppType, UpdateApplicationAppType } from '@pages/ApplicationsPage/applications.type.ts'
-import { axiosBaseQuery } from '@utils/apiUtils.ts'
+
 import { SearchAppByTokenType } from '@ui/SearchAppByToken'
+
+import {
+  ApplicationAppType,
+  ApplicationsServiceType,
+  NewApplicationAppType,
+  UpdateApplicationAppType
+} from '@pages/ApplicationsPage/applications.type.ts'
+
+import { axiosBaseQuery } from '@utils/apiUtils.ts'
 
 const applicationsApi = createApi({
   reducerPath: 'applicationsApi',
@@ -11,7 +20,7 @@ const applicationsApi = createApi({
   baseQuery: axiosBaseQuery({ baseUrl: apiPaths.baseSystemUrl }),
   endpoints: (builder) => ({
     getAllApplicationsService: builder.query<
-      ApplicationsServiceType[],
+      ApplicationAppType[],
       { id: string }
     >({
       query: () => ({ url: apiPaths.getAllApplications }),
@@ -74,14 +83,16 @@ const applicationsApi = createApi({
       }),
       invalidatesTags: ['Applications']
     }),
-    getApplicationGetApplicationByToken: builder.mutation<SearchAppByTokenType, { token: string }>({
+    getApplicationGetApplicationByToken: builder.mutation<
+      SearchAppByTokenType,
+      { token: string }
+    >({
       query: ({ token }) => ({
         url: apiPaths.getApplicationGetApplicationByToken,
-        data: { token },
-
+        data: { token }
       }),
       invalidatesTags: ['ApplicationsSearch']
-    }),
+    })
   })
 })
 
