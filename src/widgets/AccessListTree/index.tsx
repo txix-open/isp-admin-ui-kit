@@ -1,5 +1,5 @@
-import { WarningOutlined } from '@ant-design/icons'
-import { Tag, Tree, TreeProps } from 'antd'
+import { DeleteOutlined, WarningOutlined } from '@ant-design/icons'
+import { Button, Popconfirm, Tag, Tooltip, Tree, TreeProps } from 'antd'
 import { FC, memo, useCallback, useEffect, useState } from 'react'
 
 import { AccessListTreePropsType } from '@widgets/AccessListTree/access-list-tree.type.ts'
@@ -23,7 +23,18 @@ const AccessListTree: FC<AccessListTreePropsType> = ({
   const { hasPermission } = useRole()
   const [expandedKeys, setExpandedKeys] = useState<string[]>([])
 
+  const handleRemoveUnknownMethods = (methods: string[]) => {
+    console.log('Методы для удаления:', methods)
+    // removeMethod(methods)
+    //   .unwrap()
+    //   .then(() => message.success('Метод удален'))
+    //   .catch(() => message.error('Ошибка удаления метода'))
+  }
+
   const createTreeData = (data: Record<string, EndpointType[]>) => {
+    const unknownMethods = data[unknownMethodKey]?.map(
+      (objMethod) => objMethod.path
+    )
     return Object.keys(data)
       .sort()
       .map((routeKey) => {
@@ -32,6 +43,14 @@ const AccessListTree: FC<AccessListTreePropsType> = ({
             title: (
               <span className="unknown-label">
                 {routeKey} <WarningOutlined />
+                <Tooltip title="Удалить">
+                  <Popconfirm
+                    title="Удалить все неизвестные методы?"
+                    onConfirm={() => handleRemoveUnknownMethods(unknownMethods)}
+                  >
+                    <Button icon={<DeleteOutlined />} />
+                  </Popconfirm>
+                </Tooltip>
               </span>
             ),
             key: routeKey,
@@ -51,6 +70,16 @@ const AccessListTree: FC<AccessListTreePropsType> = ({
       title: (
         <span className={`${unknown ? 'unknown-label' : ''}`}>
           {obj.path}
+          {unknown && (
+            <Tooltip title="Удалить">
+              <Popconfirm
+                title="Удалить неизвестный метод?"
+                onConfirm={() => handleRemoveUnknownMethods([obj.path])}
+              >
+                <Button icon={<DeleteOutlined />} />
+              </Popconfirm>
+            </Tooltip>
+          )}
           {obj.inner ? (
             <Tag
               className="access-list-tree__inner-tag"
