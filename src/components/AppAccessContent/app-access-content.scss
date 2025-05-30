@@ -32,6 +32,10 @@
   }
 
   .unknown-label {
-    color: $error-red
+    color: $error-red;
+
+    button {
+      margin-left: 10px;
+    }
   }
 }
