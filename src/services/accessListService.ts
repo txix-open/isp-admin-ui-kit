@@ -5,6 +5,7 @@ import { apiPaths } from '@constants/api/apiPaths.ts'
 import { axiosBaseQuery } from '@utils/apiUtils.ts'
 
 import {
+  AccessListDeleteListRequestType,
   AccessListMethodType,
   AccessListSetListRequestType,
   AccessListSetListSetOneRequestType
@@ -29,6 +30,10 @@ const accessListApi = createApi({
     }),
     setOne: builder.mutation<void, AccessListSetListSetOneRequestType>({
       query: (data) => ({ url: apiPaths.setOne, data }),
+      invalidatesTags: () => ['AccessItems']
+    }),
+    deleteList: builder.mutation<void, AccessListDeleteListRequestType>({
+      query: (data) => ({ url: apiPaths.deleteList, data }),
       invalidatesTags: () => ['AccessItems']
     })
   })

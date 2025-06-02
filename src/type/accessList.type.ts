@@ -1,18 +1,25 @@
-export interface AccessListMethodType {
+interface WithAppId {
+  appId: number
+}
+
+interface AccessListMethodTypeBase {
   method: string
   value: boolean
 }
 
-export interface AccessListSetListRequestType {
-  appId: number
+export interface AccessListMethodType extends AccessListMethodTypeBase {}
+
+export interface AccessListSetListRequestType extends WithAppId {
   methods: AccessListMethodType[]
   removeOld?: boolean
 }
 
-export interface AccessListSetListSetOneRequestType {
-  appId: number
-  method: string
-  value: boolean
+export interface AccessListSetListSetOneRequestType
+  extends WithAppId,
+    AccessListMethodTypeBase {}
+
+export interface AccessListDeleteListRequestType extends WithAppId {
+  methods: string[]
 }
 
 export interface EndpointType {
@@ -22,17 +29,17 @@ export interface EndpointType {
   userAuthRequired: boolean
 }
 
-export type AddressType = {
+export interface AddressType {
   ip: string
   port: string
 }
 
-export type RequiredModuleType = {
+export interface RequiredModuleType {
   name: string
   required: boolean
 }
 
-export type RouteType = {
+export interface RouteType {
   address: AddressType
   endpoints: EndpointType[]
   libVersion: string
