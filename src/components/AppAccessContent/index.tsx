@@ -18,7 +18,11 @@ import routeApi from '@services/routeService.ts'
 
 import { routePaths } from '@routes/routePaths.ts'
 
-import { AccessListMethodType, EndpointType } from '@type/accessList.type.ts'
+import {
+  AccessListDeleteListRequestType,
+  AccessListMethodType,
+  EndpointType
+} from '@type/accessList.type.ts'
 import { PermissionKeysType } from '@type/roles.type.ts'
 
 import './app-access-content.scss'
@@ -42,6 +46,7 @@ const AppAccessContent: FC<AppAccessContentPropsType> = ({
     isSuccess: isMethodsSuccess
   } = accessListApi.useGetByIdQuery({ id })
   const [setList] = accessListApi.useSetListMutation()
+  const [deleteList] = accessListApi.useDeleteListMutation()
 
   const {
     data: routes = {
@@ -111,6 +116,22 @@ const AppAccessContent: FC<AppAccessContentPropsType> = ({
   const onChange = (e: ChangeEvent<HTMLInputElement>) => {
     const { value } = e.target
     setSearchValue(value.trim().toLowerCase(), setSearchParams, paramPrefix)
+  }
+
+  const handleRemoveUnknowMethods = (methods: string[]) => {
+    console.log('Методы для удаления:', methods)
+    const sendData: AccessListDeleteListRequestType = {
+      appId: id,
+      methods: methods
+    }
+    deleteList(sendData)
+      .unwrap()
+      .then(() => {
+        openSuccessMessage('Методы успешно удалены')
+      })
+      .catch(() => {
+        openErrorMessage('Не удалось удалить методы')
+      })
   }
 
   const saveChanges = () => {
@@ -244,6 +265,7 @@ const AppAccessContent: FC<AppAccessContentPropsType> = ({
           defaultAllRoutes={defaultAllRoutes}
           methods={methods}
           selectedMethod={selectedMethod}
+          onRemoveUnknownMethods={canWrite && handleRemoveUnknowMethods}
         />
         <SelectedAccessMethod
           unknownMethodKey={unknownMethodKey}
