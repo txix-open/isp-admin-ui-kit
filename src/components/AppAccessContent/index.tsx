@@ -90,7 +90,7 @@ const AppAccessContent: FC<AppAccessContentPropsType> = ({
     })
   }
 
-  const onCheck: TreeProps['onCheck'] = (_, info): void | never[] => {
+  const handleOnCheck: TreeProps['onCheck'] = (_, info): void | never[] => {
     const { node } = info
     if (!node.children) {
       setSelectedMethod((prev) => [
@@ -113,13 +113,12 @@ const AppAccessContent: FC<AppAccessContentPropsType> = ({
     ])
   }
 
-  const onChange = (e: ChangeEvent<HTMLInputElement>) => {
+  const handleInputOnChange = (e: ChangeEvent<HTMLInputElement>) => {
     const { value } = e.target
     setSearchValue(value.trim().toLowerCase(), setSearchParams, paramPrefix)
   }
 
   const handleRemoveUnknowMethods = (methods: string[]) => {
-    console.log('Методы для удаления:', methods)
     const sendData: AccessListDeleteListRequestType = {
       appId: id,
       methods: methods
@@ -139,14 +138,12 @@ const AppAccessContent: FC<AppAccessContentPropsType> = ({
       openSuccessMessage('Нет изменений для сохранения')
       return
     }
-
     setList({
       appId: id,
       methods: selectedMethod
     })
       .then(() => {
         openSuccessMessage('Статус методов успешно изменен')
-        setSelectedMethod([])
         setShowSaveModal(false)
       })
       .catch(() => {
@@ -179,7 +176,7 @@ const AppAccessContent: FC<AppAccessContentPropsType> = ({
   useEffect(() => {
     const allRoutes = getAllRoutes()
     setDefaultAllRoutes(allRoutes)
-  }, [isSuccess])
+  }, [isSuccess, moduleEndpoints, methods])
 
   const currentMethodStatus = methods.reduce(
     (acc, method) => {
@@ -226,7 +223,7 @@ const AppAccessContent: FC<AppAccessContentPropsType> = ({
           className="app-access-content__main__tree-search-input"
           value={searchValue}
           placeholder="Найти метод"
-          onChange={onChange}
+          onChange={handleInputOnChange}
         />
         {canWrite && (
           <div className="app-access-content__header__action-buttons">
@@ -261,7 +258,7 @@ const AppAccessContent: FC<AppAccessContentPropsType> = ({
       <div className="app-access-content__main">
         <AccessListTree
           searchValue={searchValue}
-          onCheck={onCheck}
+          onCheck={handleOnCheck}
           defaultAllRoutes={defaultAllRoutes}
           methods={methods}
           selectedMethod={selectedMethod}

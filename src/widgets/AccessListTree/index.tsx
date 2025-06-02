@@ -164,7 +164,7 @@ const AccessListTree: FC<AccessListTreePropsType> = ({
     }
     const keys = Object.values(treeData).map((node) => node.key)
     setExpandedKeys(keys)
-  }, [searchValue, defaultAllRoutes])
+  }, [searchValue])
 
   return (
     <div className="access-list-tree">
