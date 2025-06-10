@@ -1,5 +1,7 @@
 import AdminBase from '@components/AdminBase.tsx'
 
+import { filterFirstColumnItems } from '@utils/firstColumnUtils.ts'
+
 import useRole from '@hooks/useRole'
 
 import {
@@ -8,4 +10,11 @@ import {
   Context as AdminBaseContext
 } from './stores'
 
-export { AdminBase, baseApiServices, baseSetupStore, AdminBaseContext, useRole }
+export {
+  AdminBase,
+  baseApiServices,
+  baseSetupStore,
+  AdminBaseContext,
+  useRole,
+  filterFirstColumnItems
+}
