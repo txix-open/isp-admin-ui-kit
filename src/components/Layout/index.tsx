@@ -110,8 +110,15 @@ const LayoutComponent = ({ customRouters }: LayoutComponentPropsType) => {
 
   const handleItemChange = ({ key }: { key: string }) => {
     const routeWithParents = findRouteWithParents(key, resultMenuConfig)
-    if (routeWithParents && routeWithParents.route.route) {
-      navigate(routeWithParents.route.route)
+    const routePath = routeWithParents?.route.route
+
+    if (Array.isArray(routePath)) {
+      navigate(routePath[0])
+      return
+    }
+
+    if (typeof routePath === 'string') {
+      navigate(routePath)
     }
   }
 

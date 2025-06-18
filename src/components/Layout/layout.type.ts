@@ -8,7 +8,7 @@ export interface CustomMenuItemType {
   className?: string
   permissions: string[]
   icon?: ReactNode
-  route?: string
+  route?: string | string[]
   element?: any
   children?: CustomMenuItemType[]
 }
