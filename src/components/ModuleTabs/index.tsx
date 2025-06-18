@@ -17,7 +17,8 @@ const secondColumnItems = [
 const ModuleTabs = ({
   activeTab,
   setActiveTab,
-  currentModule
+  currentModule,
+  searchParams
 }: ModuleTabsPropsType) => {
   const navigate = useNavigate()
   const { id: selectedItemId = '' } = useParams()
@@ -26,8 +27,15 @@ const ModuleTabs = ({
       activeKey={activeTab}
       onChange={(activeKey) => {
         setActiveTab(activeKey)
+        const params = new URLSearchParams(searchParams)
         const path = `${selectedItemId}/${activeKey}`
-        navigate(path)
+        navigate(
+          {
+            pathname: path,
+            search: params.toString()
+          },
+          { replace: true }
+        )
       }}
       className="modules-page__tabs"
       items={secondColumnItems.map((item) => {

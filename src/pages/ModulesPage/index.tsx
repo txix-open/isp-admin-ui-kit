@@ -203,6 +203,7 @@ const ModulesPage = () => {
         setSelectedItemId={setSelectedItemId}
       />
       <ModuleTabs
+        searchParams={searchParams}
         currentModule={currentModule}
         activeTab={activeTab}
         setActiveTab={setActiveTab}
