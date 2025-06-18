@@ -3,17 +3,30 @@ import { List, message, Spin, Tooltip } from 'antd'
 import { Layout, ColumnItem } from 'isp-ui-kit'
 import { Dispatch, FC, SetStateAction, useMemo, useState } from 'react'
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
+
+import SearchAppByToken from '@ui/SearchAppByToken'
+
 import AppModal from '@components/AppModal'
 import TokenContent from '@components/TokenContent'
-import { ApplicationAppType, ApplicationsServiceType, NewApplicationAppType, UpdateApplicationAppType } from '@pages/ApplicationsPage/applications.type.ts'
+
+import {
+  ApplicationAppType,
+  NewApplicationAppType,
+  UpdateApplicationAppType
+} from '@pages/ApplicationsPage/applications.type.ts'
+
 import { setUrlValue, setSelectedItemId } from '@utils/columnLayoutUtils.ts'
 import { filterFirstColumnItems } from '@utils/firstColumnUtils.ts'
+
 import useRole from '@hooks/useRole.tsx'
+
 import applicationsApi from '@services/applicationsService.ts'
+
 import { routePaths } from '@routes/routePaths.ts'
+
 import { PermissionKeysType } from '@type/roles.type.ts'
+
 import './applications-content.scss'
-import SearchAppByToken from '@ui/SearchAppByToken'
 
 const { EmptyData, Column } = Layout
 
@@ -51,7 +64,10 @@ const ApplicationsContent: FC<ApplicationsContentPropTypes> = ({
     updateModal: false
   })
   const [searchParams, setSearchParams] = useSearchParams('')
+  const columnName = 'applications-content'
   const searchAppValue = searchParams.get('appSearch') || ''
+  const sortValue = searchParams.get(`${columnName}-sort`) || ''
+  const directionValue = searchParams.get(`${columnName}-direction`) || ''
   const navigate = useNavigate()
   const { appId = '' } = useParams()
 
@@ -127,12 +143,15 @@ const ApplicationsContent: FC<ApplicationsContentPropTypes> = ({
             ...showApplicationsModal,
             updateModal: false
           })
-          navigate(`${routePaths.applicationsGroup}/${selectedItemId}/${routePaths.application}/${data.id}`, { replace: true })
+          navigate(
+            `${routePaths.applicationsGroup}/${selectedItemId}/${routePaths.application}/${data.id}`,
+            { replace: true }
+          )
           setIsExistsId(null)
           message.success('Элемент сохранен')
         })
         .catch((e) => {
-          if(e.response.data.errorCode === 604) {
+          if (e.response.data.errorCode === 604) {
             setIsExistsId({
               field: 'id',
               message: 'Приложение с таким идентификатором уже существует'
@@ -146,7 +165,6 @@ const ApplicationsContent: FC<ApplicationsContentPropTypes> = ({
   }
 
   const handleCreateApplicationApp = (data: ApplicationAppType) => {
-
     const newApplicationApp: NewApplicationAppType = {
       name: data.name,
       id: data.id,
@@ -165,7 +183,7 @@ const ApplicationsContent: FC<ApplicationsContentPropTypes> = ({
         })
       })
       .catch((e) => {
-        if(e.response.data.errorCode === 604) {
+        if (e.response.data.errorCode === 604) {
           setIsExistsId({
             field: 'id',
             message: 'Приложение с таким идентификатором уже существует'
@@ -224,6 +242,21 @@ const ApplicationsContent: FC<ApplicationsContentPropTypes> = ({
   return (
     <section className="applications-content">
       <Column
+        sortableFields={[
+          { value: 'name', label: 'Наименование' },
+          { value: 'id', label: 'Идентификатор' },
+          { value: 'createdAt', label: 'Дата создания' },
+          { value: 'updatedAt', label: 'Дата обновления' }
+        ]}
+        sortValue={sortValue as keyof ApplicationAppType}
+        onChangeSortValue={(value) =>
+          setUrlValue(value, setSearchParams, `${columnName}-sort`)
+        }
+        directionValue={directionValue}
+        onChangeDirectionValue={(value) =>
+          setUrlValue(value, setSearchParams, `${columnName}-direction`)
+        }
+        columnKey="applications-content"
         title="Приложения"
         searchPlaceholder="Введите имя или id"
         onUpdateItem={updateApplicationModal}
@@ -235,7 +268,7 @@ const ApplicationsContent: FC<ApplicationsContentPropTypes> = ({
         items={filterFirstColumnItems(
           applications?.map((el) => {
             return el.app
-          }) as unknown as ColumnItem<ApplicationsServiceType>[],
+          }) as unknown as ColumnItem<ApplicationAppType>[],
           searchAppValue
         )}
         renderItems={renderColumnItems}
@@ -246,16 +279,12 @@ const ApplicationsContent: FC<ApplicationsContentPropTypes> = ({
           setSelectedItemId(
             `${routePaths.applicationsGroup}/${selectedItemId}/${routePaths.application}`,
             itemId.toString(),
-            searchAppValue,
+            searchParams.toString(),
             navigate
           )
         }}
         onChangeSearchValue={(value: string) => {
-          setUrlValue(
-            value.trim().toLowerCase(),
-            setSearchParams,
-            'appSearch'
-          )
+          setUrlValue(value.trim().toLowerCase(), setSearchParams, 'appSearch')
         }}
       />
       {renderTokenContent()}
