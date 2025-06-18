@@ -2,7 +2,6 @@ import { Spin } from 'antd'
 import { Layout } from 'isp-ui-kit'
 import { memo, useEffect } from 'react'
 import {
-  createSearchParams,
   Navigate,
   useNavigate,
   useParams,
@@ -12,6 +11,8 @@ import {
 import ListItem from '@widgets/ListItem'
 
 import AppAccessContent from '@components/AppAccessContent'
+
+import { ApplicationAppType } from '@pages/ApplicationsPage/applications.type.ts'
 
 import { setUrlValue, setSelectedItemId } from '@utils/columnLayoutUtils.ts'
 import { filterFirstColumnItems } from '@utils/firstColumnUtils.ts'
@@ -38,6 +39,8 @@ const AppAccessPage = () => {
   const { id: selectedItemId = '' } = useParams()
   const [searchParams, setSearchParams] = useSearchParams()
   const searchValue = searchParams.get(firstColumnSearchParam) || ''
+  const sortValue = searchParams.get('sort') || ''
+  const directionValue = searchParams.get('direction') || ''
   const canRead = hasPermission(PermissionKeysType.app_access_view)
 
   const {
@@ -61,7 +64,7 @@ const AppAccessPage = () => {
     setSelectedItemId(
       routePaths.appAccess,
       id,
-      createSearchParams(searchParams).toString(),
+      searchParams.toString(),
       navigate
     )
   }
@@ -77,6 +80,18 @@ const AppAccessPage = () => {
   return (
     <section className="app-access-page">
       <Column
+        sortableFields={[
+          { value: 'name', label: 'Наименование' },
+          { value: 'id', label: 'Идентификатор' }
+        ]}
+        sortValue={sortValue as keyof ApplicationAppType}
+        onChangeSortValue={(value) =>
+          setUrlValue(value, setSearchParams, 'sort')
+        }
+        directionValue={directionValue}
+        onChangeDirectionValue={(value) =>
+          setUrlValue(value, setSearchParams, 'direction')
+        }
         title="Приложения"
         searchPlaceholder="Введите имя или id"
         showUpdateBtn={false}
