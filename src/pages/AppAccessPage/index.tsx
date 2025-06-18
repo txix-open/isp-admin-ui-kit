@@ -13,7 +13,7 @@ import ListItem from '@widgets/ListItem'
 
 import AppAccessContent from '@components/AppAccessContent'
 
-import { setSearchValue, setSelectedItemId } from '@utils/columnLayoutUtils.ts'
+import { setUrlValue, setSelectedItemId } from '@utils/columnLayoutUtils.ts'
 import { filterFirstColumnItems } from '@utils/firstColumnUtils.ts'
 
 import useRole from '@hooks/useRole.tsx'
@@ -53,11 +53,11 @@ const AppAccessPage = () => {
   }, [canRead])
 
   const handleOnChangeSearchValue = (value: string): void => {
-    setSearchValue(value, setSearchParams)
+    setUrlValue(value, setSearchParams, 'search')
   }
 
   const onSelectedItemId = (id: string): void => {
-    setSearchValue('', setSearchParams, findMethodParam)
+    setUrlValue('', setSearchParams, findMethodParam)
     setSelectedItemId(
       routePaths.appAccess,
       id,

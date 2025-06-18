@@ -5,7 +5,7 @@ import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import ListItem from '@widgets/ListItem'
 import ApplicationsContent from '@components/ApplicationsContent'
 import { ApplicationsGroupType, NewApplicationsGroupType, UpdateApplicationsGroupType } from '@pages/ApplicationsPage/applications.type.ts'
-import { setSearchValue, setSelectedItemId } from '@utils/columnLayoutUtils.ts'
+import { setUrlValue, setSelectedItemId } from '@utils/columnLayoutUtils.ts'
 import { filterFirstColumnItems } from '@utils/firstColumnUtils.ts'
 import useRole from '@hooks/useRole.tsx'
 import applicationsGroupApi from '@services/applicationsGroupService.ts'
@@ -194,7 +194,7 @@ const ApplicationsPage = () => {
             navigate
           )
         }}
-        onChangeSearchValue={(value) => setSearchValue(value, setSearchParams)}
+        onChangeSearchValue={(value) => setUrlValue(value, setSearchParams, 'search')}
       />
       {renderMainContent()}
       <AppGroupModal

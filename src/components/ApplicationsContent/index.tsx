@@ -6,7 +6,7 @@ import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import AppModal from '@components/AppModal'
 import TokenContent from '@components/TokenContent'
 import { ApplicationAppType, ApplicationsServiceType, NewApplicationAppType, UpdateApplicationAppType } from '@pages/ApplicationsPage/applications.type.ts'
-import { setSearchValue, setSelectedItemId } from '@utils/columnLayoutUtils.ts'
+import { setUrlValue, setSelectedItemId } from '@utils/columnLayoutUtils.ts'
 import { filterFirstColumnItems } from '@utils/firstColumnUtils.ts'
 import useRole from '@hooks/useRole.tsx'
 import applicationsApi from '@services/applicationsService.ts'
@@ -251,7 +251,7 @@ const ApplicationsContent: FC<ApplicationsContentPropTypes> = ({
           )
         }}
         onChangeSearchValue={(value: string) => {
-          setSearchValue(
+          setUrlValue(
             value.trim().toLowerCase(),
             setSearchParams,
             'appSearch'

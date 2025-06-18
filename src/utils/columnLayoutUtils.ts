@@ -15,10 +15,10 @@ export const setSelectedItemId = (
   )
 }
 
-export const setSearchValue = (
-  value: string,
+export const setUrlValue = (
+  value: string | undefined,
   setSearchParams: SetURLSearchParams,
-  prefix: string = 'search'
+  prefix: string
 ) => {
   setSearchParams((prev) => {
     if (!value) {
