@@ -5,7 +5,7 @@ import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import ListItem from '@widgets/ListItem'
 import ApplicationsContent from '@components/ApplicationsContent'
 import { ApplicationsGroupType, NewApplicationsGroupType, UpdateApplicationsGroupType } from '@pages/ApplicationsPage/applications.type.ts'
-import { setSearchValue, setSelectedItemId } from '@utils/columnLayoutUtils.ts'
+import { setUrlValue, setSelectedItemId } from '@utils/columnLayoutUtils.ts'
 import { filterFirstColumnItems } from '@utils/firstColumnUtils.ts'
 import useRole from '@hooks/useRole.tsx'
 import applicationsGroupApi from '@services/applicationsGroupService.ts'
@@ -62,7 +62,10 @@ const ApplicationsPage = () => {
     addModal: false,
     updateModal: false
   })
+  const columnName = 'applications-group'
   const searchValue = searchParams.get('search') || ''
+  const sortValue = searchParams.get(`${columnName}-sort`) || ''
+  const directionValue = searchParams.get(`${columnName}-direction`) || ''
 
   const currentAppGroup = useMemo(
     () =>
@@ -170,6 +173,17 @@ const ApplicationsPage = () => {
   return (
     <main className="applications-page">
       <Column
+        columnKey="applications-group"
+        sortableFields={[
+          {value: 'name', label: 'Наименование'},
+          {value: 'id', label: 'Идентификатор'},
+          {value: 'createdAt', label: 'Дата создания'},
+          {value: 'updatedAt', label: 'Дата обновления'},
+        ]}
+        sortValue={sortValue as keyof ApplicationsGroupType}
+        onChangeSortValue={(value) => setUrlValue(value, setSearchParams, `${columnName}-sort`)}
+        directionValue={directionValue}
+        onChangeDirectionValue={(value) => setUrlValue(value, setSearchParams, `${columnName}-direction`)}
         title="Группы приложений"
         searchPlaceholder="Введите имя или id"
         onUpdateItem={updateApplicationModal}
@@ -190,11 +204,11 @@ const ApplicationsPage = () => {
           setSelectedItemId(
             `${routePaths.applicationsGroup}`,
             itemId,
-            searchValue,
+            searchParams.toString(),
             navigate
           )
         }}
-        onChangeSearchValue={(value) => setSearchValue(value, setSearchParams)}
+        onChangeSearchValue={(value) => setUrlValue(value, setSearchParams, 'search')}
       />
       {renderMainContent()}
       <AppGroupModal

@@ -4,7 +4,6 @@ import { compareVersions } from 'compare-versions'
 import { Layout } from 'isp-ui-kit'
 import { useEffect, useState } from 'react'
 import {
-  createSearchParams,
   useLocation,
   useNavigate,
   useParams,
@@ -15,6 +14,7 @@ import ModuleTabs from '@components/ModuleTabs'
 
 import { ModuleType } from '@pages/ModulesPage/module.type.ts'
 
+import { setUrlValue } from '@utils/columnLayoutUtils.ts'
 import { filterFirstColumnItems } from '@utils/firstColumnUtils.ts'
 
 import useRole from '@hooks/useRole.tsx'
@@ -44,6 +44,8 @@ const ModulesPage = () => {
   const location = useLocation()
 
   const searchValue = searchParams.get('search') || ''
+  const sortValue = searchParams.get('sort') || ''
+  const directionValue = searchParams.get('direction') || ''
   const isPageAvailable = hasPermission(PermissionKeysType.module_view)
   const canRemoveModule = hasPermission(PermissionKeysType.module_delete)
   const isLoading = isModulesLoading
@@ -74,11 +76,12 @@ const ModulesPage = () => {
   }, [location])
 
   const setSelectedItemId = (id: string): void => {
+    const params = new URLSearchParams(searchParams)
     if (id) {
       navigate(
         {
           pathname: `${routePaths.modules}/${id}/${activeTab}`,
-          search: createSearchParams(searchParams).toString()
+          search: params.toString()
         },
         { replace: true }
       )
@@ -86,14 +89,7 @@ const ModulesPage = () => {
   }
 
   const handleOnChangeSearchValue = (value: string): void => {
-    setSearchParams((prev) => {
-      if (!value) {
-        prev.delete('search')
-      } else {
-        prev.set('search', value)
-      }
-      return prev
-    })
+    setUrlValue(value, setSearchParams, 'search')
   }
 
   const handleRemoveModule = (id: string) => {
@@ -189,6 +185,18 @@ const ModulesPage = () => {
   return (
     <section className="modules-page">
       <Column
+        sortableFields={[
+          { value: 'name', label: 'Наименование' },
+          { value: 'active', label: 'Активные экземпляры' }
+        ]}
+        sortValue={sortValue as keyof ModuleType}
+        onChangeSortValue={(value) =>
+          setUrlValue(value, setSearchParams, 'sort')
+        }
+        directionValue={directionValue}
+        onChangeDirectionValue={(value) =>
+          setUrlValue(value, setSearchParams, 'direction')
+        }
         title="Модули"
         searchPlaceholder="Введите имя или id"
         items={filterFirstColumnItems(ModulesList, searchValue)}
@@ -203,6 +211,7 @@ const ModulesPage = () => {
         setSelectedItemId={setSelectedItemId}
       />
       <ModuleTabs
+        searchParams={searchParams}
         currentModule={currentModule}
         activeTab={activeTab}
         setActiveTab={setActiveTab}

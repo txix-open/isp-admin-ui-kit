@@ -5,20 +5,22 @@ export const setSelectedItemId = (
   id: string,
   searchParams: string,
   navigate: NavigateFunction
-): void => {
+) => {
+  const params = new URLSearchParams(searchParams)
+  const pathname = `${path}/${id}`
   navigate(
     {
-      pathname: `${path}/${id}`,
-      search: searchParams
+      pathname: pathname,
+      search: params.toString()
     },
     { replace: true }
   )
 }
 
-export const setSearchValue = (
-  value: string,
+export const setUrlValue = (
+  value: string | undefined,
   setSearchParams: SetURLSearchParams,
-  prefix: string = 'search'
+  prefix: string
 ) => {
   setSearchParams((prev) => {
     if (!value) {
