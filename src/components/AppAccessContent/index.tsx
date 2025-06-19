@@ -9,7 +9,7 @@ import SelectedAccessMethod from '@widgets/SelectedAccessMethod'
 import { AppAccessContentPropsType } from '@components/AppAccessContent/app-access-content.type.ts'
 import SaveModal from '@components/SaveModal/SaveModal'
 
-import { setSearchValue } from '@utils/columnLayoutUtils.ts'
+import { setUrlValue } from '@utils/columnLayoutUtils.ts'
 
 import useRole from '@hooks/useRole.tsx'
 
@@ -115,7 +115,7 @@ const AppAccessContent: FC<AppAccessContentPropsType> = ({
 
   const handleInputOnChange = (e: ChangeEvent<HTMLInputElement>) => {
     const { value } = e.target
-    setSearchValue(value.trim().toLowerCase(), setSearchParams, paramPrefix)
+    setUrlValue(value.trim().toLowerCase(), setSearchParams, paramPrefix)
   }
 
   const handleRemoveUnknowMethods = (methods: string[]) => {

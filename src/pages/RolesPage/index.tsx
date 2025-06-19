@@ -3,7 +3,6 @@ import { Layout } from 'isp-ui-kit'
 import { useEffect } from 'react'
 import { UseFormSetError } from 'react-hook-form'
 import {
-  createSearchParams,
   useLocation,
   useNavigate,
   useParams,
@@ -12,20 +11,22 @@ import {
 
 import RolesContent from '@components/RolesContent'
 
+import { setUrlValue } from '@utils/columnLayoutUtils.ts'
 import { filterFirstColumnItems } from '@utils/firstColumnUtils.ts'
 
+import { useAppDispatch } from '@hooks/redux.ts'
 import useRole from '@hooks/useRole.tsx'
 
 import roleApi from '@services/roleService.ts'
 import userServiceApi from '@services/userService.ts'
+
+import { fetchProfile } from '@stores/redusers/ActionCreators.ts'
 
 import { routePaths } from '@routes/routePaths.ts'
 
 import { NewRoleType, PermissionKeysType, RoleType } from '@type/roles.type.ts'
 
 import './roles-page.scss'
-import { useAppDispatch } from '@hooks/redux.ts'
-import { fetchProfile } from '@stores/redusers/ActionCreators.ts'
 
 const { Column, EmptyData, NoData } = Layout
 
@@ -38,6 +39,8 @@ const RolesPage = () => {
   const [searchParams, setSearchParams] = useSearchParams()
   const dispatch = useAppDispatch()
   const searchValue = searchParams.get('search') || ''
+  const sortValue = searchParams.get('sort') || ''
+  const directionValue = searchParams.get('direction') || ''
   const { data: permissionList = [], isLoading: isPermissionLoading } =
     userServiceApi.useGetAllPermissionsQuery()
   const { data = [], isLoading: isRolesLoading } = roleApi.useGetAllRolesQuery()
@@ -71,24 +74,18 @@ const RolesPage = () => {
   }, [role])
 
   const setSelectedItemId = (id: string): void => {
+    const params = new URLSearchParams(searchParams)
     navigate(
       {
         pathname: `${routePaths.roles}/${id}`,
-        search: createSearchParams(searchParams).toString()
+        search: params.toString()
       },
       { replace: true, state: { fromApp: true } }
     )
   }
 
   const handleOnChangeSearchValue = (value: string): void => {
-    setSearchParams((prev) => {
-      if (!value) {
-        prev.delete('search')
-      } else {
-        prev.set('search', value)
-      }
-      return prev
-    })
+    setUrlValue(value, setSearchParams, 'search')
   }
 
   const handeOnAddItem = () => setSelectedItemId('new')
@@ -196,6 +193,20 @@ const RolesPage = () => {
   return (
     <section className="roles-page">
       <Column
+        sortableFields={[
+          { value: 'name', label: 'Наименование' },
+          { value: 'id', label: 'Идентификатор' },
+          { value: 'createdAt', label: 'Дата создания' },
+          { value: 'updatedAt', label: 'Дата обновления' }
+        ]}
+        sortValue={sortValue as keyof RoleType}
+        onChangeSortValue={(value) =>
+          setUrlValue(value, setSearchParams, 'sort')
+        }
+        directionValue={directionValue}
+        onChangeDirectionValue={(value) =>
+          setUrlValue(value, setSearchParams, 'direction')
+        }
         title="Роли пользователей"
         searchPlaceholder="Введите имя или id"
         showUpdateBtn={false}
