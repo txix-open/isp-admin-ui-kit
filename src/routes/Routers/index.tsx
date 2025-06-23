@@ -1,9 +1,8 @@
 import { Spin } from 'antd'
-import { lazy, Suspense } from 'react'
-import { Navigate, Route, Routes } from 'react-router-dom'
+import { ComponentType, lazy, Suspense } from 'react'
+import { RouteObject, Navigate } from 'react-router-dom'
 
 import LayoutComponent from '@components/Layout'
-import { RoutersPropsType } from '@components/Layout/layout.type.ts'
 
 //  Составная часть основной страницы, поэтому без lazy
 import Configurations from '@pages/ConfigurationsPage'
@@ -14,6 +13,7 @@ import PrivateRoute from '@routes/PrivateRoute'
 import { generateCustomRoutes } from '@routes/customRoutes.tsx'
 import { routePaths } from '@routes/routePaths.ts'
 
+// Ленивые импорты
 const LoginPage = lazy(() => import('@pages/LoginPage'))
 const ProfilePage = lazy(() => import('@pages/ProfilePage'))
 const UsersPage = lazy(() => import('@pages/UsersPage'))
@@ -31,221 +31,141 @@ const ConfigurationEditorPage = lazy(
 const NotFound = lazy(() => import('@pages/NotFound'))
 const VariablesPage = lazy(() => import('@pages/VariablesPage'))
 const VariableEditor = lazy(() => import('@pages/VariableEditor'))
-const Routers = ({ customRouters }: RoutersPropsType) => {
-  return (
-    <Routes>
-      <Route element={<PrivateRoute />}>
-        <Route
-          path={routePaths.home}
-          element={<LayoutComponent customRouters={customRouters} />}
-        >
-          <Route
-            index
-            element={
-              <Suspense fallback={<Spin />}>
-                <Navigate to={routePaths.modules} replace={true} />
-              </Suspense>
-            }
-          />
-          <Route
-            path={`${routePaths.profile}`}
-            element={
-              <Suspense fallback={<Spin />}>
-                <ProfilePage />
-              </Suspense>
-            }
-          />
-          <Route
-            path={routePaths.users}
-            element={
-              <Suspense fallback={<Spin />}>
-                <UsersPage />
-              </Suspense>
-            }
-          />
-          <Route
-            path={`${routePaths.users}/:id`}
-            element={
-              <Suspense fallback={<Spin />}>
-                <UserEditor />
-              </Suspense>
-            }
-          />
-          <Route
-            path={routePaths.roles}
-            element={
-              <Suspense fallback={<Spin />}>
-                <RolesPage />
-              </Suspense>
-            }
-          >
-            <Route
-              path=":id"
-              element={
-                <Suspense fallback={<Spin />}>
-                  <RolesPage />
-                </Suspense>
-              }
-            />
-          </Route>
-          <Route
-            path={routePaths.applicationsGroup}
-            element={
-              <Suspense fallback={<Spin />}>
-                <ApplicationsPage />
-              </Suspense>
-            }
-          >
-            <Route
-              path=":id"
-              element={
-                <Suspense fallback={<Spin />}>
-                  <ApplicationsPage />
-                </Suspense>
-              }
-            >
-              <Route
-                path={routePaths.application}
-                element={
-                  <Suspense fallback={<Spin />}>
-                    <ApplicationsPage />
-                  </Suspense>
-                }
-              >
-                <Route
-                  path=":appId"
-                  element={
-                    <Suspense fallback={<Spin />}>
-                      <ApplicationsPage />
-                    </Suspense>
-                  }
-                />
-              </Route>
-            </Route>
-          </Route>
 
-          <Route
-            path={routePaths.sessions}
-            element={
-              <Suspense fallback={<Spin />}>
-                <SessionsPage />
-              </Suspense>
-            }
-          />
-          <Route
-            path={routePaths.securityLog}
-            element={
-              <Suspense fallback={<Spin />}>
-                <SecurityLogPage />
-              </Suspense>
-            }
-          />
-          <Route
-            path={`${routePaths.appAccess}`}
-            element={
-              <Suspense fallback={<Spin />}>
-                <AppAccessPage />
-              </Suspense>
-            }
-          >
-            <Route
-              path=":id"
-              element={
-                <Suspense fallback={<Spin />}>
-                  <AppAccessPage />
-                </Suspense>
-              }
-            />
-          </Route>
-          <Route
-            path={`:moduleId/${routePaths.configEditor}/:id`}
-            element={
-              <Suspense fallback={<Spin />}>
-                <ConfigurationEditorPage />
-              </Suspense>
-            }
-          ></Route>
-          <Route
-            path={routePaths.modules}
-            element={
-              <Suspense fallback={<Spin />}>
-                <ModulesPage />
-              </Suspense>
-            }
-          >
-            <Route path=":id">
-              <Route
-                path={routePaths.configurations}
-                element={
-                  <Suspense fallback={<Spin />}>
-                    <Configurations />
-                  </Suspense>
+const lazyElement = (Component: ComponentType) => (
+  <Suspense fallback={<Spin />}>
+    <Component />
+  </Suspense>
+)
+
+export const getRoutesConfig = (customRouters: any[]): RouteObject[] => {
+  return [
+    {
+      element: <PrivateRoute />,
+      children: [
+        {
+          path: routePaths.home,
+          element: <LayoutComponent customRouters={customRouters} />,
+          children: [
+            {
+              index: true,
+              element: <Navigate to={routePaths.modules} replace />
+            },
+            {
+              path: routePaths.profile,
+              element: lazyElement(ProfilePage)
+            },
+            {
+              path: routePaths.users,
+              element: lazyElement(UsersPage)
+            },
+            {
+              path: `${routePaths.users}/:id`,
+              element: lazyElement(UserEditor)
+            },
+            {
+              path: routePaths.roles,
+              element: lazyElement(RolesPage),
+              children: [
+                {
+                  path: ':id',
+                  element: lazyElement(RolesPage)
                 }
-              >
-                <Route
-                  path={routePaths.allVersions}
-                  element={
-                    <Suspense fallback={<Spin />}>
-                      <AllVersionsPage />
-                    </Suspense>
-                  }
-                />
-              </Route>
-              <Route
-                path={routePaths.connections}
-                element={
-                  <Suspense fallback={<Spin />}>
-                    <Connections />
-                  </Suspense>
+              ]
+            },
+            {
+              path: routePaths.applicationsGroup,
+              element: lazyElement(ApplicationsPage),
+              children: [
+                {
+                  path: ':id',
+                  element: lazyElement(ApplicationsPage),
+                  children: [
+                    {
+                      path: routePaths.application,
+                      element: lazyElement(ApplicationsPage),
+                      children: [
+                        {
+                          path: ':appId',
+                          element: lazyElement(ApplicationsPage)
+                        }
+                      ]
+                    }
+                  ]
                 }
-              />
-            </Route>
-          </Route>
-          <Route
-            path={routePaths.variables}
-            element={
-              <Suspense fallback={<Spin />}>
-                <VariablesPage />
-              </Suspense>
-            }
-          />
-          <Route
-            path={`${routePaths.variables}/:id`}
-            element={
-              <Suspense fallback={<Spin />}>
-                <VariableEditor />
-              </Suspense>
-            }
-          />
-          {generateCustomRoutes(customRouters)}
-        </Route>
-      </Route>
-      <Route
-        path={routePaths.error}
-        element={
-          <Suspense fallback={<Spin />}>
-            <ErrorWrapperPage />
-          </Suspense>
+              ]
+            },
+            {
+              path: routePaths.sessions,
+              element: lazyElement(SessionsPage)
+            },
+            {
+              path: routePaths.securityLog,
+              element: lazyElement(SecurityLogPage)
+            },
+            {
+              path: routePaths.appAccess,
+              element: lazyElement(AppAccessPage),
+              children: [
+                {
+                  path: ':id',
+                  element: lazyElement(AppAccessPage)
+                }
+              ]
+            },
+            {
+              path: `:moduleId/${routePaths.configEditor}/:id`,
+              element: lazyElement(ConfigurationEditorPage)
+            },
+            {
+              path: routePaths.modules,
+              element: lazyElement(ModulesPage),
+              children: [
+                {
+                  path: ':id',
+                  children: [
+                    {
+                      path: routePaths.configurations,
+                      element: lazyElement(Configurations),
+                      children: [
+                        {
+                          path: routePaths.allVersions,
+                          element: lazyElement(AllVersionsPage)
+                        }
+                      ]
+                    },
+                    {
+                      path: routePaths.connections,
+                      element: lazyElement(Connections)
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              path: routePaths.variables,
+              element: lazyElement(VariablesPage)
+            },
+            {
+              path: `${routePaths.variables}/:id`,
+              element: lazyElement(VariableEditor)
+            },
+            ...generateCustomRoutes(customRouters)
+          ]
         }
-      />
-      <Route
-        path={routePaths.login}
-        element={
-          <Suspense fallback={<Spin />}>
-            <LoginPage />
-          </Suspense>
-        }
-      />
-      <Route
-        path={routePaths.notFound}
-        element={
-          <Suspense fallback={<Spin />}>
-            <NotFound />
-          </Suspense>
-        }
-      />
-    </Routes>
-  )
+      ]
+    },
+    {
+      path: routePaths.error,
+      element: lazyElement(ErrorWrapperPage)
+    },
+    {
+      path: routePaths.login,
+      element: lazyElement(LoginPage)
+    },
+    {
+      path: routePaths.notFound,
+      element: lazyElement(NotFound)
+    }
+  ]
 }
-
-export default Routers
