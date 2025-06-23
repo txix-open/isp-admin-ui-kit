@@ -54,15 +54,12 @@ react-redux ^9.1.0
 ```js
 import { baseSetupStore } from 'isp-admin-ui-kit';
 import { Provider } from 'react-redux';
-import { BrowserRouter } from 'react-router-dom';
 import AdminBase from 'isp-admin-ui-kit';
 
 const store = baseSetupStore();
 
 <Provider store={store}>
-  <BrowserRouter>
     <AdminBase/>
-  </BrowserRouter>
 </Provider>;
 ```
 
