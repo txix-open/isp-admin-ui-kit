@@ -16,6 +16,7 @@ import './admin-base.scss'
 
 const AdminBase: FC<AdminBasePropsType> = ({
   customRouters = [],
+  defaultRoutePath,
   configProviderProps = {}
 }) => {
   const [themes, setTheme] = useState(lightTheme)
@@ -25,7 +26,9 @@ const AdminBase: FC<AdminBasePropsType> = ({
       : true
   )
 
-  const routerConfig = createBrowserRouter(getRoutesConfig(customRouters))
+  const routerConfig = createBrowserRouter(
+    getRoutesConfig(customRouters, defaultRoutePath)
+  )
 
   useEffect(() => {
     return routerConfig.subscribe((state) => {

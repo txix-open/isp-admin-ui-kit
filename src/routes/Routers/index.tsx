@@ -38,7 +38,10 @@ const lazyElement = (Component: ComponentType) => (
   </Suspense>
 )
 
-export const getRoutesConfig = (customRouters: any[]): RouteObject[] => {
+export const getRoutesConfig = (
+  customRouters: any[],
+  defaultRoutePath = routePaths.modules
+): RouteObject[] => {
   return [
     {
       element: <PrivateRoute />,
@@ -49,7 +52,7 @@ export const getRoutesConfig = (customRouters: any[]): RouteObject[] => {
           children: [
             {
               index: true,
-              element: <Navigate to={routePaths.modules} replace />
+              element: <Navigate to={defaultRoutePath} replace />
             },
             {
               path: routePaths.profile,
