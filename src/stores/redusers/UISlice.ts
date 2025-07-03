@@ -43,6 +43,7 @@ export const UISlice = createSlice({
         state.status = StateProfileStatus.rejected
         state.error = action.payload
       })
+      .addCase('RESET_STATE', () => initialState)
   }
 })
 

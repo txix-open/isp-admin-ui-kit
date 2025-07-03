@@ -23,8 +23,6 @@ const Header = ({ collapsed }: HeaderPropsType) => {
     [safePrimaryColor]
   )
 
-  console.log(textColor)
-
   const collapsedClassName = collapsed ? 'header__text-closed' : 'header__text'
 
   return (

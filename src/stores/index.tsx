@@ -71,6 +71,16 @@ export type ApiServices = Record<string, ApiService | ApiFunction>
 
 type FunctionKeys = Record<string, ApiFunction>
 
+export const resetRootState = () => ({ type: 'RESET_STATE' })
+
+export const resetApiCaches = () => (dispatch: Dispatch<any>) => {
+  Object.values(baseApiServices).forEach((service) => {
+    if (service && typeof service === 'object' && 'util' in service) {
+      dispatch((service as any).util.resetApiState())
+    }
+  })
+}
+
 export const baseSetupStore = (
   apiServices: ApiServices | undefined = {}
 ): ReturnType<typeof configureStore> => {
@@ -106,8 +116,15 @@ export const baseSetupStore = (
     ...functionKeys
   })
 
+  const appReducer: Reducer = (state, action) => {
+    if (action.type === 'RESET_STATE') {
+      return rootReducer(undefined, action)
+    }
+    return rootReducer(state, action)
+  }
+
   return configureStore({
-    reducer: rootReducer,
+    reducer: appReducer,
     middleware: (getDefaultMiddleware) =>
       getDefaultMiddleware().concat(apiMiddlewares)
   })

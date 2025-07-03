@@ -10,6 +10,8 @@ import { ValidationRules } from '@constants/form/validationRules.ts'
 import { localStorageKeys } from '@constants/localStorageKeys.ts'
 import { messages } from '@constants/messages.ts'
 
+import ClearStateOnLogin from '@pages/LoginPage/ClearStateOnLogin.tsx'
+
 import { getConfigProperty } from '@utils/configUtils.ts'
 import { LocalStorage } from '@utils/localStorageUtils.ts'
 
@@ -70,6 +72,7 @@ const LoginPage = () => {
 
     return (
       <>
+        <ClearStateOnLogin />
         <FormComponents.FormInput
           data-cy="email-input"
           control={control}
