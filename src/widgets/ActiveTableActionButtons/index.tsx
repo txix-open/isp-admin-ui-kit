@@ -39,7 +39,9 @@ const ActiveTableActionButtons: FC<ActiveTableActionButtonsPropsType> = ({
   const canUpdateConfig = hasPermission(
     PermissionKeysType.module_configuration_edit
   )
-  const canSetActiveVersion = hasPermission(PermissionKeysType.module_configuration_set_active)
+  const canSetActiveVersion = hasPermission(
+    PermissionKeysType.module_configuration_set_active
+  )
 
   const navigateToAllVersion = () => navigate(`${record.id}/all_versions`)
 
@@ -49,7 +51,8 @@ const ActiveTableActionButtons: FC<ActiveTableActionButtonsPropsType> = ({
       moduleId: record.moduleId,
       id: '',
       version: 0,
-      data: record.data
+      data: record.data,
+      unsafe: !record.valid
     } as ConfigType
     createUpdateConfig(newConfig)
       .unwrap()
