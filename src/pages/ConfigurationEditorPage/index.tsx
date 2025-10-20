@@ -240,7 +240,7 @@ const ConfigurationEditorPage: FC = () => {
           Назад
         </Button>
         <Space>
-          <h1>{bufConfig?.name}</h1>
+          <h1>{isNew ? state?.name : bufConfig?.name}</h1>
           <p className="change-status">({disableSendBtn ? 'нет изменений' : 'есть измнения'})
             <span
               className={`change-status-circle ${disableSendBtn ? 'change-status_red' : 'change-status_green'}`}

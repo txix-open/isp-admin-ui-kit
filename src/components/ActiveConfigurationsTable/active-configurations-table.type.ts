@@ -6,4 +6,5 @@ export interface ActiveConfigurationsTablePropsType {
   handleShowConfig: (config: ConfigType) => void
   handleShowCompareModal: (config: ConfigType) => void
   currentModule?: ModuleType
+  handleShowSetNameModal: () => void
 }
