@@ -6,6 +6,7 @@ import ActiveConfigurationsTable from '@components/ActiveConfigurationsTable'
 import CompareVersionModal from '@components/CompareVersionModal'
 import ConfigSchemaModal from '@components/ConfigSchemaModal'
 import ConfigurationPreviewModal from '@components/ConfigurationPreviewModal'
+import SetConfigNameModal from '@components/SetConfigNameModal'
 
 import { ConfigType } from '@pages/ModulesPage/module.type.ts'
 
@@ -35,6 +36,7 @@ const Configurations = () => {
   const navigate = useNavigate()
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [isShowModalOpen, setisShowModalOpen] = useState(false)
+  const [isSetNameModalOpen, setIsSetNameModalOpen] = useState(false)
   const [isCompareModalOpen, setIsCompareModalOpen] = useState(false)
 
   const [currentConfig, setCurrentConfig] = useState<ConfigType>(
@@ -68,6 +70,11 @@ const Configurations = () => {
         config={currentConfig}
         open={isShowModalOpen}
         onClose={() => setisShowModalOpen(false)}
+      />
+      <SetConfigNameModal
+        currentModule={currentModule}
+        open={isSetNameModalOpen}
+        onClose={() => setIsSetNameModalOpen(false)}
       />
       <ConfigSchemaModal
         schema={currentModule?.configSchema || {}}
@@ -103,6 +110,9 @@ const Configurations = () => {
           setCurrentConfig(config)
           setIsCompareModalOpen(true)
         }}
+        handleShowSetNameModal={() => {
+          setIsSetNameModalOpen(true)
+        }}
       />
       <ActiveConfigurationsTable
         currentModule={currentModule}
@@ -114,6 +124,9 @@ const Configurations = () => {
         handleShowCompareModal={(config) => {
           setCurrentConfig(config)
           setIsCompareModalOpen(true)
+        }}
+        handleShowSetNameModal={() => {
+          setIsSetNameModalOpen(true)
         }}
       />
     </section>

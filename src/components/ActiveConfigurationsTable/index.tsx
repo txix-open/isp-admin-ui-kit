@@ -3,7 +3,6 @@ import { Button, message, Table, Tag, Tooltip } from 'antd'
 import { ColumnsType } from 'antd/es/table'
 import dayjs from 'dayjs'
 import { FC, useEffect, useRef, useState } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
 
 import { dateFormats } from '@constants/date.ts'
 
@@ -17,8 +16,6 @@ import useRole from '@hooks/useRole.tsx'
 
 import configApi from '@services/configService.ts'
 
-import { routePaths } from '@routes/routePaths.ts'
-
 import { PermissionKeysType } from '@type/roles.type.ts'
 
 import './active-configurations-table.scss'
@@ -28,7 +25,7 @@ const ActiveConfigurationsTable: FC<ActiveConfigurationsTablePropsType> = ({
   handleShowConfig,
   handleShowCompareModal,
   data,
-  currentModule = {}
+  handleShowSetNameModal
 }) => {
   const { hasPermission } = useRole()
   const [editKeyConfig, setEditKeyConfig] = useState<string>('')
@@ -37,8 +34,6 @@ const ActiveConfigurationsTable: FC<ActiveConfigurationsTablePropsType> = ({
   const [updateConfigName] = configApi.useUpdateConfigNameMutation()
   const [markConfigAsActive] = configApi.useMarkConfigAsActiveMutation()
   const [deleteConfig] = configApi.useDeleteConfigMutation()
-  const navigate = useNavigate()
-  const { id: moduleId } = useParams()
 
   const canAddConfig = hasPermission(
     PermissionKeysType.module_configuration_add
@@ -211,11 +206,7 @@ const ActiveConfigurationsTable: FC<ActiveConfigurationsTablePropsType> = ({
         {!isActiveTable && canAddConfig && (
           <Button
             className="configurations__buttons__new-config-brn"
-            onClick={() =>
-              navigate(`/${moduleId}/${routePaths.configEditor}/new`, {
-                state: currentModule
-              })
-            }
+            onClick={handleShowSetNameModal}
           >
             Создать
           </Button>
