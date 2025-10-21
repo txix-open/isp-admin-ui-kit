@@ -173,7 +173,7 @@ const ConfigurationEditorCode: FC<ConfigurationEditorPropsType> = ({
         height="100vh"
         language="json"
         theme={changeTheme ? 'vs-dark' : 'vs-white'}
-        value={editorValue}
+        defaultValue={editorValue}
         onChange={(value) => handleChange(value)}
         options={{
           quickSuggestions: {
