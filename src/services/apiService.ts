@@ -46,6 +46,14 @@ apiService.interceptors.response.use(
       window.location.href = routePaths.login
     }
 
+    if (error.response && error.response.status === 403) {
+      message
+        .warning(
+          'К сожалению, некоторые данные недоступны — у вас нет прав для их просмотра'
+        )
+        .then()
+    }
+
     if (error.response && error.response.status >= 500) {
       message
         .error('Внутренняя ошибка сервиса, попробуйте повторить запрос')
