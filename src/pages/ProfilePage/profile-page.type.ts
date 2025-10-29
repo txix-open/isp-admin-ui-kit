@@ -6,6 +6,7 @@ export type ProfileDataType = {
   lastName: string
   role: string
   roles: number[]
+  roleNames: string[]
   permissions: string[]
   idleTimeoutMs: number
 }
