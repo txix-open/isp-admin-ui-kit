@@ -25,6 +25,7 @@ export const initialState: ProfileType = {
     lastName: '',
     role: '',
     roles: [],
+    roleNames: [],
     permissions: [],
     idleTimeoutMs: 0
   },

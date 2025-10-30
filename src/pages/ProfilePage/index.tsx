@@ -69,7 +69,7 @@ const ProfilePage = () => {
           </Descriptions>
         </div>
       </div>
-      <RoleList userRoles={profile.roles} />
+      <RoleList userRoles={profile.roleNames} />
       <PermissionList permissions={profile.permissions} />
       <div className="profile-page__actions">
         <Popconfirm
