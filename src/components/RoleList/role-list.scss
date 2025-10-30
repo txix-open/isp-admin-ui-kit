@@ -13,7 +13,11 @@
     list-style-position: inside
   }
 
-  li {
-    font-size: $text-size
+  &__empty-text, li {
+    font-size: $text-size;
+
+    &:last-child {
+      margin-bottom: $basic-margin;
+    }
   }
 }

@@ -1,3 +1,5 @@
 export type RoleListProps = {
-  userRoles: number[]
+  userRoles: string[]
+  isError?: boolean
+  isLoading?: boolean
 }
