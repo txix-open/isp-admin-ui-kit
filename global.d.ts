@@ -4,4 +4,5 @@ interface ImportMeta {
 
 interface ImportMetaEnv {
   readonly VITE_APP_TOKEN: string
+  readonly BASE_URL: string
 }
