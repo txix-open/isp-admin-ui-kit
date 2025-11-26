@@ -27,7 +27,8 @@ const AdminBase: FC<AdminBasePropsType> = ({
   )
 
   const routerConfig = createBrowserRouter(
-    getRoutesConfig(customRouters, defaultRoutePath)
+    getRoutesConfig(customRouters, defaultRoutePath),
+    { basename: import.meta.env.BASE_URL || '/' }
   )
 
   useEffect(() => {
