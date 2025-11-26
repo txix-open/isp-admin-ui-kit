@@ -17,7 +17,7 @@ export default [
     output: {
       file: 'dist/index.js',
       format: 'esm',
-      inlineDynamicImports: true,
+      inlineDynamicImports: true
     },
     external: ['antd', '@ant-design/cssinjs', 'react', 'react-dom'],
     plugins: [
@@ -42,7 +42,7 @@ export default [
       postcss({ minimize: true }),
       terser({
         compress: {
-          drop_console: true,
+          drop_console: false,
           drop_debugger: true
         },
         output: {
