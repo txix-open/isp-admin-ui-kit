@@ -169,6 +169,10 @@ export const getRoutesConfig = (
     {
       path: routePaths.notFound,
       element: lazyElement(NotFound)
+    },
+    {
+      path: '*',
+      element: <Navigate to={routePaths.home} replace />
     }
   ]
 }

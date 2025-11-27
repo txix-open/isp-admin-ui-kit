@@ -26,9 +26,12 @@ const AdminBase: FC<AdminBasePropsType> = ({
       : true
   )
 
+  const baseUrl = import.meta.env.BASE_URL || '/'
+  const normalizedBaseUrl = baseUrl.endsWith('/') ? baseUrl : `${baseUrl}/`
+
   const routerConfig = createBrowserRouter(
     getRoutesConfig(customRouters, defaultRoutePath),
-    { basename: import.meta.env.BASE_URL || '/' }
+    { basename: normalizedBaseUrl }
   )
 
   useEffect(() => {
