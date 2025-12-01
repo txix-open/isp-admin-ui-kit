@@ -34,6 +34,12 @@ const AdminBase: FC<AdminBasePropsType> = ({
   )
 
   useEffect(() => {
+    if (baseUrl !== '/' && window.location.pathname === '/') {
+      window.location.replace(baseUrl)
+    }
+  }, [baseUrl])
+
+  useEffect(() => {
     return routerConfig.subscribe((state) => {
       const location = state.location
       const prevRoute = sessionStorage.getItem('prevRoute')
