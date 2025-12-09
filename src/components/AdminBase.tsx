@@ -17,7 +17,8 @@ import './admin-base.scss'
 const AdminBase: FC<AdminBasePropsType> = ({
   customRouters = [],
   defaultRoutePath,
-  configProviderProps = {}
+  configProviderProps = {},
+  excludePermissions = []
 }) => {
   const [themes, setTheme] = useState(lightTheme)
   const [changeTheme, setChangeTheme] = useState(
@@ -64,7 +65,8 @@ const AdminBase: FC<AdminBasePropsType> = ({
         value={{
           setTheme,
           setChangeTheme,
-          changeTheme
+          changeTheme,
+          excludePermissions
         }}
       >
         <ConfigProvider theme={themes} locale={ruRu} {...configProviderProps}>

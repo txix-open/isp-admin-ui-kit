@@ -21,6 +21,8 @@ import tokensApi from '@services/tokensService.ts'
 import userServiceApi from '@services/userService.ts'
 import variablesApi from '@services/variablesService.ts'
 
+import { PermissionKeysType } from '@type/roles.type.ts'
+
 import profileReducer from './redusers/ProfileSlice.ts'
 import UIReducer from './redusers/UISlice.ts'
 
@@ -34,12 +36,14 @@ export interface ContextProps {
   >
   changeTheme: boolean
   setChangeTheme: Dispatch<SetStateAction<boolean>>
+  excludePermissions: PermissionKeysType[]
 }
 
 export const Context = createContext<ContextProps>({
   changeTheme: false,
   setChangeTheme: () => false,
-  setTheme: () => theme.defaultAlgorithm
+  setTheme: () => theme.defaultAlgorithm,
+  excludePermissions: []
 })
 
 export const baseApiServices = {
