@@ -4,6 +4,8 @@ import { filterFirstColumnItems } from '@utils/firstColumnUtils.ts'
 
 import useRole from '@hooks/useRole'
 
+import { PermissionKeysType } from '@type/roles.type.ts'
+
 import {
   baseApiServices,
   baseSetupStore,
@@ -16,5 +18,6 @@ export {
   baseSetupStore,
   AdminBaseContext,
   useRole,
-  filterFirstColumnItems
+  filterFirstColumnItems,
+  PermissionKeysType
 }
