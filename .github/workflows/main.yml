@@ -21,4 +21,4 @@ jobs:
       - run: npm install @rollup/rollup-linux-x64-gnu --save-optional
       - run: npm ci
       - run: npm run build
-      - run: npm publish
+      - run: npm publish --provenance
