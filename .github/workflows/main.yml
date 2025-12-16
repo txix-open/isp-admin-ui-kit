@@ -5,8 +5,8 @@ on:
       - 'v*'
 
 permissions:
-      contents: read
-      id-token: write
+  contents: read
+  id-token: write
 
 jobs:
   build:
@@ -21,4 +21,4 @@ jobs:
       - run: npm install @rollup/rollup-linux-x64-gnu --save-optional
       - run: npm ci
       - run: npm run build
-      - run: npm publish --provenance --access public
+      - run: npm publish
