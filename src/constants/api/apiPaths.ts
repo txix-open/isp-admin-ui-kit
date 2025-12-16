@@ -71,12 +71,16 @@ type PathKeys =
   | 'getByIdListApplicationGroup'
   | 'updateApplicationGroup'
 
+const BASE_URL = import.meta.env.BASE_URL?.replace(/\/$/, '') || ''
+const API_BASE_URL = `${BASE_URL}/api`
+const apiWithBaseURL = (path: `/${string}`) => `${API_BASE_URL}${path}`
+
 export const apiPaths: Record<PathKeys, string> = {
-  baseUrl: '/api/kkd-configuration-service',
-  baseAdminUrl: '/api/admin',
-  baseUserUrl: '/api/admin/user',
-  baseSystemUrl: '/api/system',
-  baseConfigUrl: '/api/config',
+  baseUrl: apiWithBaseURL('/kkd-configuration-service'),
+  baseAdminUrl: apiWithBaseURL('/admin'),
+  baseUserUrl: apiWithBaseURL('/admin/user'),
+  baseSystemUrl: apiWithBaseURL('/system'),
+  baseConfigUrl: apiWithBaseURL('/config'),
   // ======= ROLES ======
   getAllRoles: '/role/all',
   createRole: '/role/create',
