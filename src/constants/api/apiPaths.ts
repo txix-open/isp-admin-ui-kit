@@ -87,12 +87,12 @@ export const apiPaths: Record<PathKeys, string> = {
   updateRole: '/role/update',
   deleteRole: '/role/delete',
   // ======= AUTH ======
-  login: '/api/admin/auth/login',
-  logout: '/api/admin/auth/logout',
+  login: apiWithBaseURL('/admin/auth/login'),
+  logout: apiWithBaseURL('/admin/auth/logout'),
   // ======= PROFILE ======
-  getProfile: '/api/admin/user/get_profile',
-  getUI: '/api/admin/user/get_design',
-  changePassword: '/api/admin/user/change_password',
+  getProfile: apiWithBaseURL('/admin/user/get_profile'),
+  getUI: apiWithBaseURL('/admin/user/get_design'),
+  changePassword: apiWithBaseURL('/admin/user/change_password'),
   // ======= USERS ======
   getUsers: '/get_users',
   createUser: '/create_user',
