@@ -127,15 +127,34 @@ const customRouters = [
 
 ---
 
+## 🗺 Скрытие базовых страниц
+
+Компонент `AdminBase` поддерживает параметр `excludePermissions`: массив с пермишенами, страницы по которым необходимо
+скрыть, сами пермишены можно получить через импорт PermissionKeysType из библиотеки
+
+### Пример использования:
+
+```js
+import { PermissionKeysType } from 'isp-admin-ui-kit'
+const excludePermissions = [PermissionKeysType.user_view, PermissionKeysType.session_view]
+
+  < AdminBase
+excludePermissions = { excludePermissions }
+/>;
+```
+
+---
+
 ## 🧱 Параметры компонента `AdminBase`
 
 Вы можете использовать `AdminBase` с разными параметрами:
 
-| Название              | Описание                                                            | Пример                                                  |
-|-----------------------|---------------------------------------------------------------------|---------------------------------------------------------|
-| `customRouters`       | Массив объектов маршрутов                                           | customRouters={\[{ route, element, label, key, ... }]}  |
-| `configProviderProps` | Пропсы для `ConfigProvider` из библиотеки `antd`                    | configProviderProps={{ theme: lightTheme, locale: ru }} |
-| `defaultRoutePath`    | Путь, на который будет редирект при открытии `/` (главной страницы) | defaultRoutePath="/modules"                             |
+| Название              | Описание                                                            | Пример                                                   |
+|-----------------------|---------------------------------------------------------------------|----------------------------------------------------------|
+| `customRouters`       | Массив объектов маршрутов                                           | customRouters={\[{ route, element, label, key, ... }]}   |
+| `configProviderProps` | Пропсы для `ConfigProvider` из библиотеки `antd`                    | configProviderProps={{ theme: lightTheme, locale: ru }}  |
+| `defaultRoutePath`    | Путь, на который будет редирект при открытии `/` (главной страницы) | defaultRoutePath="/modules"                              |
+| `excludePermissions`  | Массив пермишенов (PermissionKeysType) для сокрытия                 | excludePermissions={[PermissionKeysType.user_view, ...]} |
 
 ### Пример использования:
 
@@ -144,6 +163,7 @@ const customRouters = [
   customRouters={customRouters}
   configProviderProps={{ theme: lightTheme, locale: ru }}
   defaultRoutePath="/dashboard"
+  excludePermissions={excludePermissions}
 />;
 ```
 
