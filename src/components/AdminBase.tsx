@@ -40,13 +40,14 @@ const AdminBase: FC<AdminBasePropsType> = ({
     return routerConfig.subscribe((state) => {
       const location = state.location
       const prevRoute = sessionStorage.getItem('prevRoute')
-
+      const currentPath = getCleanPath(location.pathname)
       if (
-        location.pathname !== routePaths.error &&
-        location.pathname !== routePaths.login &&
-        location.pathname !== prevRoute
+        currentPath !== routePaths.error &&
+        currentPath !== routePaths.login &&
+        currentPath !== routePaths.home &&
+        currentPath !== prevRoute
       ) {
-        sessionStorage.setItem('prevRoute', getCleanPath(location.pathname))
+        sessionStorage.setItem('prevRoute', currentPath)
       }
     })
   }, [routerConfig])
