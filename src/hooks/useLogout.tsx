@@ -25,6 +25,7 @@ const useLogout = () => {
       .then(() => {
         LocalStorage.remove(localStorageKeys.USER_TOKEN)
         LocalStorage.remove(localStorageKeys.HEADER_NAME)
+        sessionStorage.clear()
         navigate(routePaths.login, { replace: true })
       })
       .catch(() => {})
