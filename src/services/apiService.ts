@@ -5,6 +5,7 @@ import { localStorageKeys } from '@constants/localStorageKeys.ts'
 
 import { getConfigProperty } from '@utils/configUtils.ts'
 import { LocalStorage } from '@utils/localStorageUtils.ts'
+import { getCleanPath } from '@utils/routeUtils.ts'
 
 import { routePaths } from '@routes/routePaths.ts'
 
@@ -42,7 +43,7 @@ apiService.interceptors.response.use(
       localClear()
       const prevRoute = sessionStorage.getItem('prevRoute') || ''
       message.error('Ваша сессия истекла"').then()
-      sessionStorage.setItem('prevRoute', prevRoute)
+      sessionStorage.setItem('prevRoute', getCleanPath(prevRoute))
       window.location.href = routePaths.login
     }
 

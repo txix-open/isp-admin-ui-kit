@@ -7,6 +7,8 @@ import { darkTheme, lightTheme } from '@constants/theme.ts'
 
 import { AdminBasePropsType } from '@components/admin-base.type.ts'
 
+import { getCleanPath } from '@utils/routeUtils.ts'
+
 import { Context } from '@stores/index'
 
 import { getRoutesConfig } from '@routes/Routers'
@@ -44,7 +46,7 @@ const AdminBase: FC<AdminBasePropsType> = ({
         location.pathname !== routePaths.login &&
         location.pathname !== prevRoute
       ) {
-        sessionStorage.setItem('prevRoute', location.pathname)
+        sessionStorage.setItem('prevRoute', getCleanPath(location.pathname))
       }
     })
   }, [routerConfig])
