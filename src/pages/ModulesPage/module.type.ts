@@ -17,6 +17,7 @@ export interface EndpointType {
 }
 
 export interface ModuleStatusType {
+  id: string
   establishedAt: string
   libVersion: string
   version: string
