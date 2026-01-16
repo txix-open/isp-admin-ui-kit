@@ -23,7 +23,7 @@ import { routePaths } from '@routes/routePaths.ts'
 import './connections.scss'
 
 const Connections = () => {
-  const { data: ConnectionsList = [], isLoading: isModulesLoading } =
+  const { data: connectionsList = [], isLoading: isModulesLoading } =
     modulesServiceApi.useGetModulesQuery('modules')
   const { role } = useRole()
   const navigate = useNavigate()
@@ -33,11 +33,10 @@ const Connections = () => {
   const isLoading = isModulesLoading
 
   useEffect(() => {
-    const filterId = ConnectionsList.find((item: ModuleType) => item.id === id)
-    if (filterId && filterId.status) {
-      setObj(filterId.status)
-    }
-  }, [ConnectionsList, id])
+    const module = connectionsList.find((item: ModuleType) => item.id === id)
+
+    setObj(module?.status ?? [])
+  }, [connectionsList, id])
 
   useEffect(() => {
     if (!role) {
@@ -79,16 +78,12 @@ const Connections = () => {
     )
   }
 
-  const columns: ColumnsType = [
+  const columns: ColumnsType<ModuleStatusType> = [
     {
       title: '#',
       dataIndex: '',
       key: 'num',
-      render: (
-        _val: ModuleStatusType,
-        _record: ModuleStatusType,
-        index: number
-      ) => index + 1
+      render: (_value, _record, index: number) => index + 1
     },
     {
       title: 'Версия',
