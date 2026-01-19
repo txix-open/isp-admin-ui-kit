@@ -32,6 +32,11 @@ const modulesServiceApi = createApi({
         data: { moduleId }
       }),
       providesTags: () => ['schema']
+    }),
+    getSwagger: builder.query<object, string>({
+      query: (url) => ({
+        url: url
+      })
     })
   })
 })

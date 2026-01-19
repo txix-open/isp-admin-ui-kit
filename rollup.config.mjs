@@ -17,7 +17,8 @@ export default [
     output: {
       file: 'dist/index.js',
       format: 'esm',
-      inlineDynamicImports: true
+      inlineDynamicImports: true,
+      sourcemap: true
     },
     external: ['antd', '@ant-design/cssinjs', 'react', 'react-dom'],
     plugins: [

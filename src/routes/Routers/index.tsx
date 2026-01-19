@@ -8,6 +8,7 @@ import LayoutComponent from '@components/Layout'
 import Configurations from '@pages/ConfigurationsPage'
 import Connections from '@pages/ConnectionsPage'
 import ErrorWrapperPage from '@pages/ErrorWrapperPage'
+import SwaggerPage from '@pages/SwaggerPage'
 
 import PrivateRoute from '@routes/PrivateRoute'
 import { generateCustomRoutes } from '@routes/customRoutes.tsx'
@@ -140,6 +141,10 @@ export const getRoutesConfig = (
                     {
                       path: routePaths.connections,
                       element: lazyElement(Connections)
+                    },
+                    {
+                      path: routePaths.swagger,
+                      element: lazyElement(SwaggerPage)
                     }
                   ]
                 }

@@ -1,0 +1,12 @@
+.swagger-page {
+  height: calc(100vh - 100px);
+  overflow: hidden;
+  display: flex;
+  width: 100%;
+
+  .swagger-ui {
+    flex: 1;
+    overflow-y: auto;
+    background: #fff;
+  }
+}

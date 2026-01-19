@@ -10,6 +10,8 @@ import {
   useSearchParams
 } from 'react-router-dom'
 
+import { MODULES_TAB_KEYS, ModulesTabKeysType } from '@constants/modules.ts'
+
 import ModuleTabs from '@components/ModuleTabs'
 
 import { ModuleType } from '@pages/ModulesPage/module.type.ts'
@@ -30,7 +32,7 @@ import './modules-page.scss'
 const { Column } = Layout
 
 const ModulesPage = () => {
-  const [activeTab, setActiveTab] = useState('configurations')
+  const [activeTab, setActiveTab] = useState(MODULES_TAB_KEYS.configurations)
   const { id: selectedItemId = '' } = useParams()
   const navigate = useNavigate()
   const { role, hasPermission } = useRole()
@@ -66,12 +68,14 @@ const ModulesPage = () => {
   useEffect(() => {
     const url = location.pathname.substring(
       location.pathname.lastIndexOf('/') + 1
-    )
+    ) as ModulesTabKeysType
     switch (url) {
-      case 'configurations':
-        return setActiveTab('configurations')
-      case 'connections':
-        return setActiveTab('connections')
+      case MODULES_TAB_KEYS.configurations:
+        return setActiveTab(MODULES_TAB_KEYS.configurations)
+      case MODULES_TAB_KEYS.connections:
+        return setActiveTab(MODULES_TAB_KEYS.connections)
+      case MODULES_TAB_KEYS.swagger:
+        return setActiveTab(MODULES_TAB_KEYS.swagger)
     }
   }, [location])
 
