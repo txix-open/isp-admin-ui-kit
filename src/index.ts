@@ -1,6 +1,8 @@
 import AdminBase from '@components/AdminBase.tsx'
 
+import { axiosBaseQuery } from '@utils/apiUtils'
 import { filterFirstColumnItems } from '@utils/firstColumnUtils.ts'
+import { sortObject } from '@utils/objectUtils.ts'
 
 import useRole from '@hooks/useRole'
 
@@ -19,5 +21,7 @@ export {
   AdminBaseContext,
   useRole,
   filterFirstColumnItems,
-  PermissionKeysType
+  PermissionKeysType,
+  sortObject,
+  axiosBaseQuery
 }
