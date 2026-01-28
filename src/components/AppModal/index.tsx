@@ -1,34 +1,47 @@
 import { SyncOutlined } from '@ant-design/icons'
 import { Button, message, Tooltip } from 'antd'
-import { FormComponents } from 'isp-ui-kit'
+import { FormInput, FormTextArea, FormInputNumber } from 'isp-ui-kit'
 import { FC, useEffect } from 'react'
 import { useForm } from 'react-hook-form'
+
 import { ValidationRules } from '@constants/form/validationRules.ts'
+
 import Modal from '@widgets/Modal'
+
 import { AppModalType } from '@components/AppModal/app-group-modal.type.ts'
+
 import { ApplicationAppType } from '@pages/ApplicationsPage/applications.type.ts'
+
 import applicationsApi from '@services/applicationsService.ts'
+
 import './app-modal.scss'
 
-const { FormInput, FormTextArea, FormInputNumber } = FormComponents
-
-const AppModal: FC<AppModalType> = ({ title, onOk, onClose, open, app, isNew = false, isExistsId }) => {
-  const [getNextAppId, {isLoading}] = applicationsApi.useGetNextAppIdMutation()
+const AppModal: FC<AppModalType> = ({
+  title,
+  onOk,
+  onClose,
+  open,
+  app,
+  isNew = false,
+  isExistsId
+}) => {
+  const [getNextAppId, { isLoading }] =
+    applicationsApi.useGetNextAppIdMutation()
   const { handleSubmit, control, reset, setValue, setError, clearErrors } =
     useForm<ApplicationAppType>({
       mode: 'onChange',
       defaultValues: app
     })
-  
-    useEffect(() => {
-      if (open) {
-        reset(app)
-      }
 
-      if(isNew) {
-        reset()
-      }
-    }, [open, isNew])
+  useEffect(() => {
+    if (open) {
+      reset(app)
+    }
+
+    if (isNew) {
+      reset()
+    }
+  }, [open, isNew])
 
   useEffect(() => {
     if (isExistsId?.field && isExistsId?.message) {
@@ -38,7 +51,6 @@ const AppModal: FC<AppModalType> = ({ title, onOk, onClose, open, app, isNew = f
       })
     }
   }, [isExistsId])
-
 
   const handleGetNextAppId = () => {
     getNextAppId()
@@ -74,11 +86,17 @@ const AppModal: FC<AppModalType> = ({ title, onOk, onClose, open, app, isNew = f
             name="id"
             label="Идентификатор"
             rules={{ required: ValidationRules.required }}
-            addonAfter={isNew && (
-              <Tooltip title="Сгенерировать">
-                <Button icon={<SyncOutlined />} onClick={handleGetNextAppId} loading={isLoading} />
-              </Tooltip>
-            )}
+            addonAfter={
+              isNew && (
+                <Tooltip title="Сгенерировать">
+                  <Button
+                    icon={<SyncOutlined />}
+                    onClick={handleGetNextAppId}
+                    loading={isLoading}
+                  />
+                </Tooltip>
+              )
+            }
           />
         </div>
         <FormInput
@@ -93,7 +111,6 @@ const AppModal: FC<AppModalType> = ({ title, onOk, onClose, open, app, isNew = f
           label="Описание"
           name="description"
         />
-
       </form>
     </Modal>
   )

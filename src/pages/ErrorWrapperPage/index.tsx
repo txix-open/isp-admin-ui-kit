@@ -1,10 +1,8 @@
 import { Button } from 'antd'
-import { Layout } from 'isp-ui-kit'
+import { ErrorPage } from 'isp-ui-kit'
 import { useNavigate } from 'react-router-dom'
 
 import { routePaths } from '@routes/routePaths.ts'
-
-const { ErrorPage } = Layout
 
 const ErrorWrapperPage = () => {
   const navigate = useNavigate()

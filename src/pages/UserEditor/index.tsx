@@ -1,7 +1,13 @@
 import { ArrowLeftOutlined, SaveOutlined } from '@ant-design/icons'
 import { Button, message, Spin } from 'antd'
 import dayjs from 'dayjs'
-import { FormComponents, LabelItem } from 'isp-ui-kit'
+import {
+  FormInput,
+  FormSelect,
+  FormTextArea,
+  FormInputPassword,
+  LabelItem
+} from 'isp-ui-kit'
 import { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { useLocation, useNavigate } from 'react-router-dom'
@@ -39,9 +45,7 @@ const UserEditor = () => {
 
   const [updateUser] = userServiceApi.useUpdateUserMutation()
 
-  const isSaveBtnAvailable = isNew
-    ? canCreateUser
-    : canUpdateUser
+  const isSaveBtnAvailable = isNew ? canCreateUser : canUpdateUser
 
   const {
     control,
@@ -190,7 +194,7 @@ const UserEditor = () => {
       <form className="user-editor__content">
         <div className="user-editor__content__wrap">
           <div className="user-editor__content__name">
-            <FormComponents.FormInput
+            <FormInput
               label="Имя"
               rules={{ required: ValidationRules.required }}
               control={control}
@@ -198,7 +202,7 @@ const UserEditor = () => {
             />
           </div>
           <div className="user-editor__content__name">
-            <FormComponents.FormInput
+            <FormInput
               label="Фамилия"
               rules={{ required: ValidationRules.required }}
               control={control}
@@ -206,7 +210,7 @@ const UserEditor = () => {
             />
           </div>
           <div className="user-editor__content__email">
-            <FormComponents.FormInput
+            <FormInput
               label="Email"
               rules={{ required: ValidationRules.required }}
               control={control}
@@ -216,7 +220,7 @@ const UserEditor = () => {
 
           {isNew && (
             <div className="user-editor__content__password">
-              <FormComponents.FormInputPassword
+              <FormInputPassword
                 label="Пароль"
                 rules={{ required: ValidationRules.required }}
                 control={control}
@@ -225,7 +229,7 @@ const UserEditor = () => {
             </div>
           )}
           <div className="user-editor__content__description">
-            <FormComponents.FormTextArea
+            <FormTextArea
               autoSize={{ minRows: 2, maxRows: 6 }}
               label="Описание"
               control={control}
@@ -233,7 +237,7 @@ const UserEditor = () => {
             />
           </div>
           <div className="user-editor__content__roles">
-            <FormComponents.FormSelect
+            <FormSelect
               mode="multiple"
               label="Роли"
               optionFilterProp="label"

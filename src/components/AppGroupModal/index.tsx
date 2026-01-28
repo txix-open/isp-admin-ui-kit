@@ -1,4 +1,4 @@
-import { FormComponents } from 'isp-ui-kit'
+import { FormInput, FormTextArea } from 'isp-ui-kit'
 import { FC, useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 
@@ -9,8 +9,6 @@ import Modal from '@widgets/Modal'
 import { AppGroupModalType } from '@components/AppGroupModal/app-group-modal.type.ts'
 
 import { ApplicationsGroupType } from '@pages/ApplicationsPage/applications.type.ts'
-
-const { FormInput, FormTextArea } = FormComponents
 
 const AppGroupModal: FC<AppGroupModalType> = ({
   title,

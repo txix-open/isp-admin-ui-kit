@@ -1,5 +1,5 @@
 import { List, message, Spin, Tooltip } from 'antd'
-import { Layout } from 'isp-ui-kit'
+import { Column, EmptyData, NoData } from 'isp-ui-kit'
 import { useEffect } from 'react'
 import { UseFormSetError } from 'react-hook-form'
 import {
@@ -27,8 +27,6 @@ import { routePaths } from '@routes/routePaths.ts'
 import { NewRoleType, PermissionKeysType, RoleType } from '@type/roles.type.ts'
 
 import './roles-page.scss'
-
-const { Column, EmptyData, NoData } = Layout
 
 const RolesPage = () => {
   const { id: selectedItemId = '' } = useParams()

@@ -1,7 +1,7 @@
 import { ExclamationCircleOutlined } from '@ant-design/icons'
 import { Badge, List, message, Spin, Tag, Tooltip } from 'antd'
 import { compareVersions } from 'compare-versions'
-import { Layout } from 'isp-ui-kit'
+import { Column } from 'isp-ui-kit'
 import { useEffect, useState } from 'react'
 import {
   useLocation,
@@ -26,8 +26,6 @@ import { routePaths } from '@routes/routePaths.ts'
 import { PermissionKeysType } from '@type/roles.type.ts'
 
 import './modules-page.scss'
-
-const { Column } = Layout
 
 const ModulesPage = () => {
   const [activeTab, setActiveTab] = useState('configurations')
