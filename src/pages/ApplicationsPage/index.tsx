@@ -1,23 +1,34 @@
 import { message, Spin } from 'antd'
-import { Layout, ColumnItem } from 'isp-ui-kit'
+import { Column, EmptyData, ColumnItem } from 'isp-ui-kit'
 import { useEffect, useMemo, useState } from 'react'
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
+
+import SearchAppByToken from '@ui/SearchAppByToken'
+
 import ListItem from '@widgets/ListItem'
+
 import ApplicationsContent from '@components/ApplicationsContent'
-import { ApplicationsGroupType, NewApplicationsGroupType, UpdateApplicationsGroupType } from '@pages/ApplicationsPage/applications.type.ts'
+
+import {
+  ApplicationsGroupType,
+  NewApplicationsGroupType,
+  UpdateApplicationsGroupType
+} from '@pages/ApplicationsPage/applications.type.ts'
+
 import { setUrlValue, setSelectedItemId } from '@utils/columnLayoutUtils.ts'
 import { filterFirstColumnItems } from '@utils/firstColumnUtils.ts'
+
 import useRole from '@hooks/useRole.tsx'
+
 import applicationsGroupApi from '@services/applicationsGroupService.ts'
+
 import { routePaths } from '@routes/routePaths.ts'
+
 import { PermissionKeysType } from '@type/roles.type.ts'
+
 import AppGroupModal from 'src/components/AppGroupModal'
 
 import './applications-page.scss'
-import SearchAppByToken from '@ui/SearchAppByToken'
-
-
-const { Column, EmptyData } = Layout
 
 const ApplicationsPage = () => {
   const navigate = useNavigate()
@@ -44,7 +55,9 @@ const ApplicationsPage = () => {
     PermissionKeysType.application_group_view
   )
   const canAddGroup = hasPermission(PermissionKeysType.application_group_add)
-  const canUpdateGroup = hasPermission(PermissionKeysType.application_group_edit)
+  const canUpdateGroup = hasPermission(
+    PermissionKeysType.application_group_edit
+  )
   const canRemoveGroup = hasPermission(
     PermissionKeysType.application_group_delete
   )
@@ -142,7 +155,7 @@ const ApplicationsPage = () => {
   }
 
   const handleRemoveApplicationsGtoup = () => {
-    deleteApplicationsGroup({idList:[ Number(selectedItemId)]})
+    deleteApplicationsGroup({ idList: [Number(selectedItemId)] })
       .unwrap()
       .then(() => {
         message.success('Элемент удален')
@@ -175,15 +188,19 @@ const ApplicationsPage = () => {
       <Column
         columnKey="applications-group"
         sortableFields={[
-          {value: 'name', label: 'Наименование'},
-          {value: 'id', label: 'Идентификатор'},
-          {value: 'createdAt', label: 'Дата создания'},
-          {value: 'updatedAt', label: 'Дата обновления'},
+          { value: 'name', label: 'Наименование' },
+          { value: 'id', label: 'Идентификатор' },
+          { value: 'createdAt', label: 'Дата создания' },
+          { value: 'updatedAt', label: 'Дата обновления' }
         ]}
         sortValue={sortValue as keyof ApplicationsGroupType}
-        onChangeSortValue={(value) => setUrlValue(value, setSearchParams, `${columnName}-sort`)}
+        onChangeSortValue={(value) =>
+          setUrlValue(value, setSearchParams, `${columnName}-sort`)
+        }
         directionValue={directionValue}
-        onChangeDirectionValue={(value) => setUrlValue(value, setSearchParams, `${columnName}-direction`)}
+        onChangeDirectionValue={(value) =>
+          setUrlValue(value, setSearchParams, `${columnName}-direction`)
+        }
         title="Группы приложений"
         searchPlaceholder="Введите имя или id"
         onUpdateItem={updateApplicationModal}
@@ -208,7 +225,9 @@ const ApplicationsPage = () => {
             navigate
           )
         }}
-        onChangeSearchValue={(value) => setUrlValue(value, setSearchParams, 'search')}
+        onChangeSearchValue={(value) =>
+          setUrlValue(value, setSearchParams, 'search')
+        }
       />
       {renderMainContent()}
       <AppGroupModal

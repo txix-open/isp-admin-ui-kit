@@ -1,4 +1,4 @@
-import { FormComponents } from 'isp-ui-kit'
+import { FormInput } from 'isp-ui-kit'
 import { FC } from 'react'
 import { useForm } from 'react-hook-form'
 import { useNavigate, useParams } from 'react-router-dom'
@@ -11,7 +11,6 @@ import { SetConfigNameModalProps } from '@components/SetConfigNameModal/set-conf
 
 import { routePaths } from '@routes/routePaths.ts'
 
-const { FormInput } = FormComponents
 const SetConfigNameModal: FC<SetConfigNameModalProps> = ({
   open,
   onClose,

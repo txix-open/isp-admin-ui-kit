@@ -1,5 +1,5 @@
 import { ConfigProvider, Layout, Spin } from 'antd'
-import { findRouteWithParents, Layout as LayoutUi } from 'isp-ui-kit'
+import { findRouteWithParents, LayoutMenu, LayoutSider } from 'isp-ui-kit'
 import { useContext, useEffect, useState } from 'react'
 import { Navigate, Outlet, useLocation, useNavigate } from 'react-router-dom'
 
@@ -28,7 +28,6 @@ import { PermissionKeysType } from '@type/roles.type.ts'
 import './layout.scss'
 
 const { Content } = Layout
-const { LayoutMenu, LayoutSider } = LayoutUi
 
 const LayoutComponent = ({ customRouters }: LayoutComponentPropsType) => {
   const [collapsed, setCollapsed] = useState<boolean>(

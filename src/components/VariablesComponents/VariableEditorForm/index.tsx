@@ -1,4 +1,10 @@
-import { FormComponents, LabelItem } from 'isp-ui-kit'
+import {
+  FormInput,
+  FormRadioGroup,
+  FormTextArea,
+  FormSecretTextArea,
+  LabelItem
+} from 'isp-ui-kit'
 import { Path } from 'react-hook-form'
 
 import { ValidationRules } from '@constants/form/validationRules.ts'
@@ -6,9 +12,6 @@ import { ValidationRules } from '@constants/form/validationRules.ts'
 import { VariableEditorFormPropsType } from './variable-editor-form.type.ts'
 
 import './variable-editor-form.scss'
-
-const { FormInput, FormRadioGroup, FormTextArea, FormSecretTextArea } =
-  FormComponents
 
 const radioGroupOptions: LabelItem[] = [
   { label: 'SECRET', value: 'SECRET' },

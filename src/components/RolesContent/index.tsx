@@ -1,6 +1,6 @@
 import { Divider, message, Table } from 'antd'
 import { ColumnsType } from 'antd/es/table'
-import { FormComponents } from 'isp-ui-kit'
+import { FormInput } from 'isp-ui-kit'
 import { useEffect, useState } from 'react'
 import { Controller, useForm } from 'react-hook-form'
 import { useParams } from 'react-router-dom'
@@ -35,7 +35,6 @@ const columns: ColumnsType = [
     dataIndex: 'key'
   }
 ]
-const { FormInput } = FormComponents
 const RolesContent = ({
   role,
   permissions,

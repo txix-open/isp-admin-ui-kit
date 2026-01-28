@@ -1,5 +1,5 @@
 import { Spin } from 'antd'
-import { Layout } from 'isp-ui-kit'
+import { Column, EmptyData } from 'isp-ui-kit'
 import { memo, useEffect } from 'react'
 import {
   Navigate,
@@ -26,8 +26,6 @@ import { routePaths } from '@routes/routePaths.ts'
 import { PermissionKeysType } from '@type/roles.type.ts'
 
 import './app-access-page.scss'
-
-const { Column, EmptyData } = Layout
 
 const firstColumnSearchParam = 'search'
 const findMethodParam = 'method'

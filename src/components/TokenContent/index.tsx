@@ -6,24 +6,29 @@ import dayjs from 'dayjs'
 import 'dayjs/locale/ru'
 import duration from 'dayjs/plugin/duration'
 import relativeTime from 'dayjs/plugin/relativeTime'
-import { FormComponents, Layout } from 'isp-ui-kit'
+import { FormSelect, EmptyData } from 'isp-ui-kit'
 import { useEffect, useMemo, useState } from 'react'
 import { useForm } from 'react-hook-form'
+
 import { dateFormats } from '@constants/date.ts'
 import { ValidationRules } from '@constants/form/validationRules.ts'
+
+import SearchAppByToken from '@ui/SearchAppByToken'
+
 import Modal from '@widgets/Modal'
+
 import {
   ApplicationTokenType,
   NewApplicationTokenType
 } from '@pages/ApplicationsPage/applications.type.ts'
-import useRole from '@hooks/useRole.tsx'
-import tokensApi from '@services/tokensService.ts'
-import { PermissionKeysType } from '@type/roles.type.ts'
-import './tokens.scss'
-import SearchAppByToken from '@ui/SearchAppByToken'
 
-const { FormSelect } = FormComponents
-const { EmptyData } = Layout
+import useRole from '@hooks/useRole.tsx'
+
+import tokensApi from '@services/tokensService.ts'
+
+import { PermissionKeysType } from '@type/roles.type.ts'
+
+import './tokens.scss'
 
 interface TokenPropTypes {
   id: number
@@ -208,10 +213,12 @@ const TokenContent = ({ id }: TokenPropTypes) => {
     []
   )
   if (!id) {
-    return <div className="empty-data__wrap">
-      {canViewToken && <SearchAppByToken />}
-      <EmptyData />
-    </div>
+    return (
+      <div className="empty-data__wrap">
+        {canViewToken && <SearchAppByToken />}
+        <EmptyData />
+      </div>
+    )
   }
 
   if (isLoading) {

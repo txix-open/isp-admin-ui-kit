@@ -1,7 +1,7 @@
 import { LockOutlined, UserOutlined } from '@ant-design/icons'
 import { Button, Divider, Layout } from 'antd'
 import { AxiosError } from 'axios'
-import { FormComponents, useAuth } from 'isp-ui-kit'
+import { FormInput, useAuth } from 'isp-ui-kit'
 import { useForm } from 'react-hook-form'
 import { useNavigate } from 'react-router-dom'
 
@@ -73,7 +73,7 @@ const LoginPage = () => {
     return (
       <>
         <ClearStateOnLogin />
-        <FormComponents.FormInput
+        <FormInput
           data-cy="email-input"
           control={control}
           name="email"
@@ -82,7 +82,7 @@ const LoginPage = () => {
           placeholder="Логин"
           rules={{ required: ValidationRules.required }}
         />
-        <FormComponents.FormInput
+        <FormInput
           data-cy="password-input"
           control={control}
           name="password"

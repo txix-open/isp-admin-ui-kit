@@ -1,6 +1,6 @@
 import { FileProtectOutlined } from '@ant-design/icons'
 import { List, message, Spin, Tooltip } from 'antd'
-import { Layout, ColumnItem } from 'isp-ui-kit'
+import { EmptyData, Column, ColumnItem } from 'isp-ui-kit'
 import { Dispatch, FC, SetStateAction, useMemo, useState } from 'react'
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
 
@@ -27,8 +27,6 @@ import { routePaths } from '@routes/routePaths.ts'
 import { PermissionKeysType } from '@type/roles.type.ts'
 
 import './applications-content.scss'
-
-const { EmptyData, Column } = Layout
 
 interface ApplicationsContentPropTypes {
   selectedItemId: number

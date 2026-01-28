@@ -1,5 +1,5 @@
 import { message } from 'antd'
-import { FormComponents } from 'isp-ui-kit'
+import { FormInputPassword } from 'isp-ui-kit'
 import { FC, useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
 
@@ -18,7 +18,6 @@ import useLogout from '@hooks/useLogout.tsx'
 
 import { apiService } from '@services/apiService.ts'
 
-const { FormInputPassword } = FormComponents
 const ChangePasswordModal: FC<ChangePasswordModalProps> = ({
   open,
   onClose
