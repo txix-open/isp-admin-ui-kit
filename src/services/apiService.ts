@@ -21,6 +21,11 @@ apiService.defaults.headers.post['X-APPLICATION-TOKEN'] = getConfigProperty(
   import.meta.env.VITE_APP_TOKEN
 )
 
+apiService.defaults.headers.get['X-APPLICATION-TOKEN'] = getConfigProperty(
+  'APP_TOKEN',
+  import.meta.env.VITE_APP_TOKEN
+)
+
 apiService.interceptors.request.use(
   async (config: any) => {
     const headerName = LocalStorage.get(localStorageKeys.HEADER_NAME)
