@@ -72,7 +72,7 @@ type PathKeys =
   | 'updateApplicationGroup'
 
 const BASE_URL = import.meta.env.BASE_URL?.replace(/\/$/, '') || ''
-const API_BASE_URL = `${BASE_URL}/api`
+export const API_BASE_URL = `${BASE_URL}/api`
 const apiWithBaseURL = (path: `/${string}`) => `${API_BASE_URL}${path}`
 
 export const apiPaths: Record<PathKeys, string> = {

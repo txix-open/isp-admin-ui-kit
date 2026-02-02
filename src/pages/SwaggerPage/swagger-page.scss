@@ -1,0 +1,25 @@
+.swagger-page {
+  height: calc(100vh - 100px);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+
+  &__toolbar {
+    padding: 12px 16px;
+    background: #f7f7f7;
+    border-bottom: 1px solid #e5e5e5;
+  }
+
+  &__content {
+    flex: 1;
+    min-height: 0;
+    display: flex;
+  }
+
+  &__content .swagger-ui {
+    flex: 1;
+    overflow-y: auto;
+    background: #fff;
+  }
+}
