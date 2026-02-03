@@ -1,4 +1,5 @@
 import { Button, Spin } from 'antd'
+import { theme } from 'antd'
 import { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import SwaggerUI from 'swagger-ui-react'
@@ -14,7 +15,12 @@ import './swagger-page.scss'
 
 import 'swagger-ui-react/swagger-ui.css'
 
+const { useToken } = theme
+
 const SwaggerPage = () => {
+  const { token } = useToken()
+
+  const isDark = token.colorBgBase === '#141414'
   const { id } = useParams<{ id: string }>()
 
   const { data: modules = [] } = modulesServiceApi.useGetModulesQuery('modules')
@@ -26,7 +32,6 @@ const SwaggerPage = () => {
     if (!modules.length || !id) {
       return
     }
-
     const module = modules.find((m) => m.id === id)
 
     if (!module) {
@@ -42,6 +47,20 @@ const SwaggerPage = () => {
       setSwaggerPath(`/${swaggerEndpoint.path}`)
     }
   }, [modules, id])
+
+  useEffect(() => {
+    const root = document.documentElement
+
+    if (isDark) {
+      root.classList.add('dark-mode')
+    } else {
+      root.classList.remove('dark-mode')
+    }
+
+    return () => {
+      root.classList.remove('dark-mode')
+    }
+  }, [isDark])
 
   const { data: swaggerSpec, isLoading } = swaggerServiceApi.useGetSwaggerQuery(
     swaggerPath,
@@ -85,7 +104,14 @@ const SwaggerPage = () => {
           </div>
 
           <div className="swagger-page__content">
-            <SwaggerUI spec={swaggerSpecText} />
+            <SwaggerUI
+              spec={swaggerSpecText}
+              docExpansion="list"
+              defaultModelsExpandDepth={-1}
+              displayOperationId={false}
+              tryItOutEnabled={false}
+              requestSnippetsEnabled={false}
+            />
           </div>
         </>
       ) : (
