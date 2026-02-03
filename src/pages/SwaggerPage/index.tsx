@@ -1,10 +1,8 @@
-import { Button, Spin } from 'antd'
-import { theme } from 'antd'
+import { Button, Spin, theme } from 'antd'
 import { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import SwaggerUI from 'swagger-ui-react'
 
-import { base64ToUtf8 } from '@utils/base64ToJson.ts'
 import { downloadFile } from '@utils/downloadFile.ts'
 import { toSafeFileName } from '@utils/toSafeFileName.ts'
 
@@ -69,19 +67,17 @@ const SwaggerPage = () => {
     }
   )
 
-  const swaggerSpecText = swaggerSpec ? base64ToUtf8(swaggerSpec) : ''
-
   const handleDownload = () => {
-    if (!swaggerSpecText) {
+    if (!swaggerSpec) {
       return
     }
 
     const safeName = toSafeFileName(moduleName)
-
+    const json = JSON.stringify(swaggerSpec, null, 2)
     downloadFile({
-      fileName: `swagger-${safeName}.yml`,
-      content: swaggerSpecText,
-      mimeType: 'application/yaml;charset=utf-8'
+      fileName: `swagger-${safeName}.json`,
+      content: json,
+      mimeType: 'application/json;charset=utf-8'
     })
   }
 
@@ -105,7 +101,7 @@ const SwaggerPage = () => {
 
           <div className="swagger-page__content">
             <SwaggerUI
-              spec={swaggerSpecText}
+              spec={swaggerSpec}
               docExpansion="list"
               defaultModelsExpandDepth={-1}
               displayOperationId={false}
