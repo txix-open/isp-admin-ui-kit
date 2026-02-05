@@ -4,8 +4,6 @@ import {
   Middleware,
   Reducer
 } from '@reduxjs/toolkit'
-import { theme } from 'antd'
-import { MapToken, SeedToken } from 'antd/es/theme/interface'
 import { createContext, Dispatch, SetStateAction } from 'react'
 
 import accessListApi from '@services/accessListService.ts'
@@ -28,13 +26,6 @@ import profileReducer from './redusers/ProfileSlice.ts'
 import UIReducer from './redusers/UISlice.ts'
 
 export interface ContextProps {
-  setTheme: Dispatch<
-    SetStateAction<{
-      algorithm: (token: SeedToken) => MapToken
-      cssVar: boolean
-      token: { colorBgLayout: string }
-    }>
-  >
   changeTheme: boolean
   setChangeTheme: Dispatch<SetStateAction<boolean>>
   excludePermissions: PermissionKeysType[]
@@ -43,7 +34,6 @@ export interface ContextProps {
 export const Context = createContext<ContextProps>({
   changeTheme: false,
   setChangeTheme: () => false,
-  setTheme: () => theme.defaultAlgorithm,
   excludePermissions: []
 })
 
