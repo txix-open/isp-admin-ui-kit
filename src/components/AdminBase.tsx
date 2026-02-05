@@ -1,18 +1,18 @@
 import { ConfigProvider } from 'antd'
 import ruRu from 'antd/locale/ru_RU'
-import { FC, useEffect, useState } from 'react'
+import { FC, useEffect, useMemo, useState } from 'react'
 import { createBrowserRouter, RouterProvider } from 'react-router-dom'
 
-import { darkTheme, lightTheme } from '@constants/theme.ts'
+import { darkTheme, lightTheme } from '@constants/theme'
 
 import { AdminBasePropsType } from '@components/admin-base.type.ts'
 
-import { getCleanPath } from '@utils/routeUtils.ts'
+import { getCleanPath } from '@utils/routeUtils'
 
 import { Context } from '@stores/index'
 
 import { getRoutesConfig } from '@routes/Routers'
-import { routePaths } from '@routes/routePaths.ts'
+import { routePaths } from '@routes/routePaths'
 
 import './admin-base.scss'
 
@@ -22,25 +22,31 @@ const AdminBase: FC<AdminBasePropsType> = ({
   configProviderProps = {},
   excludePermissions = []
 }) => {
-  const [themes, setTheme] = useState(lightTheme)
-  const [changeTheme, setChangeTheme] = useState(
-    localStorage.getItem('theme')
-      ? JSON.parse(localStorage.getItem('theme') || '')
-      : true
-  )
+  const [changeTheme, setChangeTheme] = useState<boolean>(() => {
+    const saved = localStorage.getItem('theme')
+    return saved ? JSON.parse(saved) : true
+  })
 
   const baseUrl = import.meta.env.BASE_URL || '/'
 
-  const routerConfig = createBrowserRouter(
-    getRoutesConfig(customRouters, defaultRoutePath),
-    { basename: baseUrl }
+  const routerConfig = useMemo(
+    () =>
+      createBrowserRouter(getRoutesConfig(customRouters, defaultRoutePath), {
+        basename: baseUrl
+      }),
+    [customRouters, defaultRoutePath, baseUrl]
+  )
+
+  const theme = useMemo(
+    () => (changeTheme ? darkTheme : lightTheme),
+    [changeTheme]
   )
 
   useEffect(() => {
     return routerConfig.subscribe((state) => {
-      const location = state.location
+      const currentPath = getCleanPath(state.location.pathname)
       const prevRoute = sessionStorage.getItem('prevRoute')
-      const currentPath = getCleanPath(location.pathname)
+
       if (
         currentPath !== routePaths.error &&
         currentPath !== routePaths.login &&
@@ -52,25 +58,23 @@ const AdminBase: FC<AdminBasePropsType> = ({
     })
   }, [routerConfig])
 
-  useEffect(() => {
-    setTheme(() => (changeTheme ? darkTheme : lightTheme))
-  }, [changeTheme])
-
   return (
-    <div>
-      <Context.Provider
-        value={{
-          setTheme,
-          setChangeTheme,
-          changeTheme,
-          excludePermissions
-        }}
+    <Context.Provider
+      value={{
+        changeTheme,
+        setChangeTheme,
+        excludePermissions
+      }}
+    >
+      <ConfigProvider
+        key={changeTheme ? 'dark' : 'light'}
+        theme={theme}
+        locale={ruRu}
+        {...configProviderProps}
       >
-        <ConfigProvider theme={themes} locale={ruRu} {...configProviderProps}>
-          <RouterProvider router={routerConfig} />
-        </ConfigProvider>
-      </Context.Provider>
-    </div>
+        <RouterProvider router={routerConfig} />
+      </ConfigProvider>
+    </Context.Provider>
   )
 }
 
