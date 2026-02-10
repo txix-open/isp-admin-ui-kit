@@ -6,14 +6,14 @@ import { useNavigate } from 'react-router-dom'
 import {
   Filters,
   Sorts
-} from '@components/VariablesComponents/VariablesTable/variables-table.type.ts'
+} from '@components/VariablesComponents/VariablesTable/variables-table.type'
 
 import { useColumnSearch } from '@hooks/useColumnsSearch'
-import useRole from '@hooks/useRole.tsx'
+import useRole from '@hooks/useRole'
 
 import { routePaths } from '@routes/routePaths'
 
-import { PermissionKeysType } from '@type/roles.type.ts'
+import { PermissionKeysType } from '@type/roles.type'
 
 export const getColumns = (
   sortedInfo: Sorts,

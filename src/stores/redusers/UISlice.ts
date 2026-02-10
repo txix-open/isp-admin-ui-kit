@@ -4,11 +4,11 @@ import {
   PayloadAction
 } from '@reduxjs/toolkit'
 
-import { UIDataType, UIType } from '@pages/ProfilePage/profile-page.type.ts'
+import { UIDataType, UIType } from '@pages/ProfilePage/profile-page.type'
 
-import { StateProfileStatus } from '@stores/redusers/ProfileSlice.ts'
+import { StateProfileStatus } from '@stores/redusers/ProfileSlice'
 
-import { fetchUI } from './ActionCreators.ts'
+import { fetchUI } from './ActionCreators'
 
 export const initialState: UIType = {
   ui: {

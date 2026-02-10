@@ -1,14 +1,14 @@
 import { createApi } from '@reduxjs/toolkit/query/react'
 
-import { apiPaths } from '@constants/api/apiPaths.ts'
+import { apiPaths } from '@constants/api/apiPaths'
 
 import {
   ApplicationsGroupType,
   NewApplicationsGroupType,
   UpdateApplicationsGroupType
-} from '@pages/ApplicationsPage/applications.type.ts'
+} from '@pages/ApplicationsPage/applications.type'
 
-import { axiosBaseQuery } from '@utils/apiUtils.ts'
+import { axiosBaseQuery } from '@utils/apiUtils'
 
 const applicationsGroupApi = createApi({
   reducerPath: 'applicationsGroupApi',
@@ -49,10 +49,7 @@ const applicationsGroupApi = createApi({
       providesTags: () => ['ApplicationsGroup']
     }),
 
-    getAllApplicationsGroup: builder.query<
-      ApplicationsGroupType[],
-      void
-    >({
+    getAllApplicationsGroup: builder.query<ApplicationsGroupType[], void>({
       query: () => ({ url: apiPaths.getAllApplicationGroup }),
       providesTags: () => ['ApplicationsGroup']
     }),
@@ -79,13 +76,13 @@ const applicationsGroupApi = createApi({
       invalidatesTags: ['ApplicationsGroup']
     }),
 
-    removeApplicationsGroup: builder.mutation<void,  { idList: number[] }>({
+    removeApplicationsGroup: builder.mutation<void, { idList: number[] }>({
       query: (id) => ({
         url: apiPaths.deleteListApplicationGroup,
         data: id
       }),
       invalidatesTags: ['ApplicationsGroup']
-    }),
+    })
   })
 })
 

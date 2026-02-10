@@ -10,23 +10,23 @@ import dayjs from 'dayjs'
 import { useEffect, useState } from 'react'
 import { Navigate, useNavigate, useParams } from 'react-router-dom'
 
-import { dateFormats } from '@constants/date.ts'
+import { dateFormats } from '@constants/date'
 
 import CompareVersionModal from '@components/CompareVersionModal'
 import ConfigurationPreviewModal from '@components/ConfigurationPreviewModal'
 
-import { ConfigType } from '@pages/ModulesPage/module.type.ts'
+import { ConfigType } from '@pages/ModulesPage/module.type'
 
-import { useAppSelector } from '@hooks/redux.ts'
-import useRole from '@hooks/useRole.tsx'
+import { useAppSelector } from '@hooks/redux'
+import useRole from '@hooks/useRole'
 
-import configServiceApi from '@services/configService.ts'
-import userServiceApi from '@services/userService.ts'
+import configServiceApi from '@services/configService'
+import userServiceApi from '@services/userService'
 
-import { routePaths } from '@routes/routePaths.ts'
+import { routePaths } from '@routes/routePaths'
 
-import { PermissionKeysType } from '@type/roles.type.ts'
-import { VersionType } from '@type/version.type.ts'
+import { PermissionKeysType } from '@type/roles.type'
+import { VersionType } from '@type/version.type'
 
 import './all-versions-page.scss'
 
@@ -108,7 +108,11 @@ const AllVersionsPage = () => {
         message.error('Не удалось восстановить версию')
       })
   }
-  const renderActionsField = (_: unknown, record: VersionType, index: number) => {
+  const renderActionsField = (
+    _: unknown,
+    record: VersionType,
+    index: number
+  ) => {
     return (
       <div className="all-version-page__actions-field">
         <Button.Group className="button_group">

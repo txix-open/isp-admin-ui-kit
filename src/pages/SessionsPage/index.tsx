@@ -13,7 +13,7 @@ import dayjs from 'dayjs'
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 
-import { dateFormats } from '@constants/date.ts'
+import { dateFormats } from '@constants/date'
 import { SessionStatusKeysType, sessionStatuses } from '@constants/statuses'
 
 import { getUserFullName } from '@utils/userUtils/getFullNameUtil'
@@ -23,9 +23,9 @@ import useRole from '@hooks/useRole'
 import sessionServiceApi from '@services/sessionService'
 import userServiceApi from '@services/userService'
 
-import { routePaths } from '@routes/routePaths.ts'
+import { routePaths } from '@routes/routePaths'
 
-import { PermissionKeysType } from '@type/roles.type.ts'
+import { PermissionKeysType } from '@type/roles.type'
 import { SessionType } from '@type/session.type'
 
 import './sessions-page.scss'

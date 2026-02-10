@@ -3,7 +3,7 @@ import JSONSchemaView from 'json-schema-view-js'
 import cloneDeep from 'lodash.clonedeep'
 import { FC, useContext, useEffect, useRef } from 'react'
 
-import { Context } from '@stores/index.tsx'
+import { Context } from '@stores/index'
 
 import 'json-schema-view-js/dist/style.min.css'
 

@@ -1,8 +1,7 @@
 import { Descriptions } from 'antd'
 import { FC } from 'react'
 
-import { PermissionListProps } from './permisiion-list.type.ts'
-
+import { PermissionListProps } from './permisiion-list.type'
 import './permission-list.scss'
 
 const PermissionList: FC<PermissionListProps> = ({ permissions }) => {

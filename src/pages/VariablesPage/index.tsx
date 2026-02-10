@@ -4,18 +4,18 @@ import { AxiosError } from 'axios'
 import { useEffect } from 'react'
 import { Navigate, useNavigate } from 'react-router-dom'
 
-import VariablesTable from '@components/VariablesComponents/VariablesTable/VariablesTable.tsx'
+import VariablesTable from '@components/VariablesComponents/VariablesTable/VariablesTable'
 
-import { handleVariableApiError } from '@utils/variableUtils.ts'
+import { handleVariableApiError } from '@utils/variableUtils'
 
-import useRole from '@hooks/useRole.tsx'
+import useRole from '@hooks/useRole'
 
-import variablesApi from '@services/variablesService.ts'
+import variablesApi from '@services/variablesService'
 
-import { routePaths } from '@routes/routePaths.ts'
+import { routePaths } from '@routes/routePaths'
 
-import { MSPError } from '@type/index.ts'
-import { PermissionKeysType } from '@type/roles.type.ts'
+import { MSPError } from '@type/index'
+import { PermissionKeysType } from '@type/roles.type'
 
 import './variables-page.scss'
 

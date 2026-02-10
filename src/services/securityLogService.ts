@@ -4,7 +4,7 @@ import { apiPaths } from '@constants/api/apiPaths'
 
 import { axiosBaseQuery } from '@utils/apiUtils'
 
-import { LimitOffsetRequestType } from '@type/index.ts'
+import { LimitOffsetRequestType } from '@type/index'
 import { LogEventType, LogResponseType, SetEventType } from '@type/log.type'
 
 const securityLogServiceApi = createApi({

@@ -7,15 +7,15 @@ import PermissionList from '@widgets/PermissionList'
 import ChangePasswordModal from '@components/ChangePasswordModal'
 import RoleList from '@components/RoleList'
 
-import { useAppSelector } from '@hooks/redux.ts'
-import useLogout from '@hooks/useLogout.tsx'
-import useRole from '@hooks/useRole.tsx'
+import { useAppSelector } from '@hooks/redux'
+import useLogout from '@hooks/useLogout'
+import useRole from '@hooks/useRole'
 
-import { Context } from '@stores/index.tsx'
+import { Context } from '@stores/index'
 
-import { routePaths } from '@routes/routePaths.ts'
+import { routePaths } from '@routes/routePaths'
 
-import { PermissionKeysType } from '@type/roles.type.ts'
+import { PermissionKeysType } from '@type/roles.type'
 
 import './profile-page.scss'
 

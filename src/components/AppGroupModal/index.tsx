@@ -2,13 +2,13 @@ import { FormInput, FormTextArea } from 'isp-ui-kit'
 import { FC, useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 
-import { ValidationRules } from '@constants/form/validationRules.ts'
+import { ValidationRules } from '@constants/form/validationRules'
 
 import Modal from '@widgets/Modal'
 
-import { AppGroupModalType } from '@components/AppGroupModal/app-group-modal.type.ts'
+import { AppGroupModalType } from '@components/AppGroupModal/app-group-modal.type'
 
-import { ApplicationsGroupType } from '@pages/ApplicationsPage/applications.type.ts'
+import { ApplicationsGroupType } from '@pages/ApplicationsPage/applications.type'
 
 const AppGroupModal: FC<AppGroupModalType> = ({
   title,

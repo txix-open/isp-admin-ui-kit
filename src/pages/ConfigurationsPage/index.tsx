@@ -8,14 +8,14 @@ import ConfigSchemaModal from '@components/ConfigSchemaModal'
 import ConfigurationPreviewModal from '@components/ConfigurationPreviewModal'
 import SetConfigNameModal from '@components/SetConfigNameModal'
 
-import { ConfigType } from '@pages/ModulesPage/module.type.ts'
+import { ConfigType } from '@pages/ModulesPage/module.type'
 
-import useRole from '@hooks/useRole.tsx'
+import useRole from '@hooks/useRole'
 
-import configServiceApi from '@services/configService.ts'
-import modulesServiceApi from '@services/modulesService.ts'
+import configServiceApi from '@services/configService'
+import modulesServiceApi from '@services/modulesService'
 
-import { routePaths } from '@routes/routePaths.ts'
+import { routePaths } from '@routes/routePaths'
 
 import './configurations.scss'
 
