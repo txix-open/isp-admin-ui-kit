@@ -1,10 +1,10 @@
 import { Navigate, Outlet, useLocation } from 'react-router-dom'
 
-import { localStorageKeys } from '@constants/localStorageKeys.ts'
+import { localStorageKeys } from '@constants/localStorageKeys'
 
-import { LocalStorage } from '@utils/localStorageUtils.ts'
+import { LocalStorage } from '@utils/localStorageUtils'
 
-import { routePaths } from '@routes/routePaths.ts'
+import { routePaths } from '@routes/routePaths'
 
 const PrivateRoute = () => {
   const location = useLocation()

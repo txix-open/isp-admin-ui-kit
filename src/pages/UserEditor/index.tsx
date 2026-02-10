@@ -12,20 +12,20 @@ import { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { useLocation, useNavigate } from 'react-router-dom'
 
-import { dateFormats } from '@constants/date.ts'
-import { ValidationRules } from '@constants/form/validationRules.ts'
+import { dateFormats } from '@constants/date'
+import { ValidationRules } from '@constants/form/validationRules'
 
-import { findExclusiveRole } from '@utils/roleUtils.ts'
+import { findExclusiveRole } from '@utils/roleUtils'
 
-import useRole from '@hooks/useRole.tsx'
+import useRole from '@hooks/useRole'
 
-import roleApi from '@services/roleService.ts'
-import userServiceApi from '@services/userService.ts'
+import roleApi from '@services/roleService'
+import userServiceApi from '@services/userService'
 
-import { routePaths } from '@routes/routePaths.ts'
+import { routePaths } from '@routes/routePaths'
 
-import { PermissionKeysType, RoleType } from '@type/roles.type.ts'
-import { UserType } from '@type/user.type.ts'
+import { PermissionKeysType, RoleType } from '@type/roles.type'
+import { UserType } from '@type/user.type'
 
 import './user-editor.scss'
 

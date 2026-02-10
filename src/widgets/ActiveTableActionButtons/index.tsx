@@ -11,19 +11,18 @@ import { Button, Dropdown, message, Popconfirm, Tooltip } from 'antd'
 import { FC } from 'react'
 import { useNavigate } from 'react-router-dom'
 
-import { ConfigType } from '@pages/ModulesPage/module.type.ts'
+import { ConfigType } from '@pages/ModulesPage/module.type'
 
-import useRole from '@hooks/useRole.tsx'
+import useRole from '@hooks/useRole'
 
-import configServiceApi from '@services/configService.ts'
+import configServiceApi from '@services/configService'
 
-import { routePaths } from '@routes/routePaths.ts'
+import { routePaths } from '@routes/routePaths'
 
-import { PermissionKeysType } from '@type/roles.type.ts'
-
-import { ActiveTableActionButtonsPropsType } from './active-table-action-buttons.type.ts'
+import { PermissionKeysType } from '@type/roles.type'
 
 import './active-table-action-buttons.scss'
+import { ActiveTableActionButtonsPropsType } from './active-table-action-buttons.type'
 
 const ActiveTableActionButtons: FC<ActiveTableActionButtonsPropsType> = ({
   isActive,

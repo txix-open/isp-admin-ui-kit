@@ -1,27 +1,30 @@
-import { DiffEditor } from '@monaco-editor/react'
 import { Button, Spin, Table, Tag } from 'antd'
 import { ColumnsType } from 'antd/es/table'
 import dayjs from 'dayjs'
-import { FC, memo, useContext, useState } from 'react'
+import { FC, lazy, memo, Suspense, useContext, useState } from 'react'
 
-import { dateFormats } from '@constants/date.ts'
+import { dateFormats } from '@constants/date'
 
 import Modal from '@widgets/Modal'
 
 import { CompareVersionModalPropsType } from '@components/CompareVersionModal/compare-version-modal.type'
 
-import { sortObject } from '@utils/objectUtils.ts'
+import { sortObject } from '@utils/objectUtils'
 
-import { useAppSelector } from '@hooks/redux.ts'
+import { useAppSelector } from '@hooks/redux'
 
-import configServiceApi from '@services/configService.ts'
-import userServiceApi from '@services/userService.ts'
+import configServiceApi from '@services/configService'
+import userServiceApi from '@services/userService'
 
-import { Context } from '@stores/index.tsx'
+import { Context } from '@stores/index'
 
 import { VersionType } from '@type/version.type'
 
 import './compare-version-modal.scss'
+
+const DiffEditor = lazy(() =>
+  import('@monaco-editor/react').then((mod) => ({ default: mod.DiffEditor }))
+)
 
 const CompareVersionModal: FC<CompareVersionModalPropsType> = ({
   open,
@@ -97,17 +100,23 @@ const CompareVersionModal: FC<CompareVersionModalPropsType> = ({
                   : `Версия: ${config?.configVersion}`}
               </span>
             </div>
-            <DiffEditor
-              original={JSON.stringify(sortObject(selectedItem.data), null, 2)}
-              modified={JSON.stringify(sortObject(config?.data), null, 2)}
-              theme={changeTheme ? 'vs-dark' : 'vs-white'}
-              options={{
-                readOnly: true,
-                domReadOnly: true,
-                renderOverviewRuler: false,
-                autoClosingOvertype: 'auto'
-              }}
-            />
+            <Suspense fallback={<Spin />}>
+              <DiffEditor
+                original={JSON.stringify(
+                  sortObject(selectedItem.data),
+                  null,
+                  2
+                )}
+                modified={JSON.stringify(sortObject(config?.data), null, 2)}
+                theme={changeTheme ? 'vs-dark' : 'vs-white'}
+                options={{
+                  readOnly: true,
+                  domReadOnly: true,
+                  renderOverviewRuler: false,
+                  autoClosingOvertype: 'auto'
+                }}
+              />
+            </Suspense>
           </div>
         ) : (
           <div className="compare-version-modal__content__table">
@@ -118,7 +127,7 @@ const CompareVersionModal: FC<CompareVersionModalPropsType> = ({
               dataSource={versions}
               rowKey={(record) => record.id}
               onRow={(record, i) => {
-                if(i === 0) {
+                if (i === 0) {
                   return {}
                 }
                 return {

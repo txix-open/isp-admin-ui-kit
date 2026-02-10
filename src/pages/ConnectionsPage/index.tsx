@@ -5,20 +5,20 @@ import relativeTime from 'dayjs/plugin/relativeTime'
 import { memo, useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 
-import { dateFormats } from '@constants/date.ts'
+import { dateFormats } from '@constants/date'
 
 import {
   AddressType,
   EndpointType,
   ModuleStatusType,
   ModuleType
-} from '@pages/ModulesPage/module.type.ts'
+} from '@pages/ModulesPage/module.type'
 
-import useRole from '@hooks/useRole.tsx'
+import useRole from '@hooks/useRole'
 
-import modulesServiceApi from '@services/modulesService.ts'
+import modulesServiceApi from '@services/modulesService'
 
-import { routePaths } from '@routes/routePaths.ts'
+import { routePaths } from '@routes/routePaths'
 
 import './connections.scss'
 

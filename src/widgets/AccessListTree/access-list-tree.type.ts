@@ -1,6 +1,6 @@
 import { TreeProps } from 'antd'
 
-import { AccessListMethodType, EndpointType } from '@type/accessList.type.ts'
+import { AccessListMethodType, EndpointType } from '@type/accessList.type'
 
 export interface AccessListTreePropsType {
   searchValue: string

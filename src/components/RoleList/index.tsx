@@ -1,6 +1,6 @@
 import { Descriptions, Spin } from 'antd'
 
-import { RoleListProps } from '@components/RoleList/role-list.type.ts'
+import { RoleListProps } from '@components/RoleList/role-list.type'
 
 import './role-list.scss'
 

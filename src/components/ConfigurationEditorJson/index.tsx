@@ -2,9 +2,9 @@ import { Spin } from 'antd'
 import { ReactJsonView } from 'isp-ui-kit'
 import { FC, useContext } from 'react'
 
-import { ConfigurationEditorPropsType } from '@pages/ConfigurationEditorPage/ConfigurationEditor.type.ts'
+import { ConfigurationEditorPropsType } from '@pages/ConfigurationEditorPage/ConfigurationEditor.type'
 
-import { Context } from '@stores/index.tsx'
+import { Context } from '@stores/index'
 
 const ConfigurationEditorJson: FC<ConfigurationEditorPropsType> = ({
   bufConfig,
@@ -21,7 +21,7 @@ const ConfigurationEditorJson: FC<ConfigurationEditorPropsType> = ({
       ...bufConfig,
       data: { ...updated_src }
     }
-      setBufConfig(newData)
+    setBufConfig(newData)
   }
 
   return (

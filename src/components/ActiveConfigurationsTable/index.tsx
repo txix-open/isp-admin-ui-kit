@@ -4,19 +4,19 @@ import { ColumnsType } from 'antd/es/table'
 import dayjs from 'dayjs'
 import { FC, useEffect, useRef, useState } from 'react'
 
-import { dateFormats } from '@constants/date.ts'
+import { dateFormats } from '@constants/date'
 
 import ActiveTableActionButtons from '@widgets/ActiveTableActionButtons'
 
-import { ActiveConfigurationsTablePropsType } from '@components/ActiveConfigurationsTable/active-configurations-table.type.ts'
+import { ActiveConfigurationsTablePropsType } from '@components/ActiveConfigurationsTable/active-configurations-table.type'
 
-import { ConfigType } from '@pages/ModulesPage/module.type.ts'
+import { ConfigType } from '@pages/ModulesPage/module.type'
 
-import useRole from '@hooks/useRole.tsx'
+import useRole from '@hooks/useRole'
 
-import configApi from '@services/configService.ts'
+import configApi from '@services/configService'
 
-import { PermissionKeysType } from '@type/roles.type.ts'
+import { PermissionKeysType } from '@type/roles.type'
 
 import './active-configurations-table.scss'
 

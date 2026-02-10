@@ -1,8 +1,8 @@
 import { FC } from 'react'
 
-import { SelectedAccessMethodPropsType } from '@widgets/SelectedAccessMethod/selected-access-method.type.ts'
+import { SelectedAccessMethodPropsType } from '@widgets/SelectedAccessMethod/selected-access-method.type'
 
-import { AccessListMethodType } from '@type/accessList.type.ts'
+import { AccessListMethodType } from '@type/accessList.type'
 
 import './selected-access-method.scss'
 

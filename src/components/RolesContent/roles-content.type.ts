@@ -1,6 +1,6 @@
 import { UseFormSetError } from 'react-hook-form'
 
-import { NewRoleType, PermissionType, RoleType } from '@type/roles.type.ts'
+import { NewRoleType, PermissionType, RoleType } from '@type/roles.type'
 
 export interface RolesContentPropsType {
   role?: Partial<RoleType>

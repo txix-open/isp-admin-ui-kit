@@ -1,5 +1,4 @@
-import alias from '@rollup/plugin-alias'
-import { babel } from '@rollup/plugin-babel'
+import babel from '@rollup/plugin-babel'
 import commonjs from '@rollup/plugin-commonjs'
 import image from '@rollup/plugin-image'
 import json from '@rollup/plugin-json'
@@ -14,45 +13,55 @@ import postcss from 'rollup-plugin-postcss'
 export default [
   {
     input: 'src/index.ts',
-    output: {
-      file: 'dist/index.js',
-      format: 'esm',
-      inlineDynamicImports: true
-    },
-    external: ['antd', '@ant-design/cssinjs', 'react', 'react-dom'],
+    output: [
+      {
+        file: 'dist/index.cjs.js',
+        format: 'cjs',
+        sourcemap: true,
+        inlineDynamicImports: true
+      },
+      {
+        file: 'dist/index.esm.js',
+        format: 'esm',
+        sourcemap: true,
+        inlineDynamicImports: true
+      }
+    ],
     plugins: [
-      alias({
-        entries: [{ find: '@', replacement: './src' }]
-      }),
       del({ targets: 'dist/*' }),
-      babel({
-        babelHelpers: 'bundled',
-        exclude: 'node_modules/**'
-      }),
       peerDepsExternal(),
       resolve({
-        extensions: ['.js', '.jsx']
+        extensions: ['.ts', '.tsx', '.js', '.jsx'],
+        preferBuiltins: false
       }),
       commonjs(),
-      typescript({
-        tsconfig: './tsconfig.json',
-        include: ['src/**/*.{ts,tsx}']
-      }),
       json(),
-      postcss({ minimize: true }),
+      image(),
+      postcss({
+        extract: false,
+        minimize: true,
+        inject: true,
+        use: {
+          sass: {
+            silenceDeprecations: ['legacy-js-api']
+          }
+        }
+      }),
+      typescript({ tsconfig: './tsconfig.json' }),
+      babel({
+        babelHelpers: 'bundled',
+        exclude: 'node_modules/**',
+        extensions: ['.js', '.jsx', '.ts', '.tsx']
+      }),
       terser({
         compress: {
-          drop_console: false,
+          drop_console: ['log', 'info'],
           drop_debugger: true
         },
         output: {
           comments: false
         }
-      }),
-      image()
-    ],
-    watch: {
-      include: 'src/**' // отслеживать изменения в src
-    }
+      })
+    ]
   }
 ]

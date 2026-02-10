@@ -3,20 +3,20 @@ import { FormInputPassword } from 'isp-ui-kit'
 import { FC, useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
 
-import { apiPaths } from '@constants/api/apiPaths.ts'
+import { apiPaths } from '@constants/api/apiPaths'
 
 import Modal from '@widgets/Modal'
 
 import {
   ChangePasswordModalProps,
   ChangePasswordModalType
-} from '@components/ChangePasswordModal/change-password-modal.type.ts'
+} from '@components/ChangePasswordModal/change-password-modal.type'
 
-import { ChangeProfilePassword } from '@pages/ProfilePage/profile-page.type.ts'
+import { ChangeProfilePassword } from '@pages/ProfilePage/profile-page.type'
 
-import useLogout from '@hooks/useLogout.tsx'
+import useLogout from '@hooks/useLogout'
 
-import { apiService } from '@services/apiService.ts'
+import { apiService } from '@services/apiService'
 
 const ChangePasswordModal: FC<ChangePasswordModalProps> = ({
   open,

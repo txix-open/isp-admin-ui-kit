@@ -11,19 +11,19 @@ import dayjs from 'dayjs'
 import { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 
-import { dateFormats } from '@constants/date.ts'
+import { dateFormats } from '@constants/date'
 
-import { getUserFullName } from '@utils/userUtils/getFullNameUtil.ts'
+import { getUserFullName } from '@utils/userUtils/getFullNameUtil'
 
-import useRole from '@hooks/useRole.tsx'
+import useRole from '@hooks/useRole'
 
-import roleApi from '@services/roleService.ts'
-import userServiceApi from '@services/userService.ts'
+import roleApi from '@services/roleService'
+import userServiceApi from '@services/userService'
 
-import { routePaths } from '@routes/routePaths.ts'
+import { routePaths } from '@routes/routePaths'
 
-import { PermissionKeysType } from '@type/roles.type.ts'
-import { UserType } from '@type/user.type.ts'
+import { PermissionKeysType } from '@type/roles.type'
+import { UserType } from '@type/user.type'
 
 import './users-page.scss'
 

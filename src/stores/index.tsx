@@ -6,24 +6,24 @@ import {
 } from '@reduxjs/toolkit'
 import { createContext, Dispatch, SetStateAction } from 'react'
 
-import accessListApi from '@services/accessListService.ts'
-import applicationsGroupApi from '@services/applicationsGroupService.ts'
-import applicationsApi from '@services/applicationsService.ts'
-import configServiceApi from '@services/configService.ts'
-import modulesServiceApi from '@services/modulesService.ts'
-import roleApi from '@services/roleService.ts'
-import routeApi from '@services/routeService.ts'
-import securityLogServiceApi from '@services/securityLogService.ts'
-import sessionServiceApi from '@services/sessionService.ts'
-import swaggerServiceApi from '@services/swaggerService.ts'
-import tokensApi from '@services/tokensService.ts'
-import userServiceApi from '@services/userService.ts'
-import variablesApi from '@services/variablesService.ts'
+import accessListApi from '@services/accessListService'
+import applicationsGroupApi from '@services/applicationsGroupService'
+import applicationsApi from '@services/applicationsService'
+import configServiceApi from '@services/configService'
+import modulesServiceApi from '@services/modulesService'
+import roleApi from '@services/roleService'
+import routeApi from '@services/routeService'
+import securityLogServiceApi from '@services/securityLogService'
+import sessionServiceApi from '@services/sessionService'
+import swaggerServiceApi from '@services/swaggerService'
+import tokensApi from '@services/tokensService'
+import userServiceApi from '@services/userService'
+import variablesApi from '@services/variablesService'
 
-import { PermissionKeysType } from '@type/roles.type.ts'
+import { PermissionKeysType } from '@type/roles.type'
 
-import profileReducer from './redusers/ProfileSlice.ts'
-import UIReducer from './redusers/UISlice.ts'
+import profileReducer from './redusers/ProfileSlice'
+import UIReducer from './redusers/UISlice'
 
 export interface ContextProps {
   changeTheme: boolean
@@ -125,3 +125,8 @@ export const baseSetupStore = (
       getDefaultMiddleware().concat(apiMiddlewares)
   })
 }
+
+const store = baseSetupStore()
+
+export type RootState = ReturnType<typeof store.getState>
+export type AppDispatch = typeof store.dispatch

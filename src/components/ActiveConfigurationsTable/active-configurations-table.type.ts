@@ -1,4 +1,4 @@
-import { ConfigType, ModuleType } from '@pages/ModulesPage/module.type.ts'
+import { ConfigType, ModuleType } from '@pages/ModulesPage/module.type'
 
 export interface ActiveConfigurationsTablePropsType {
   isActiveTable?: boolean

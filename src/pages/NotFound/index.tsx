@@ -2,7 +2,7 @@ import { Button } from 'antd'
 import { NotFoundPage } from 'isp-ui-kit'
 import { useNavigate } from 'react-router-dom'
 
-import { routePaths } from '@routes/routePaths.ts'
+import { routePaths } from '@routes/routePaths'
 
 const NotFound = () => {
   const navigate = useNavigate()

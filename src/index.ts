@@ -1,12 +1,12 @@
-import AdminBase from '@components/AdminBase.tsx'
+import AdminBase from '@components/AdminBase'
 
 import { axiosBaseQuery } from '@utils/apiUtils'
-import { filterFirstColumnItems } from '@utils/firstColumnUtils.ts'
-import { sortObject } from '@utils/objectUtils.ts'
+import { filterFirstColumnItems } from '@utils/firstColumnUtils'
+import { sortObject } from '@utils/objectUtils'
 
 import useRole from '@hooks/useRole'
 
-import { PermissionKeysType } from '@type/roles.type.ts'
+import { PermissionKeysType } from '@type/roles.type'
 
 import {
   baseApiServices,

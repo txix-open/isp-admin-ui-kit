@@ -2,12 +2,12 @@ import { DeleteOutlined, WarningOutlined } from '@ant-design/icons'
 import { Button, Popconfirm, Tag, Tooltip, Tree, TreeProps } from 'antd'
 import { FC, memo, useCallback, useEffect, useState } from 'react'
 
-import { AccessListTreePropsType } from '@widgets/AccessListTree/access-list-tree.type.ts'
+import { AccessListTreePropsType } from '@widgets/AccessListTree/access-list-tree.type'
 
-import useRole from '@hooks/useRole.tsx'
+import useRole from '@hooks/useRole'
 
-import { EndpointType } from '@type/accessList.type.ts'
-import { PermissionKeysType } from '@type/roles.type.ts'
+import { EndpointType } from '@type/accessList.type'
+import { PermissionKeysType } from '@type/roles.type'
 
 import './access-list-tree.scss'
 

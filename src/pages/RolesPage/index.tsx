@@ -11,20 +11,20 @@ import {
 
 import RolesContent from '@components/RolesContent'
 
-import { setUrlValue } from '@utils/columnLayoutUtils.ts'
-import { filterFirstColumnItems } from '@utils/firstColumnUtils.ts'
+import { setUrlValue } from '@utils/columnLayoutUtils'
+import { filterFirstColumnItems } from '@utils/firstColumnUtils'
 
-import { useAppDispatch } from '@hooks/redux.ts'
-import useRole from '@hooks/useRole.tsx'
+import { useAppDispatch } from '@hooks/redux'
+import useRole from '@hooks/useRole'
 
-import roleApi from '@services/roleService.ts'
-import userServiceApi from '@services/userService.ts'
+import roleApi from '@services/roleService'
+import userServiceApi from '@services/userService'
 
-import { fetchProfile } from '@stores/redusers/ActionCreators.ts'
+import { fetchProfile } from '@stores/redusers/ActionCreators'
 
-import { routePaths } from '@routes/routePaths.ts'
+import { routePaths } from '@routes/routePaths'
 
-import { NewRoleType, PermissionKeysType, RoleType } from '@type/roles.type.ts'
+import { NewRoleType, PermissionKeysType, RoleType } from '@type/roles.type'
 
 import './roles-page.scss'
 

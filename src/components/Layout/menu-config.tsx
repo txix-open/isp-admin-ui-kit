@@ -6,11 +6,11 @@ import {
   ProfileOutlined
 } from '@ant-design/icons'
 
-import DefaultUser from '@components/Icons/DefaultUser.tsx'
+import DefaultUser from '@components/Icons/DefaultUser'
 
-import { routePaths } from '@routes/routePaths.ts'
+import { routePaths } from '@routes/routePaths'
 
-import { PermissionKeysType } from '@type/roles.type.ts'
+import { PermissionKeysType } from '@type/roles.type'
 
 export const menuConfig = (name: string) => [
   {

@@ -4,15 +4,15 @@ import { FormInput, FormTextArea, FormInputNumber } from 'isp-ui-kit'
 import { FC, useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 
-import { ValidationRules } from '@constants/form/validationRules.ts'
+import { ValidationRules } from '@constants/form/validationRules'
 
 import Modal from '@widgets/Modal'
 
-import { AppModalType } from '@components/AppModal/app-group-modal.type.ts'
+import { AppModalType } from '@components/AppModal/app-group-modal.type'
 
-import { ApplicationAppType } from '@pages/ApplicationsPage/applications.type.ts'
+import { ApplicationAppType } from '@pages/ApplicationsPage/applications.type'
 
-import applicationsApi from '@services/applicationsService.ts'
+import applicationsApi from '@services/applicationsService'
 
 import './app-modal.scss'
 

@@ -2,11 +2,11 @@ import { Tabs } from 'antd'
 import { memo, useEffect, useMemo } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 
-import { MODULES_TAB_KEYS } from '@constants/modules.ts'
+import { MODULES_TAB_KEYS } from '@constants/modules'
 
 import ModuleTabContent from '@widgets/ModuleTabContent'
 
-import { ModuleTabsPropsType } from '@components/ModuleTabs/module-tabs.type.ts'
+import { ModuleTabsPropsType } from '@components/ModuleTabs/module-tabs.type'
 
 const secondColumnItems = [
   { key: 'configurations', name: 'Конфигурации' },

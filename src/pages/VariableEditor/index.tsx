@@ -7,16 +7,16 @@ import { Navigate, useNavigate, useParams } from 'react-router-dom'
 import VariableEditorForm from '@components/VariablesComponents/VariableEditorForm'
 import VariableEditorHeader from '@components/VariablesComponents/VariableEditorHeader'
 
-import { handleVariableApiError } from '@utils/variableUtils.ts'
+import { handleVariableApiError } from '@utils/variableUtils'
 
-import useRole from '@hooks/useRole.tsx'
+import useRole from '@hooks/useRole'
 
-import variablesApi from '@services/variablesService.ts'
+import variablesApi from '@services/variablesService'
 
 import { routePaths } from '@routes/routePaths'
 
-import { MSPError } from '@type/index.ts'
-import { PermissionKeysType } from '@type/roles.type.ts'
+import { MSPError } from '@type/index'
+import { PermissionKeysType } from '@type/roles.type'
 
 import './variable-editor.scss'
 

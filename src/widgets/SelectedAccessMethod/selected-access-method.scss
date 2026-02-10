@@ -1,4 +1,4 @@
-@import "src/constants/style/styleConst";
+@use "src/constants/style/styleConst" as *;
 
 .selected-access-method {
   display: flex;

@@ -5,7 +5,8 @@ import {
   MenuProps,
   message,
   Radio,
-  RadioChangeEvent, Space,
+  RadioChangeEvent,
+  Space,
   Spin
 } from 'antd'
 import { AxiosError, AxiosResponse } from 'axios'
@@ -16,22 +17,26 @@ import ConfigSchemaModal from '@components/ConfigSchemaModal'
 import ConfigurationEditorCode from '@components/ConfigurationEditorCode'
 import ConfigurationEditorForm from '@components/ConfigurationEditorForm'
 import ConfigurationEditorJson from '@components/ConfigurationEditorJson'
-import ConfirmConfigModal from '@components/ConfirmConfigModal/ConfirmConfigModal.tsx'
-import ErrorConfigModal from '@components/ErrorConfigModal/ErrorConfigModal.tsx'
+import ConfirmConfigModal from '@components/ConfirmConfigModal/ConfirmConfigModal'
+import ErrorConfigModal from '@components/ErrorConfigModal/ErrorConfigModal'
 
-import { ConfigType } from '@pages/ModulesPage/module.type.ts'
+import { ConfigType } from '@pages/ModulesPage/module.type'
 
-import { cleanEmptyParamsObject, sortObject, fastDeepEqualLite } from '@utils/objectUtils.ts'
+import {
+  cleanEmptyParamsObject,
+  sortObject,
+  fastDeepEqualLite
+} from '@utils/objectUtils'
 
-import useRole from '@hooks/useRole.tsx'
+import useRole from '@hooks/useRole'
 
-import configServiceApi from '@services/configService.ts'
-import modulesServiceApi from '@services/modulesService.ts'
+import configServiceApi from '@services/configService'
+import modulesServiceApi from '@services/modulesService'
 
-import { routePaths } from '@routes/routePaths.ts'
+import { routePaths } from '@routes/routePaths'
 
-import { MSPError } from '@type/index.ts'
-import { PermissionKeysType } from '@type/roles.type.ts'
+import { MSPError } from '@type/index'
+import { PermissionKeysType } from '@type/roles.type'
 
 import './configuration-editor-page.scss'
 
@@ -83,7 +88,6 @@ const ConfigurationEditorPage: FC = () => {
     setDisableSendBtn(!isConfigsEqual)
   }, [bufConfig, currentConfig])
 
-
   useEffect(() => {
     if (!bufConfig || !currentConfig) return
 
@@ -99,11 +103,9 @@ const ConfigurationEditorPage: FC = () => {
     setDisableSendBtn(isConfigsEqual)
   }, [bufConfig, currentConfig])
 
-
   useEffect(() => {
     setBufConfig(isNew ? {} : sortObject(currentConfig))
   }, [isCurrentConfigLoading])
-
 
   const itemsSaveBtn = [
     {
@@ -241,7 +243,8 @@ const ConfigurationEditorPage: FC = () => {
         </Button>
         <Space>
           <h1>{isNew ? state?.name : bufConfig?.name}</h1>
-          <p className="change-status">({disableSendBtn ? 'нет изменений' : 'есть измнения'})
+          <p className="change-status">
+            ({disableSendBtn ? 'нет изменений' : 'есть измнения'})
             <span
               className={`change-status-circle ${disableSendBtn ? 'change-status_red' : 'change-status_green'}`}
             />

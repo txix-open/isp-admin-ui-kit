@@ -3,9 +3,9 @@ import { Input, message } from 'antd'
 import { SearchProps } from 'antd/es/input'
 import { useNavigate } from 'react-router-dom'
 
-import applicationsApi from '@services/applicationsService.ts'
+import applicationsApi from '@services/applicationsService'
 
-import { routePaths } from '@routes/routePaths.ts'
+import { routePaths } from '@routes/routePaths'
 
 import './search-app-by-token.scss'
 

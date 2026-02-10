@@ -1,3 +1,4 @@
+import { ButtonProps } from 'antd'
 import {
   ComponentType,
   Dispatch,
@@ -5,12 +6,8 @@ import {
   ReactNode,
   SetStateAction
 } from 'react'
-import { ButtonProps } from 'antd'
 
-import {
-  ConfigType,
-  ResponseSchemaType
-} from '@pages/ModulesPage/module.type.ts'
+import { ConfigType, ResponseSchemaType } from '@pages/ModulesPage/module.type'
 
 export interface ConfigurationEditorPropsType {
   jsonSchema?: ResponseSchemaType
@@ -77,18 +74,18 @@ export interface ObjectFieldTemplatePropsType {
     $id: string
   }
   schema: {
-    properties: SchemaPropertiesType,
-    additionalProperties: boolean | {type: string}
-  },
-  onAddClick: (schema: any) => () => void,
-  title: string,
+    properties: SchemaPropertiesType
+    additionalProperties: boolean | { type: string }
+  }
+  onAddClick: (schema: any) => () => void
+  title: string
   activeTabKey: string
   handleTabsChange: (key: string) => void
 }
 
 export interface RemoveButtonProps extends ButtonProps {
-  icon?: ReactNode;
-  iconType?: string;
+  icon?: ReactNode
+  iconType?: string
 }
 
 export interface ErrorsObjType {

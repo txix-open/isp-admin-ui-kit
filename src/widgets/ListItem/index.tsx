@@ -1,7 +1,7 @@
 import { List, Tooltip } from 'antd'
 import { FC } from 'react'
 
-import { ListItemProps } from '@widgets/ListItem/list-item.type.ts'
+import { ListItemProps } from '@widgets/ListItem/list-item.type'
 
 const ListItem: FC<ListItemProps> = ({ item }) => {
   return (

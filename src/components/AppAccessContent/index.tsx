@@ -6,24 +6,24 @@ import { Navigate, useSearchParams } from 'react-router-dom'
 import AccessListTree from '@widgets/AccessListTree'
 import SelectedAccessMethod from '@widgets/SelectedAccessMethod'
 
-import { AppAccessContentPropsType } from '@components/AppAccessContent/app-access-content.type.ts'
+import { AppAccessContentPropsType } from '@components/AppAccessContent/app-access-content.type'
 import SaveModal from '@components/SaveModal/SaveModal'
 
-import { setUrlValue } from '@utils/columnLayoutUtils.ts'
+import { setUrlValue } from '@utils/columnLayoutUtils'
 
-import useRole from '@hooks/useRole.tsx'
+import useRole from '@hooks/useRole'
 
-import accessListApi from '@services/accessListService.ts'
-import routeApi from '@services/routeService.ts'
+import accessListApi from '@services/accessListService'
+import routeApi from '@services/routeService'
 
-import { routePaths } from '@routes/routePaths.ts'
+import { routePaths } from '@routes/routePaths'
 
 import {
   AccessListDeleteListRequestType,
   AccessListMethodType,
   EndpointType
-} from '@type/accessList.type.ts'
-import { PermissionKeysType } from '@type/roles.type.ts'
+} from '@type/accessList.type'
+import { PermissionKeysType } from '@type/roles.type'
 
 import './app-access-content.scss'
 

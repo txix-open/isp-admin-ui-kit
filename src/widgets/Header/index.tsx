@@ -1,11 +1,11 @@
 import { theme } from 'antd'
 import { useMemo } from 'react'
 
-import { HeaderPropsType } from '@widgets/Header/header.type.ts'
+import { HeaderPropsType } from '@widgets/Header/header.type'
 
-import { getContrastTextColor } from '@utils/styleUtils.ts'
+import { getContrastTextColor } from '@utils/styleUtils'
 
-import { useAppSelector } from '@hooks/redux.ts'
+import { useAppSelector } from '@hooks/redux'
 
 import './header.scss'
 

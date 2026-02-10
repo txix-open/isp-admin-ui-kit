@@ -10,8 +10,8 @@ import { FormSelect, EmptyData } from 'isp-ui-kit'
 import { useEffect, useMemo, useState } from 'react'
 import { useForm } from 'react-hook-form'
 
-import { dateFormats } from '@constants/date.ts'
-import { ValidationRules } from '@constants/form/validationRules.ts'
+import { dateFormats } from '@constants/date'
+import { ValidationRules } from '@constants/form/validationRules'
 
 import SearchAppByToken from '@ui/SearchAppByToken'
 
@@ -20,13 +20,13 @@ import Modal from '@widgets/Modal'
 import {
   ApplicationTokenType,
   NewApplicationTokenType
-} from '@pages/ApplicationsPage/applications.type.ts'
+} from '@pages/ApplicationsPage/applications.type'
 
-import useRole from '@hooks/useRole.tsx'
+import useRole from '@hooks/useRole'
 
-import tokensApi from '@services/tokensService.ts'
+import tokensApi from '@services/tokensService'
 
-import { PermissionKeysType } from '@type/roles.type.ts'
+import { PermissionKeysType } from '@type/roles.type'
 
 import './tokens.scss'
 

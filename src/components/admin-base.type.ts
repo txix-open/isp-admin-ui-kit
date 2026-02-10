@@ -1,8 +1,8 @@
 import { ConfigProviderProps } from 'antd'
 
-import { CustomMenuItemType } from '@components/Layout/layout.type.ts'
+import { CustomMenuItemType } from '@components/Layout/layout.type'
 
-import { PermissionKeysType } from '@type/roles.type.ts'
+import { PermissionKeysType } from '@type/roles.type'
 
 export interface AdminBasePropsType {
   customRouters?: CustomMenuItemType[]

@@ -1,6 +1,6 @@
 import { RouteObject } from 'react-router-dom'
 
-import { CustomMenuItemType } from '@components/Layout/layout.type.ts'
+import { CustomMenuItemType } from '@components/Layout/layout.type'
 
 export const generateCustomRoutes = (
   customRouters: CustomMenuItemType[]

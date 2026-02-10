@@ -2,7 +2,7 @@ import { SearchOutlined } from '@ant-design/icons'
 import { Button, Input, InputRef, Space, TableColumnType } from 'antd'
 import { useRef } from 'react'
 
-import { Filters } from '@components/VariablesComponents/VariablesTable/variables-table.type.ts'
+import { Filters } from '@components/VariablesComponents/VariablesTable/variables-table.type'
 
 import './variable-column-search.scss'
 

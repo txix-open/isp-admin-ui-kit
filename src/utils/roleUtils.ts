@@ -1,4 +1,4 @@
-import { RoleType } from '@type/roles.type.ts'
+import { RoleType } from '@type/roles.type'
 
 export const findExclusiveRole = (
   roles: RoleType[],

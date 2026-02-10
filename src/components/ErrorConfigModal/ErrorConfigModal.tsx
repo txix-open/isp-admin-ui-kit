@@ -2,10 +2,12 @@ import { Table } from 'antd'
 import { FC } from 'react'
 
 import Modal from '@widgets/Modal'
-import { ModalPropsType } from '@widgets/Modal/modal.type.ts'
+import { ModalPropsType } from '@widgets/Modal/modal.type'
 
-interface ErrorConfigModalProps
-  extends Omit<ModalPropsType, 'title' | 'children'> {
+interface ErrorConfigModalProps extends Omit<
+  ModalPropsType,
+  'title' | 'children'
+> {
   details?: { [key: string]: string }
 }
 

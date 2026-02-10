@@ -1,4 +1,4 @@
-@import "src/constants/style/styleConst";
+@use "src/constants/style/styleConst" as *;
 
 .all-version-page {
   padding: $basic-padding*2 0;

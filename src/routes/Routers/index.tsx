@@ -4,15 +4,9 @@ import { RouteObject, Navigate } from 'react-router-dom'
 
 import LayoutComponent from '@components/Layout'
 
-//  Составная часть основной страницы, поэтому без lazy
-import Configurations from '@pages/ConfigurationsPage'
-import Connections from '@pages/ConnectionsPage'
-import ErrorWrapperPage from '@pages/ErrorWrapperPage'
-import SwaggerPage from '@pages/SwaggerPage'
-
 import PrivateRoute from '@routes/PrivateRoute'
-import { generateCustomRoutes } from '@routes/customRoutes.tsx'
-import { routePaths } from '@routes/routePaths.ts'
+import { generateCustomRoutes } from '@routes/customRoutes'
+import { routePaths } from '@routes/routePaths'
 
 // Ленивые импорты
 const LoginPage = lazy(() => import('@pages/LoginPage'))
@@ -20,6 +14,10 @@ const ProfilePage = lazy(() => import('@pages/ProfilePage'))
 const UsersPage = lazy(() => import('@pages/UsersPage'))
 const RolesPage = lazy(() => import('@pages/RolesPage'))
 const UserEditor = lazy(() => import('src/pages/UserEditor'))
+const Configurations = lazy(() => import('@pages/ConfigurationsPage'))
+const Connections = lazy(() => import('@pages/ConnectionsPage'))
+const SwaggerPage = lazy(() => import('@pages/SwaggerPage'))
+const ErrorWrapperPage = lazy(() => import('@pages/ErrorWrapperPage'))
 const SessionsPage = lazy(() => import('@pages/SessionsPage'))
 const SecurityLogPage = lazy(() => import('@pages/SecurityLogPage'))
 const AppAccessPage = lazy(() => import('@pages/AppAccessPage'))

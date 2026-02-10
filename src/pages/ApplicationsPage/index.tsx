@@ -13,18 +13,18 @@ import {
   ApplicationsGroupType,
   NewApplicationsGroupType,
   UpdateApplicationsGroupType
-} from '@pages/ApplicationsPage/applications.type.ts'
+} from '@pages/ApplicationsPage/applications.type'
 
-import { setUrlValue, setSelectedItemId } from '@utils/columnLayoutUtils.ts'
-import { filterFirstColumnItems } from '@utils/firstColumnUtils.ts'
+import { setUrlValue, setSelectedItemId } from '@utils/columnLayoutUtils'
+import { filterFirstColumnItems } from '@utils/firstColumnUtils'
 
-import useRole from '@hooks/useRole.tsx'
+import useRole from '@hooks/useRole'
 
-import applicationsGroupApi from '@services/applicationsGroupService.ts'
+import applicationsGroupApi from '@services/applicationsGroupService'
 
-import { routePaths } from '@routes/routePaths.ts'
+import { routePaths } from '@routes/routePaths'
 
-import { PermissionKeysType } from '@type/roles.type.ts'
+import { PermissionKeysType } from '@type/roles.type'
 
 import AppGroupModal from 'src/components/AppGroupModal'
 

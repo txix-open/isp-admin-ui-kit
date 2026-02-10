@@ -2,9 +2,9 @@ import { useEffect } from 'react'
 import { useDispatch } from 'react-redux'
 import { useLocation } from 'react-router-dom'
 
-import { resetApiCaches, resetRootState } from '@stores/index.tsx'
+import { resetApiCaches, resetRootState } from '@stores/index'
 
-import { routePaths } from '@routes/routePaths.ts'
+import { routePaths } from '@routes/routePaths'
 
 const ClearStateOnLogin = () => {
   const location = useLocation()

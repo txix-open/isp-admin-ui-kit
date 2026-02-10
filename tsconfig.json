@@ -1,29 +1,23 @@
 {
   "compilerOptions": {
+    "target": "es2022",
+    "module": "esnext",
     "moduleResolution": "node",
-    "target": "es6",
-    "useDefineForClassFields": true,
-    "lib": ["ES2022", "DOM", "DOM.Iterable"],
-    "outDir": "./dist/",
-    "sourceMap": true,
-    "declaration": true,
-    "module": "ESNext",
-    "skipLibCheck": true,
-
-    /* Bundler mode */
-    "allowImportingTsExtensions": true,
-    "resolveJsonModule": true,
-    "isolatedModules": true,
-    "noEmit": true,
     "jsx": "react-jsx",
-
-    /* Linting */
     "strict": true,
     "esModuleInterop": true,
+    "lib": ["es2022", "dom", "dom.iterable"],
+    "emitDeclarationOnly": true,
+    "outDir": "./dist/",
+    "baseUrl": ".",
+    "rootDir": "./src",
+    "sourceMap": true,
+    "declaration": true,
+    "skipLibCheck": true,
+    "allowSyntheticDefaultImports": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true,
-    "baseUrl": ".",
     "paths": {
       "@assets/*": ["src/assets/*"],
       "@constants/*": ["src/constants/*"],
@@ -38,9 +32,9 @@
       "@type/*": ["src/type/*"],
       "@utils/*": ["src/utils/*"],
       "@routes/*": ["src/routes/*"]
-    },
-    "allowSyntheticDefaultImports": true
+    }
   },
-  "include": ["**/*.ts", "src"],
-  "exclude": ["node_modules", "dist"],
+  "types": ["vite/client"],
+  "include": ["src"],
+  "exclude": ["node_modules", "dist"]
 }

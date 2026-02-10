@@ -7,11 +7,10 @@ import {
 } from 'isp-ui-kit'
 import { Path } from 'react-hook-form'
 
-import { ValidationRules } from '@constants/form/validationRules.ts'
-
-import { VariableEditorFormPropsType } from './variable-editor-form.type.ts'
+import { ValidationRules } from '@constants/form/validationRules'
 
 import './variable-editor-form.scss'
+import { VariableEditorFormPropsType } from './variable-editor-form.type'
 
 const radioGroupOptions: LabelItem[] = [
   { label: 'SECRET', value: 'SECRET' },

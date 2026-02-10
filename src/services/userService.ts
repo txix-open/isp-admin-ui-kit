@@ -1,11 +1,11 @@
 import { createApi } from '@reduxjs/toolkit/query/react'
 
-import { apiPaths } from '@constants/api/apiPaths.ts'
+import { apiPaths } from '@constants/api/apiPaths'
 
-import { axiosBaseQuery } from '@utils/apiUtils.ts'
+import { axiosBaseQuery } from '@utils/apiUtils'
 
-import { PermissionType } from '@type/roles.type.ts'
-import { NewUserType, UserResponseType, UserType } from '@type/user.type.ts'
+import { PermissionType } from '@type/roles.type'
+import { NewUserType, UserResponseType, UserType } from '@type/user.type'
 
 const userServiceApi = createApi({
   reducerPath: 'userServiceApi',

@@ -3,9 +3,9 @@ import { FC, memo, useContext } from 'react'
 
 import Modal from '@widgets/Modal'
 
-import { ConfigurationPreviewModalPropsType } from '@components/ConfigurationPreviewModal/configuration-preview-modal.type.ts'
+import { ConfigurationPreviewModalPropsType } from '@components/ConfigurationPreviewModal/configuration-preview-modal.type'
 
-import { Context } from '@stores/index.tsx'
+import { Context } from '@stores/index'
 
 import './configuration-preview-modal.scss'
 

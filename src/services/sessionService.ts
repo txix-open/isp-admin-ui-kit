@@ -4,7 +4,7 @@ import { apiPaths } from '@constants/api/apiPaths'
 
 import { axiosBaseQuery } from '@utils/apiUtils'
 
-import { LimitOffsetRequestType } from '@type/index.ts'
+import { LimitOffsetRequestType } from '@type/index'
 import { SessionResponseType } from '@type/session.type'
 
 const sessionServiceApi = createApi({

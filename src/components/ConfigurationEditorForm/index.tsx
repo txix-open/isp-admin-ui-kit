@@ -3,18 +3,17 @@ import { Theme as AntDTheme } from '@rjsf/antd'
 import { IChangeEvent, withTheme } from '@rjsf/core'
 import { RJSFSchema, UiSchema } from '@rjsf/utils'
 import validator from '@rjsf/validator-ajv8'
+import { Badge, Button, Tabs, Tooltip, Collapse, Typography, Space } from 'antd'
 import {
-  Badge,
-  Button,
-  Tabs,
-  Tooltip,
-  Collapse,
-  Typography,
-  Space
-} from 'antd'
-import { createRef, FC, memo, useEffect, useMemo, useRef, useState } from 'react'
+  createRef,
+  FC,
+  memo,
+  useEffect,
+  useMemo,
+  useRef,
+  useState
+} from 'react'
 import { useParams } from 'react-router-dom'
-
 
 import {
   ArrayFieldTemplatePropsType,
@@ -25,20 +24,24 @@ import {
   ObjectFieldTemplatePropsType,
   RemoveButtonProps,
   SortPropType
-} from '@pages/ConfigurationEditorPage/ConfigurationEditor.type.ts'
-import { ResponseSchemaType } from '@pages/ModulesPage/module.type.ts'
+} from '@pages/ConfigurationEditorPage/ConfigurationEditor.type'
+import { ResponseSchemaType } from '@pages/ModulesPage/module.type'
 
-import { cleanEmptyParamsObject, sortObject, fastDeepEqualLite } from '@utils/objectUtils.ts'
+import {
+  cleanEmptyParamsObject,
+  sortObject,
+  fastDeepEqualLite
+} from '@utils/objectUtils'
 
 const { Text: AntdText } = Typography
 
 const ConfigurationEditorForm: FC<ConfigurationEditorPropsType> = ({
-                                                                     bufConfig = {},
-                                                                     jsonSchema = {},
-                                                                     submitRef,
-                                                                     setDisableSendBtn = () => {},
-                                                                     currentConfig
-                                                                   }) => {
+  bufConfig = {},
+  jsonSchema = {},
+  submitRef,
+  setDisableSendBtn = () => {},
+  currentConfig
+}) => {
   const Form = withTheme(AntDTheme)
   const sortProps = (a: SortPropType, b: SortPropType) =>
     a.name.localeCompare(b.name)
@@ -94,7 +97,6 @@ const ConfigurationEditorForm: FC<ConfigurationEditorPropsType> = ({
     return debounced
   }
 
-
   const debouncedValidateAndCompare = useRef(
     debounce((formData: any) => {
       const cleanedFormData = cleanEmptyParamsObject(formData)
@@ -107,14 +109,17 @@ const ConfigurationEditorForm: FC<ConfigurationEditorPropsType> = ({
         setDisableSendBtn(true)
       }
 
-      if (formRef.current?.validateFormWithFormData(formRef.current.state.formData)) {
+      if (
+        formRef.current?.validateFormWithFormData(
+          formRef.current.state.formData
+        )
+      ) {
         formRef?.current?.submit()
       } else {
         forceSubmit()
       }
     }, 300)
   ).current
-
 
   const onSubmit = (data: any) => {
     if (!submitRef) return
@@ -154,12 +159,12 @@ const ConfigurationEditorForm: FC<ConfigurationEditorPropsType> = ({
   }
 
   const ArrayFieldTemplate: FC<ArrayFieldTemplatePropsType> = ({
-                                                                 items,
-                                                                 onAddClick,
-                                                                 canAdd,
-                                                                 title,
-                                                                 idSchema
-                                                               }) => {
+    items,
+    onAddClick,
+    canAdd,
+    title,
+    idSchema
+  }) => {
     return (
       <Collapse defaultActiveKey={idSchema.$id}>
         <Collapse.Panel
@@ -210,26 +215,36 @@ const ConfigurationEditorForm: FC<ConfigurationEditorPropsType> = ({
 
   const RemoveButton = (props: RemoveButtonProps) => {
     const { icon, iconType, ...btnProps } = props
-    return (
-      <Button type="link" icon={<DeleteOutlined />} {...btnProps} />
-    )
+    return <Button type="link" icon={<DeleteOutlined />} {...btnProps} />
   }
 
   const ObjectFieldTemplate: FC<ObjectFieldTemplatePropsType> = (props) => {
-    const { properties, schema, idSchema, onAddClick, activeTabKey, handleTabsChange, title } = props
+    const {
+      properties,
+      schema,
+      idSchema,
+      onAddClick,
+      activeTabKey,
+      handleTabsChange,
+      title
+    } = props
     const depth = getDepth(idSchema.$id)
 
     const renderComplexTabs = (propsComplex: any[]) => {
       return propsComplex.map((element) => ({
         label: schema.properties[element.name]?.title || element.name,
         key: element.name,
-        children: schema.additionalProperties
-          ? properties.map((element: any) => (
+        children: schema.additionalProperties ? (
+          properties.map((element: any) => (
             <div key={element.content.key} className="collapseArray_item">
-              <div className="collapseArray_item_content">{element.content}</div>
+              <div className="collapseArray_item_content">
+                {element.content}
+              </div>
             </div>
           ))
-          : <>{element.content}</>
+        ) : (
+          <>{element.content}</>
+        )
       }))
     }
 
@@ -239,7 +254,8 @@ const ConfigurationEditorForm: FC<ConfigurationEditorPropsType> = ({
     const processProperties = (properties: any) => {
       properties.forEach((prop: any) => {
         const fieldType = schema.properties[prop.name]?.type
-        const isComplex = !fieldType || fieldType === 'array' || fieldType === 'object'
+        const isComplex =
+          !fieldType || fieldType === 'array' || fieldType === 'object'
         if (isComplex) {
           propsComplex.push(prop)
         } else {
@@ -261,11 +277,13 @@ const ConfigurationEditorForm: FC<ConfigurationEditorPropsType> = ({
           onChange={handleTabsChange}
           items={[
             ...(propsSimple.length
-              ? [{
-                label: 'Остальные',
-                key: 'General',
-                children: propsSimple.map((element) => element.content)
-              }]
+              ? [
+                  {
+                    label: 'Остальные',
+                    key: 'General',
+                    children: propsSimple.map((element) => element.content)
+                  }
+                ]
               : []),
             ...renderComplexTabs(propsComplex)
           ]}
@@ -275,12 +293,18 @@ const ConfigurationEditorForm: FC<ConfigurationEditorPropsType> = ({
 
     if (schema.additionalProperties) {
       return (
-        <Collapse className="collapse" defaultActiveKey={depth > 1 ? '' : idSchema.$id}>
+        <Collapse
+          className="collapse"
+          defaultActiveKey={depth > 1 ? '' : idSchema.$id}
+        >
           <Collapse.Panel
             key={idSchema.$id}
             className="configEditor_collapseObject"
             header={
-              <Space direction="horizontal" style={{ justifyContent: 'space-between', width: '100%' }}>
+              <Space
+                direction="horizontal"
+                style={{ justifyContent: 'space-between', width: '100%' }}
+              >
                 <Space direction="horizontal">
                   <Tooltip title={title}>
                     <AntdText>{title}</AntdText>
@@ -299,7 +323,9 @@ const ConfigurationEditorForm: FC<ConfigurationEditorPropsType> = ({
           >
             {properties.map((element: any) => (
               <div key={element.content.key} className="collapseArray_item">
-                <div className="collapseArray_item_content">{element.content}</div>
+                <div className="collapseArray_item_content">
+                  {element.content}
+                </div>
               </div>
             ))}
           </Collapse.Panel>
@@ -309,7 +335,10 @@ const ConfigurationEditorForm: FC<ConfigurationEditorPropsType> = ({
 
     if (depth > 2) {
       return (
-        <Collapse className="collapse" defaultActiveKey={depth > 1 ? '' : idSchema.$id}>
+        <Collapse
+          className="collapse"
+          defaultActiveKey={depth > 1 ? '' : idSchema.$id}
+        >
           <Collapse.Panel
             key={idSchema.$id}
             className="configEditor_collapseObject"
