@@ -35,17 +35,21 @@ npm install @monaco-editor/react antd axios dayjs monaco-editor react react-dom 
 #### Версии зависимостей:
 
 ```json
-@monaco-editor/react ^4.6.0
-antd >=5.12.2
-axios ^1.7.7
-dayjs ^1.11.10
-monaco-editor ^0.52.0
-react >=18.2.0
-react-dom >=18.2.0
-react-hook-form ^7.54.0
-react-router-dom ^6.22.3
-react-redux ^9.1.0
-@reduxjs/toolkit ^2.2.3
+{
+  "@monaco-editor/react": "^4.7.0",
+  "@reduxjs/toolkit": "^2.2.3",
+  "antd": ">=5.12.2",
+  "axios": "^1.7.7",
+  "dayjs": "^1.11.10",
+  "isp-ui-kit": ">=1.0.0",
+  "monaco-editor": "^0.55.1",
+  "react": ">=18.2.0 <19",
+  "react-dom": ">=18.2.0 <19",
+  "react-hook-form": "^7.54.0",
+  "react-redux": "^9.1.0",
+  "react-router-dom": "^6.22.3",
+  "swagger-ui-react": "^5.31.0"
+}
 ```
 
 ---
