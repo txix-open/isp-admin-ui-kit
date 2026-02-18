@@ -1,8 +1,8 @@
 import { createApi } from '@reduxjs/toolkit/query/react'
 
-import { apiPaths } from '@constants/api/apiPaths.ts'
+import { apiPaths } from '@constants/api/apiPaths'
 
-import { axiosBaseQuery } from '@utils/apiUtils.ts'
+import { axiosBaseQuery } from '@utils/apiUtils'
 
 const variablesApi = createApi({
   reducerPath: 'variablesService',

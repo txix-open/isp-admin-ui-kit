@@ -1,15 +1,15 @@
 import { createAsyncThunk } from '@reduxjs/toolkit'
 
-import { apiPaths } from '@constants/api/apiPaths.ts'
+import { apiPaths } from '@constants/api/apiPaths'
 
 import {
   ProfileDataType,
   UIDataType
-} from '@pages/ProfilePage/profile-page.type.ts'
+} from '@pages/ProfilePage/profile-page.type'
 
-import { initUI } from '@utils/UIUtiles.tsx'
+import { initUI } from '@utils/UIUtiles'
 
-import { apiService } from '@services/apiService.ts'
+import { apiService } from '@services/apiService'
 
 export const fetchProfile = createAsyncThunk(
   'profile/fetchProfile',

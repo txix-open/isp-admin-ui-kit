@@ -1,4 +1,4 @@
-import { AccessListMethodType, EndpointType } from '@type/accessList.type.ts'
+import { AccessListMethodType, EndpointType } from '@type/accessList.type'
 
 export interface SelectedAccessMethodPropsType {
   unknownMethodKey: string

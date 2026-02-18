@@ -1,4 +1,4 @@
-import { ConfigType } from '@pages/ModulesPage/module.type.ts'
+import { ConfigType } from '@pages/ModulesPage/module.type'
 
 export interface ActiveTableActionButtonsPropsType {
   isActive: boolean

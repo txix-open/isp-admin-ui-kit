@@ -1,6 +1,6 @@
-import { ModalPropsType } from '@widgets/Modal/modal.type.ts'
+import { ModalPropsType } from '@widgets/Modal/modal.type'
 
-import { ApplicationAppType } from '@pages/ApplicationsPage/applications.type.ts'
+import { ApplicationAppType } from '@pages/ApplicationsPage/applications.type'
 
 export type AppModalType = Omit<ModalPropsType, 'onOk' | 'children'> & {
   app?: ApplicationAppType
@@ -9,4 +9,5 @@ export type AppModalType = Omit<ModalPropsType, 'onOk' | 'children'> & {
   isExistsId?: {
     field: keyof ApplicationAppType
     message: string
-  } | null}
+  } | null
+}

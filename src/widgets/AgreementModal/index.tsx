@@ -1,7 +1,7 @@
 import { Input, Modal } from 'antd'
 import { ChangeEvent, useState } from 'react'
 
-import { AgreementModalPropsType } from '@widgets/AgreementModal/agreement-modal.type.ts'
+import { AgreementModalPropsType } from '@widgets/AgreementModal/agreement-modal.type'
 
 import './agreement-modal.scss'
 

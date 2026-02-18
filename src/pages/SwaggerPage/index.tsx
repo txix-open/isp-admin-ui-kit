@@ -1,17 +1,16 @@
 import { Button, Spin, theme } from 'antd'
-import { useEffect, useState } from 'react'
+import { lazy, Suspense, useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
-import SwaggerUI from 'swagger-ui-react'
 
-import { downloadFile } from '@utils/downloadFile.ts'
-import { toSafeFileName } from '@utils/toSafeFileName.ts'
+import { downloadFile } from '@utils/downloadFile'
+import { toSafeFileName } from '@utils/toSafeFileName'
 
-import modulesServiceApi from '@services/modulesService.ts'
-import swaggerServiceApi from '@services/swaggerService.ts'
+import modulesServiceApi from '@services/modulesService'
+import swaggerServiceApi from '@services/swaggerService'
 
 import './swagger-page.scss'
 
-import 'swagger-ui-react/swagger-ui.css'
+const SwaggerUI = lazy(() => import('swagger-ui-react'))
 
 const { useToken } = theme
 
@@ -67,6 +66,10 @@ const SwaggerPage = () => {
     }
   )
 
+  useEffect(() => {
+    import('swagger-ui-react/swagger-ui.css')
+  }, [])
+
   const handleDownload = () => {
     if (!swaggerSpec) {
       return
@@ -100,14 +103,16 @@ const SwaggerPage = () => {
           </div>
 
           <div className="swagger-page__content">
-            <SwaggerUI
-              spec={swaggerSpec}
-              docExpansion="list"
-              defaultModelsExpandDepth={-1}
-              displayOperationId={false}
-              tryItOutEnabled={false}
-              requestSnippetsEnabled={false}
-            />
+            <Suspense fallback={<Spin />}>
+              <SwaggerUI
+                spec={swaggerSpec}
+                docExpansion="list"
+                defaultModelsExpandDepth={-1}
+                displayOperationId={false}
+                tryItOutEnabled={false}
+                requestSnippetsEnabled={false}
+              />
+            </Suspense>
           </div>
         </>
       ) : (

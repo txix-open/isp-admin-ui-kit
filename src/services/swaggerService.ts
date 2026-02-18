@@ -1,8 +1,8 @@
 import { createApi } from '@reduxjs/toolkit/query/react'
 
-import { API_BASE_URL } from '@constants/api/apiPaths.ts'
+import { API_BASE_URL } from '@constants/api/apiPaths'
 
-import { axiosBaseQuery } from '@utils/apiUtils.ts'
+import { axiosBaseQuery } from '@utils/apiUtils'
 
 const swaggerServiceApi = createApi({
   reducerPath: 'swaggerServiceApi',

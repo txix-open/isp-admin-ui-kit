@@ -2,7 +2,7 @@ import { Button } from 'antd'
 import { ErrorPage } from 'isp-ui-kit'
 import { useNavigate } from 'react-router-dom'
 
-import { routePaths } from '@routes/routePaths.ts'
+import { routePaths } from '@routes/routePaths'
 
 const ErrorWrapperPage = () => {
   const navigate = useNavigate()

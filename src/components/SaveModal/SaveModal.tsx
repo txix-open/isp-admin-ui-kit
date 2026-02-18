@@ -2,7 +2,7 @@ import { FC } from 'react'
 
 import Modal from '@widgets/Modal'
 
-import { SaveModalPropsType } from '@components/SaveModal/save-modal.type.ts'
+import { SaveModalPropsType } from '@components/SaveModal/save-modal.type'
 
 import './save-modal.scss'
 

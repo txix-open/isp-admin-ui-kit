@@ -1,10 +1,10 @@
 import { useContext, useMemo } from 'react'
 
-import { Context } from '@stores/index.tsx'
+import { Context } from '@stores/index'
 
-import { PermissionKeysType } from '@type/roles.type.ts'
+import { PermissionKeysType } from '@type/roles.type'
 
-import { useAppSelector } from './redux.ts'
+import { useAppSelector } from './redux'
 
 export const useRole = () => {
   const { excludePermissions } = useContext(Context)

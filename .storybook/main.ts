@@ -2,15 +2,8 @@ import type { StorybookConfig } from '@storybook/react-vite'
 import remarkGfm from 'remark-gfm'
 
 const config: StorybookConfig = {
-  'stories': [
-    '../src/**/Welcome.mdx',
-    '../src/**/*.mdx',
-    '../src/**/*.stories.@(js|jsx|mjs|ts|tsx)'
-  ],
-  'addons': [
-    '@storybook/addon-onboarding',
-    '@storybook/addon-essentials',
-    '@storybook/addon-interactions',
+  stories: ['../src/stories/**/*.mdx'],
+  addons: [
     {
       name: '@storybook/addon-docs',
       options: {
@@ -22,9 +15,7 @@ const config: StorybookConfig = {
       }
     }
   ],
-  'framework': {
-    'name': '@storybook/react-vite',
-    'options': {}
-  }
+  framework: '@storybook/react-vite'
 }
+
 export default config

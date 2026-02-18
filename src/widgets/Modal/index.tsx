@@ -2,7 +2,7 @@ import { Button } from 'antd'
 import { useEffect } from 'react'
 import CloseBtn from 'src/ui/CloseBtn'
 
-import { ModalPropsType } from '@widgets/Modal/modal.type.ts'
+import { ModalPropsType } from '@widgets/Modal/modal.type'
 
 import './modal.scss'
 
