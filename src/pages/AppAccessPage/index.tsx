@@ -12,18 +12,18 @@ import ListItem from '@widgets/ListItem'
 
 import AppAccessContent from '@components/AppAccessContent'
 
-import { ApplicationAppType } from '@pages/ApplicationsPage/applications.type.ts'
+import { ApplicationAppType } from '@pages/ApplicationsPage/applications.type'
 
-import { setUrlValue, setSelectedItemId } from '@utils/columnLayoutUtils.ts'
-import { filterFirstColumnItems } from '@utils/firstColumnUtils.ts'
+import { setUrlValue, setSelectedItemId } from '@utils/columnLayoutUtils'
+import { filterFirstColumnItems } from '@utils/firstColumnUtils'
 
-import useRole from '@hooks/useRole.tsx'
+import useRole from '@hooks/useRole'
 
-import applicationsApi from '@services/applicationsService.ts'
+import applicationsApi from '@services/applicationsService'
 
-import { routePaths } from '@routes/routePaths.ts'
+import { routePaths } from '@routes/routePaths'
 
-import { PermissionKeysType } from '@type/roles.type.ts'
+import { PermissionKeysType } from '@type/roles.type'
 
 import './app-access-page.scss'
 

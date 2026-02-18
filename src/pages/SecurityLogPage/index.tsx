@@ -4,7 +4,7 @@ import dayjs from 'dayjs'
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 
-import { dateFormats } from '@constants/date.ts'
+import { dateFormats } from '@constants/date'
 
 import { getUserFullName } from '@utils/userUtils/getFullNameUtil'
 
@@ -13,7 +13,7 @@ import useRole from '@hooks/useRole'
 import securityLogServiceApi from '@services/securityLogService'
 import userServiceApi from '@services/userService'
 
-import { routePaths } from '@routes/routePaths.ts'
+import { routePaths } from '@routes/routePaths'
 
 import { LogType } from '@type/log.type'
 import { PermissionKeysType } from '@type/roles.type'

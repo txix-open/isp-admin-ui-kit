@@ -1,16 +1,15 @@
 import { Button, Table } from 'antd'
 import { useState } from 'react'
 
-import { getColumns } from '@components/VariablesComponents/VariablesTable/variable-table-columns.tsx'
+import { getColumns } from '@components/VariablesComponents/VariablesTable/variable-table-columns'
 
+import './variables-table.scss'
 import {
   Sorts,
   VariablesTablePropsType,
   OnChange,
   Filters
-} from './variables-table.type.ts'
-
-import './variables-table.scss'
+} from './variables-table.type'
 
 const VariablesTable = ({
   dataTable,

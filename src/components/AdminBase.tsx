@@ -5,7 +5,7 @@ import { createBrowserRouter, RouterProvider } from 'react-router-dom'
 
 import { darkTheme, lightTheme } from '@constants/theme'
 
-import { AdminBasePropsType } from '@components/admin-base.type.ts'
+import { AdminBasePropsType } from '@components/admin-base.type'
 
 import { getCleanPath } from '@utils/routeUtils'
 

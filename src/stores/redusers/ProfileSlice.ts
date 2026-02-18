@@ -7,9 +7,9 @@ import {
 import {
   ProfileDataType,
   ProfileType
-} from '@pages/ProfilePage/profile-page.type.ts'
+} from '@pages/ProfilePage/profile-page.type'
 
-import { fetchProfile } from './ActionCreators.ts'
+import { fetchProfile } from './ActionCreators'
 
 export enum StateProfileStatus {
   resolved = 'resolved',

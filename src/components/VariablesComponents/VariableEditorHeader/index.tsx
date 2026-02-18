@@ -3,9 +3,8 @@ import { useNavigate } from 'react-router-dom'
 
 import { routePaths } from '@routes/routePaths'
 
-import { VariableEditorHeaderPropsType } from './variable-editor-header.type.ts'
-
 import './variable-editor-header.scss'
+import { VariableEditorHeaderPropsType } from './variable-editor-header.type'
 
 const VariableEditorHeader = ({
   title,

@@ -1,9 +1,9 @@
 import { BaseQueryFn, retry } from '@reduxjs/toolkit/query/react'
 import { AxiosError, AxiosRequestConfig } from 'axios'
 
-import { apiService } from '@services/apiService.ts'
+import { apiService } from '@services/apiService'
 
-import { MSPError } from '@type/index.ts'
+import { MSPError } from '@type/index'
 
 export const axiosBaseQuery =
   (

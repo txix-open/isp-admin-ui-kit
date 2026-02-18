@@ -3,27 +3,27 @@ import { findRouteWithParents, LayoutMenu, LayoutSider } from 'isp-ui-kit'
 import { useContext, useEffect, useState } from 'react'
 import { Navigate, Outlet, useLocation, useNavigate } from 'react-router-dom'
 
-import { localStorageKeys } from '@constants/localStorageKeys.ts'
+import { localStorageKeys } from '@constants/localStorageKeys'
 
 import Header from '@widgets/Header'
 
 import {
   CustomMenuItemType,
   LayoutComponentPropsType
-} from '@components/Layout/layout.type.ts'
-import { menuConfig } from '@components/Layout/menu-config.tsx'
+} from '@components/Layout/layout.type'
+import { menuConfig } from '@components/Layout/menu-config'
 
-import { LocalStorage } from '@utils/localStorageUtils.ts'
+import { LocalStorage } from '@utils/localStorageUtils'
 
-import { useAppDispatch, useAppSelector } from '@hooks/redux.ts'
-import useRole from '@hooks/useRole.tsx'
+import { useAppDispatch, useAppSelector } from '@hooks/redux'
+import useRole from '@hooks/useRole'
 
-import { fetchProfile, fetchUI } from '@stores/redusers/ActionCreators.ts'
-import { StateProfileStatus } from '@stores/redusers/ProfileSlice.ts'
+import { fetchProfile, fetchUI } from '@stores/redusers/ActionCreators'
+import { StateProfileStatus } from '@stores/redusers/ProfileSlice'
 
-import { routePaths } from '@routes/routePaths.ts'
+import { routePaths } from '@routes/routePaths'
 
-import { PermissionKeysType } from '@type/roles.type.ts'
+import { PermissionKeysType } from '@type/roles.type'
 
 import './layout.scss'
 

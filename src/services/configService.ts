@@ -1,12 +1,16 @@
 import { createApi } from '@reduxjs/toolkit/query/react'
 
-import { apiPaths } from '@constants/api/apiPaths.ts'
+import { apiPaths } from '@constants/api/apiPaths'
 
-import { ConfigNameType, ConfigResponse, ConfigType } from '@pages/ModulesPage/module.type.ts'
+import {
+  ConfigNameType,
+  ConfigResponse,
+  ConfigType
+} from '@pages/ModulesPage/module.type'
 
-import { axiosBaseQuery } from '@utils/apiUtils.ts'
+import { axiosBaseQuery } from '@utils/apiUtils'
 
-import { VersionType } from '@type/version.type.ts'
+import { VersionType } from '@type/version.type'
 
 const configServiceApi = createApi({
   reducerPath: 'configApi',

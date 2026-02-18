@@ -1,14 +1,14 @@
 import { createApi } from '@reduxjs/toolkit/query/react'
 
-import { apiPaths } from '@constants/api/apiPaths.ts'
+import { apiPaths } from '@constants/api/apiPaths'
 
-import { axiosBaseQuery } from '@utils/apiUtils.ts'
+import { axiosBaseQuery } from '@utils/apiUtils'
 
 import {
   EndpointType,
   RouteApiResponseType,
   RouteType
-} from '@type/accessList.type.ts'
+} from '@type/accessList.type'
 
 const routeApi = createApi({
   reducerPath: 'routeApi',

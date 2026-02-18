@@ -1,10 +1,10 @@
 import { createApi } from '@reduxjs/toolkit/query/react'
 
-import { apiPaths } from '@constants/api/apiPaths.ts'
+import { apiPaths } from '@constants/api/apiPaths'
 
-import { axiosBaseQuery } from '@utils/apiUtils.ts'
+import { axiosBaseQuery } from '@utils/apiUtils'
 
-import { NewRoleType, RoleType } from '@type/roles.type.ts'
+import { NewRoleType, RoleType } from '@type/roles.type'
 
 const roleApi = createApi({
   reducerPath: 'roleApi',

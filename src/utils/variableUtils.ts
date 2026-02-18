@@ -2,7 +2,7 @@ import { MessageInstance } from 'antd/es/message/interface'
 import { AxiosError } from 'axios'
 import { UseFormSetError, FieldValues, Path } from 'react-hook-form'
 
-import { MSPError } from '@type/index.ts'
+import { MSPError } from '@type/index'
 
 type ErrorHandlerOptions<T extends FieldValues> = {
   setError?: UseFormSetError<T>

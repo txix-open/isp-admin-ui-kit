@@ -1,4 +1,4 @@
-@import "src/constants/style/styleConst";
+@use "src/constants/style/styleConst" as *;
 
 .token-content {
   overflow-x: auto;

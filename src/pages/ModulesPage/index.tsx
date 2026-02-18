@@ -10,22 +10,22 @@ import {
   useSearchParams
 } from 'react-router-dom'
 
-import { MODULES_TAB_KEYS, ModulesTabKeysType } from '@constants/modules.ts'
+import { MODULES_TAB_KEYS, ModulesTabKeysType } from '@constants/modules'
 
 import ModuleTabs from '@components/ModuleTabs'
 
-import { ModuleType } from '@pages/ModulesPage/module.type.ts'
+import { ModuleType } from '@pages/ModulesPage/module.type'
 
-import { setUrlValue } from '@utils/columnLayoutUtils.ts'
-import { filterFirstColumnItems } from '@utils/firstColumnUtils.ts'
+import { setUrlValue } from '@utils/columnLayoutUtils'
+import { filterFirstColumnItems } from '@utils/firstColumnUtils'
 
-import useRole from '@hooks/useRole.tsx'
+import useRole from '@hooks/useRole'
 
-import modulesServiceApi from '@services/modulesService.ts'
+import modulesServiceApi from '@services/modulesService'
 
-import { routePaths } from '@routes/routePaths.ts'
+import { routePaths } from '@routes/routePaths'
 
-import { PermissionKeysType } from '@type/roles.type.ts'
+import { PermissionKeysType } from '@type/roles.type'
 
 import './modules-page.scss'
 

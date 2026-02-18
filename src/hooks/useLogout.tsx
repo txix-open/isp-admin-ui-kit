@@ -1,13 +1,13 @@
 import { useAuth } from 'isp-ui-kit'
 import { useNavigate } from 'react-router-dom'
 
-import { apiPaths } from '@constants/api/apiPaths.ts'
-import { localStorageKeys } from '@constants/localStorageKeys.ts'
+import { apiPaths } from '@constants/api/apiPaths'
+import { localStorageKeys } from '@constants/localStorageKeys'
 
-import { getConfigProperty } from '@utils/configUtils.ts'
-import { LocalStorage } from '@utils/localStorageUtils.ts'
+import { getConfigProperty } from '@utils/configUtils'
+import { LocalStorage } from '@utils/localStorageUtils'
 
-import { routePaths } from '@routes/routePaths.ts'
+import { routePaths } from '@routes/routePaths'
 
 const useLogout = () => {
   const { logout, isLoading } = useAuth()

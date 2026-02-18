@@ -5,20 +5,20 @@ import { FormInput, useAuth } from 'isp-ui-kit'
 import { useForm } from 'react-hook-form'
 import { useNavigate } from 'react-router-dom'
 
-import { apiPaths } from '@constants/api/apiPaths.ts'
-import { ValidationRules } from '@constants/form/validationRules.ts'
-import { localStorageKeys } from '@constants/localStorageKeys.ts'
-import { messages } from '@constants/messages.ts'
+import { apiPaths } from '@constants/api/apiPaths'
+import { ValidationRules } from '@constants/form/validationRules'
+import { localStorageKeys } from '@constants/localStorageKeys'
+import { messages } from '@constants/messages'
 
-import ClearStateOnLogin from '@pages/LoginPage/ClearStateOnLogin.tsx'
+import ClearStateOnLogin from '@pages/LoginPage/ClearStateOnLogin'
 
-import { getConfigProperty } from '@utils/configUtils.ts'
-import { LocalStorage } from '@utils/localStorageUtils.ts'
+import { getConfigProperty } from '@utils/configUtils'
+import { LocalStorage } from '@utils/localStorageUtils'
 
-import { routePaths } from '@routes/routePaths.ts'
+import { routePaths } from '@routes/routePaths'
 
-import { MSPError } from '@type/index.ts'
-import { LoginRequest } from '@type/login.type.ts'
+import { MSPError } from '@type/index'
+import { LoginRequest } from '@type/login.type'
 
 import './login-page.scss'
 

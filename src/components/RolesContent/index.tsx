@@ -5,17 +5,17 @@ import { useEffect, useState } from 'react'
 import { Controller, useForm } from 'react-hook-form'
 import { useParams } from 'react-router-dom'
 
-import { ValidationRules } from '@constants/form/validationRules.ts'
+import { ValidationRules } from '@constants/form/validationRules'
 
 import SaveButton from '@ui/SaveButton'
 
 import AgreementModal from '@widgets/AgreementModal'
 
-import { RolesContentPropsType } from '@components/RolesContent/roles-content.type.ts'
+import { RolesContentPropsType } from '@components/RolesContent/roles-content.type'
 
-import useRole from '@hooks/useRole.tsx'
+import useRole from '@hooks/useRole'
 
-import { PermissionKeysType, RoleType } from '@type/roles.type.ts'
+import { PermissionKeysType, RoleType } from '@type/roles.type'
 
 import './roles-content.scss'
 
