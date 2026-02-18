@@ -1,6 +1,6 @@
 {
   "name": "isp-admin-ui-kit",
-  "version": "1.7.4",
+  "version": "1.8.0",
   "description": "react ui lib for admin-panels",
   "main": "dist/index.cjs.js",
   "module": "dist/index.esm.js",
@@ -54,8 +54,8 @@
     "@rollup/plugin-node-resolve": "^16.0.3",
     "@rollup/plugin-terser": "^0.4.4",
     "@rollup/plugin-typescript": "^12.3.0",
-    "@storybook/addon-docs": "^10.2.8",
-    "@storybook/react-vite": "^10.2.8",
+    "@storybook/addon-docs": "^10.2.10",
+    "@storybook/react-vite": "^10.2.10",
     "@trivago/prettier-plugin-sort-imports": "^6.0.2",
     "@types/lodash.clonedeep": "^4.5.9",
     "@types/node": "^25.2.2",
@@ -83,7 +83,7 @@
     "rollup-plugin-peer-deps-external": "^2.2.4",
     "rollup-plugin-postcss": "^4.0.2",
     "sass": "1.97.3",
-    "storybook": "^10.2.8",
+    "storybook": "^10.2.10",
     "terser": "^5.46.0",
     "typescript": "^5.9.3"
   },
@@ -100,7 +100,7 @@
     "react-hook-form": "^7.54.0",
     "react-redux": "^9.1.0",
     "react-router-dom": "^6.22.3",
-    "swagger-ui-react": "^5.31.0"
+    "swagger-ui-react": "^5.31.1"
   },
   "eslintConfig": {
     "extends": [
