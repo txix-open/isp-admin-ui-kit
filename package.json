@@ -2,14 +2,33 @@
   "name": "isp-admin-ui-kit",
   "version": "1.8.1",
   "description": "react ui lib for admin-panels",
-  "main": "dist/index.cjs.js",
-  "module": "dist/index.esm.js",
-  "types": "dist/types/index.d.ts",
+  "main": "dist/cjs/index.js",
+  "module": "dist/esm/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist",
+    "README.md"
+  ],
   "exports": {
     ".": {
-      "types": "./dist/types/index.d.ts",
-      "import": "./dist/index.esm.js",
-      "require": "./dist/index.cjs.js"
+      "types": "./dist/index.d.ts",
+      "import": "./dist/esm/index.js",
+      "require": "./dist/cjs/index.js"
+    },
+    "./admin": {
+      "types": "./dist/entries/admin.d.ts",
+      "import": "./dist/esm/admin.js",
+      "require": "./dist/cjs/admin.js"
+    },
+    "./utils": {
+      "types": "./dist/entries/utils.d.ts",
+      "import": "./dist/esm/utils.js",
+      "require": "./dist/cjs/utils.js"
+    },
+    "./hooks": {
+      "types": "./dist/entries/hooks.d.ts",
+      "import": "./dist/esm/hooks.js",
+      "require": "./dist/cjs/hooks.js"
     }
   },
   "sideEffects": [
@@ -18,9 +37,10 @@
   ],
   "scripts": {
     "build": "rollup -c",
+    "build:prod": "BUILD_SOURCEMAP=false rollup -c",
     "watch": "rollup -c -w",
     "prepare": "husky  || true",
-    "pub": "rollup -c && npm publish",
+    "pub": "npm run build:prod && npm publish",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build"
   },
@@ -88,6 +108,7 @@
     "typescript": "^5.9.3"
   },
   "peerDependencies": {
+    "@ant-design/icons": ">=5.0.0",
     "@monaco-editor/react": "^4.7.0",
     "@reduxjs/toolkit": "^2.2.3",
     "antd": ">=5.12.2",

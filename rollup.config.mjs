@@ -5,28 +5,61 @@ import json from '@rollup/plugin-json'
 import resolve from '@rollup/plugin-node-resolve'
 import terser from '@rollup/plugin-terser'
 import typescript from '@rollup/plugin-typescript'
+import { createRequire } from 'node:module'
 import del from 'rollup-plugin-delete'
 import peerDepsExternal from 'rollup-plugin-peer-deps-external'
 
 import postcss from 'rollup-plugin-postcss'
 
+const require = createRequire(import.meta.url)
+const pkg = require('./package.json')
+
+const dependencyNames = new Set([
+  ...Object.keys(pkg.dependencies || {}),
+  ...Object.keys(pkg.peerDependencies || {})
+])
+const buildSourceMap = process.env.BUILD_SOURCEMAP !== 'false'
+
+const isExternal = (id) => {
+  if (id.startsWith('.') || id.startsWith('/')) {
+    return false
+  }
+
+  for (const dep of dependencyNames) {
+    if (id === dep || id.startsWith(`${dep}/`)) {
+      return true
+    }
+  }
+
+  return false
+}
+
 export default [
   {
-    input: 'src/index.ts',
+    input: {
+      index: 'src/index.ts',
+      admin: 'src/entries/admin.ts',
+      utils: 'src/entries/utils.ts',
+      hooks: 'src/entries/hooks.ts'
+    },
     output: [
       {
-        file: 'dist/index.cjs.js',
+        dir: 'dist',
         format: 'cjs',
-        sourcemap: true,
-        inlineDynamicImports: true
+        sourcemap: buildSourceMap,
+        entryFileNames: 'cjs/[name].js',
+        chunkFileNames: 'cjs/chunks/[name]-[hash].js',
+        exports: 'named'
       },
       {
-        file: 'dist/index.esm.js',
+        dir: 'dist',
         format: 'esm',
-        sourcemap: true,
-        inlineDynamicImports: true
+        sourcemap: buildSourceMap,
+        entryFileNames: 'esm/[name].js',
+        chunkFileNames: 'esm/chunks/[name]-[hash].js'
       }
     ],
+    external: isExternal,
     plugins: [
       del({ targets: 'dist/*' }),
       peerDepsExternal(),
@@ -47,13 +80,18 @@ export default [
           }
         }
       }),
-      typescript({ tsconfig: './tsconfig.json' }),
+      typescript({
+        tsconfig: './tsconfig.json',
+        sourceMap: buildSourceMap,
+        inlineSources: buildSourceMap
+      }),
       babel({
         babelHelpers: 'bundled',
         exclude: 'node_modules/**',
         extensions: ['.js', '.jsx', '.ts', '.tsx']
       }),
       terser({
+        maxWorkers: 1,
         compress: {
           drop_console: ['log', 'info'],
           drop_debugger: true
