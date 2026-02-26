@@ -174,11 +174,9 @@ const CompareVersionModal: FC<CompareVersionModalPropsType> = ({
               columns={columns}
               pagination={{ pageSize: 30 }}
               dataSource={versions}
+              rowClassName="compare-version-modal__content__table__row"
               rowKey={(record) => record.id}
-              onRow={(record, i) => {
-                if (i === 0) {
-                  return {}
-                }
+              onRow={(record) => {
                 return {
                   onClick: () => setSelectedItem(record)
                 }
