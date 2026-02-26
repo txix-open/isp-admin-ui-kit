@@ -1,7 +1,7 @@
 import { Button, Spin, Table, Tag } from 'antd'
 import { ColumnsType } from 'antd/es/table'
 import dayjs from 'dayjs'
-import { FC, lazy, memo, Suspense, useContext, useState } from 'react'
+import { FC, lazy, memo, Suspense, useContext, useMemo, useState } from 'react'
 
 import { dateFormats } from '@constants/date'
 
@@ -23,7 +23,9 @@ import { VersionType } from '@type/version.type'
 import './compare-version-modal.scss'
 
 const DiffEditor = lazy(() =>
-  import('@monaco-editor/react').then((mod) => ({ default: mod.DiffEditor }))
+  import('@monaco-editor/react').then((mod) => ({
+    default: mod.DiffEditor
+  }))
 )
 
 const CompareVersionModal: FC<CompareVersionModalPropsType> = ({
@@ -33,12 +35,15 @@ const CompareVersionModal: FC<CompareVersionModalPropsType> = ({
   currentConfigId
 }) => {
   const [selectedItem, setSelectedItem] = useState<VersionType>()
+  const { changeTheme } = useContext(Context)
   const { data: versions = [], isLoading: isVersionLoading } =
     configServiceApi.useGetAllVersionQuery(currentConfigId)
+
   const { data: allUsers = [], isLoading: isUsersLoading } =
     userServiceApi.useGetAllUsersQuery()
+
   const { profile } = useAppSelector((state) => state.profileReducer)
-  const { changeTheme } = useContext(Context)
+
   const isLoading = isVersionLoading || isUsersLoading
 
   const originalValue = useMemo(() => {
@@ -106,9 +111,7 @@ const CompareVersionModal: FC<CompareVersionModalPropsType> = ({
       key: 'createdAt',
       title: 'Создано',
       dataIndex: 'createdAt',
-      render: (value: string) => {
-        return dayjs(value).format(dateFormats.fullFormat)
-      }
+      render: (value: string) => dayjs(value).format(dateFormats.fullFormat)
     },
     {
       key: 'user',
@@ -135,10 +138,10 @@ const CompareVersionModal: FC<CompareVersionModalPropsType> = ({
           <div className="compare-version-modal__content">
             <Button onClick={() => setSelectedItem(undefined)}>Назад</Button>
             <div className="compare-version-modal__header">
-              <span> Версия: {selectedItem.configVersion}</span>
+              <span>Версия: {selectedItem.configVersion}</span>
               <span>
                 {config?.version
-                  ? `Текущая версия : ${config?.version}`
+                  ? `Текущая версия: ${config.version}`
                   : `Версия: ${config?.configVersion}`}
               </span>
             </div>
