@@ -91,6 +91,14 @@ const CompareVersionModal: FC<CompareVersionModalPropsType> = ({
             </div>
           )
         }
+        if (config.configVersion === value) {
+          return (
+            <div className="compare-version-modal__content__table__current-version-cell">
+              <span>{value}</span>
+              <Tag color="green">Выбрана для сравнения</Tag>
+            </div>
+          )
+        }
         return value
       }
     },
