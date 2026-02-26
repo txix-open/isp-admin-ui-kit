@@ -40,6 +40,39 @@ const CompareVersionModal: FC<CompareVersionModalPropsType> = ({
   const { profile } = useAppSelector((state) => state.profileReducer)
   const { changeTheme } = useContext(Context)
   const isLoading = isVersionLoading || isUsersLoading
+
+  const originalValue = useMemo(() => {
+    if (!selectedItem?.data) return ''
+    return JSON.stringify(sortObject(selectedItem.data), null, 2)
+  }, [selectedItem])
+
+  const modifiedValue = useMemo(() => {
+    if (!config?.data) return ''
+    return JSON.stringify(sortObject(config.data), null, 2)
+  }, [config])
+
+  const handleDiffMount = (editor: any) => {
+    const revealFirstDiff = () => {
+      const changes = editor?.getLineChanges?.()
+      if (!changes?.length) return
+
+      const first = changes[0]
+      const line =
+        first?.modifiedStartLineNumber ?? first?.originalStartLineNumber ?? 1
+
+      const modifiedEditor = editor?.getModifiedEditor?.()
+      modifiedEditor?.revealLineInCenter(line)
+      modifiedEditor?.setPosition({ lineNumber: line, column: 1 })
+    }
+
+    const disposable = editor?.onDidUpdateDiff?.(() => {
+      revealFirstDiff()
+      disposable?.dispose?.()
+    })
+
+    revealFirstDiff()
+  }
+
   if (isLoading) {
     return <Spin />
   }
@@ -102,18 +135,34 @@ const CompareVersionModal: FC<CompareVersionModalPropsType> = ({
             </div>
             <Suspense fallback={<Spin />}>
               <DiffEditor
-                original={JSON.stringify(
-                  sortObject(selectedItem.data),
-                  null,
-                  2
-                )}
-                modified={JSON.stringify(sortObject(config?.data), null, 2)}
-                theme={changeTheme ? 'vs-dark' : 'vs-white'}
+                onMount={handleDiffMount}
+                language="json"
+                original={originalValue}
+                modified={modifiedValue}
+                theme={changeTheme ? 'vs-dark' : 'light'}
                 options={{
                   readOnly: true,
                   domReadOnly: true,
-                  renderOverviewRuler: false,
-                  autoClosingOvertype: 'auto'
+
+                  wordWrap: 'on',
+                  scrollBeyondLastLine: false,
+
+                  renderSideBySide: true,
+                  ignoreTrimWhitespace: true,
+                  diffAlgorithm: 'advanced',
+
+                  renderIndicators: true,
+                  renderOverviewRuler: true,
+
+                  minimap: { enabled: false },
+
+                  hideUnchangedRegions: {
+                    enabled: true,
+                    contextLineCount: 4,
+                    minimumLineCount: 3
+                  },
+
+                  maxComputationTime: 5000
                 }}
               />
             </Suspense>
