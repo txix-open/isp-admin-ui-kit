@@ -123,13 +123,14 @@ const CompareVersionModal: FC<CompareVersionModalPropsType> = ({
       }
     }
   ]
+
+  const modalTitle = !selectedItem
+    ? 'Выберите версию для сравнения'
+    : 'Сравнение версий'
+
   return (
     <div className="compare-version-modal">
-      <Modal
-        title="Выберите версию для сравнения"
-        open={open}
-        onClose={onClose}
-      >
+      <Modal title={modalTitle} open={open} onClose={onClose}>
         {selectedItem ? (
           <div className="compare-version-modal__content">
             <Button onClick={() => setSelectedItem(undefined)}>Назад</Button>
