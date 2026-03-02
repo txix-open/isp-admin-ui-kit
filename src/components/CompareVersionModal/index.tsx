@@ -1,7 +1,7 @@
 import { Button, Spin, Table, Tag } from 'antd'
 import { ColumnsType } from 'antd/es/table'
 import dayjs from 'dayjs'
-import { FC, lazy, memo, Suspense, useContext, useState } from 'react'
+import { FC, lazy, memo, Suspense, useContext, useMemo, useState } from 'react'
 
 import { dateFormats } from '@constants/date'
 
@@ -23,7 +23,9 @@ import { VersionType } from '@type/version.type'
 import './compare-version-modal.scss'
 
 const DiffEditor = lazy(() =>
-  import('@monaco-editor/react').then((mod) => ({ default: mod.DiffEditor }))
+  import('@monaco-editor/react').then((mod) => ({
+    default: mod.DiffEditor
+  }))
 )
 
 const CompareVersionModal: FC<CompareVersionModalPropsType> = ({
@@ -33,13 +35,49 @@ const CompareVersionModal: FC<CompareVersionModalPropsType> = ({
   currentConfigId
 }) => {
   const [selectedItem, setSelectedItem] = useState<VersionType>()
+  const { changeTheme } = useContext(Context)
   const { data: versions = [], isLoading: isVersionLoading } =
     configServiceApi.useGetAllVersionQuery(currentConfigId)
+
   const { data: allUsers = [], isLoading: isUsersLoading } =
     userServiceApi.useGetAllUsersQuery()
+
   const { profile } = useAppSelector((state) => state.profileReducer)
-  const { changeTheme } = useContext(Context)
+
   const isLoading = isVersionLoading || isUsersLoading
+
+  const originalValue = useMemo(() => {
+    if (!selectedItem?.data) return ''
+    return JSON.stringify(sortObject(selectedItem.data), null, 2)
+  }, [selectedItem])
+
+  const modifiedValue = useMemo(() => {
+    if (!config?.data) return ''
+    return JSON.stringify(sortObject(config.data), null, 2)
+  }, [config])
+
+  const handleDiffMount = (editor: any) => {
+    const revealFirstDiff = () => {
+      const changes = editor?.getLineChanges?.()
+      if (!changes?.length) return
+
+      const first = changes[0]
+      const line =
+        first?.modifiedStartLineNumber ?? first?.originalStartLineNumber ?? 1
+
+      const modifiedEditor = editor?.getModifiedEditor?.()
+      modifiedEditor?.revealLineInCenter(line)
+      modifiedEditor?.setPosition({ lineNumber: line, column: 1 })
+    }
+
+    const disposable = editor?.onDidUpdateDiff?.(() => {
+      revealFirstDiff()
+      disposable?.dispose?.()
+    })
+
+    revealFirstDiff()
+  }
+
   if (isLoading) {
     return <Spin />
   }
@@ -58,6 +96,14 @@ const CompareVersionModal: FC<CompareVersionModalPropsType> = ({
             </div>
           )
         }
+        if (config.configVersion === value) {
+          return (
+            <div className="compare-version-modal__content__table__current-version-cell">
+              <span>{value}</span>
+              <Tag color="green">Выбрана для сравнения</Tag>
+            </div>
+          )
+        }
         return value
       }
     },
@@ -65,9 +111,7 @@ const CompareVersionModal: FC<CompareVersionModalPropsType> = ({
       key: 'createdAt',
       title: 'Создано',
       dataIndex: 'createdAt',
-      render: (value: string) => {
-        return dayjs(value).format(dateFormats.fullFormat)
-      }
+      render: (value: string) => dayjs(value).format(dateFormats.fullFormat)
     },
     {
       key: 'user',
@@ -82,38 +126,55 @@ const CompareVersionModal: FC<CompareVersionModalPropsType> = ({
       }
     }
   ]
+
+  const modalTitle = !selectedItem
+    ? 'Выберите версию для сравнения'
+    : 'Сравнение версий'
+
   return (
     <div className="compare-version-modal">
-      <Modal
-        title="Выберите версию для сравнения"
-        open={open}
-        onClose={onClose}
-      >
+      <Modal title={modalTitle} open={open} onClose={onClose}>
         {selectedItem ? (
           <div className="compare-version-modal__content">
             <Button onClick={() => setSelectedItem(undefined)}>Назад</Button>
             <div className="compare-version-modal__header">
-              <span> Версия: {selectedItem.configVersion}</span>
+              <span>Версия: {selectedItem.configVersion}</span>
               <span>
                 {config?.version
-                  ? `Текущая версия : ${config?.version}`
+                  ? `Текущая версия: ${config.version}`
                   : `Версия: ${config?.configVersion}`}
               </span>
             </div>
             <Suspense fallback={<Spin />}>
               <DiffEditor
-                original={JSON.stringify(
-                  sortObject(selectedItem.data),
-                  null,
-                  2
-                )}
-                modified={JSON.stringify(sortObject(config?.data), null, 2)}
-                theme={changeTheme ? 'vs-dark' : 'vs-white'}
+                onMount={handleDiffMount}
+                language="json"
+                original={originalValue}
+                modified={modifiedValue}
+                theme={changeTheme ? 'vs-dark' : 'light'}
                 options={{
                   readOnly: true,
                   domReadOnly: true,
-                  renderOverviewRuler: false,
-                  autoClosingOvertype: 'auto'
+
+                  wordWrap: 'on',
+                  scrollBeyondLastLine: false,
+
+                  renderSideBySide: true,
+                  ignoreTrimWhitespace: true,
+                  diffAlgorithm: 'advanced',
+
+                  renderIndicators: true,
+                  renderOverviewRuler: true,
+
+                  minimap: { enabled: false },
+
+                  hideUnchangedRegions: {
+                    enabled: true,
+                    contextLineCount: 4,
+                    minimumLineCount: 3
+                  },
+
+                  maxComputationTime: 5000
                 }}
               />
             </Suspense>
@@ -125,11 +186,9 @@ const CompareVersionModal: FC<CompareVersionModalPropsType> = ({
               columns={columns}
               pagination={{ pageSize: 30 }}
               dataSource={versions}
+              rowClassName="compare-version-modal__content__table__row"
               rowKey={(record) => record.id}
-              onRow={(record, i) => {
-                if (i === 0) {
-                  return {}
-                }
+              onRow={(record) => {
                 return {
                   onClick: () => setSelectedItem(record)
                 }
