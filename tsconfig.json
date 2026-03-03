@@ -21,6 +21,7 @@
     "paths": {
       "@assets/*": ["src/assets/*"],
       "@constants/*": ["src/constants/*"],
+      "@entries/*": ["src/entries/*"],
       "@ui/*": ["src/ui/*"],
       "@widgets/*": ["src/widgets/*"],
       "@components/*": ["src/components/*"],
