@@ -129,7 +129,7 @@ export const apiPaths: Record<PathKeys, string> = {
   setList: '/access_list/set_list',
   setOne: '/access_list/set_one',
   getAllRoutes: '/routing/get_routes',
-  deleteList: '/access_list/delete_list',
+  deleteList: '/access_list/delete_list_with_methods',
   // ======= MODULES ======
   getModules: '/module/get_modules_info',
   deleteModule: '/module/delete_module',
