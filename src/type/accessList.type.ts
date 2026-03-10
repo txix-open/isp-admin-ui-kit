@@ -2,10 +2,13 @@ interface WithAppId {
   appId: number
 }
 
-interface AccessListMethodTypeBase {
+export interface AccessListMethodTypeBase {
   method: string
   value: boolean
+  httpMethod?: string
 }
+
+type AccessListBaseType = Omit<AccessListMethodTypeBase, 'value'>
 
 export interface AccessListMethodType extends AccessListMethodTypeBase {}
 
@@ -15,17 +18,20 @@ export interface AccessListSetListRequestType extends WithAppId {
 }
 
 export interface AccessListSetListSetOneRequestType
-  extends WithAppId,
-    AccessListMethodTypeBase {}
+  extends WithAppId, AccessListMethodTypeBase {}
 
 export interface AccessListDeleteListRequestType extends WithAppId {
-  methods: string[]
+  methods: AccessListBaseType[]
 }
 
-export interface EndpointType {
+export type BaseEndpoint = {
+  path: string
+  httpMethod: string
+}
+
+export type EndpointType = BaseEndpoint & {
   extra: Record<string, any>
   inner: boolean
-  path: string
   userAuthRequired: boolean
 }
 
