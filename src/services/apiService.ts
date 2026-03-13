@@ -16,12 +16,7 @@ export const apiService = axios.create({
   data: {}
 })
 
-apiService.defaults.headers.post['X-APPLICATION-TOKEN'] = getConfigProperty(
-  'APP_TOKEN',
-  import.meta.env.VITE_APP_TOKEN
-)
-
-apiService.defaults.headers.get['X-APPLICATION-TOKEN'] = getConfigProperty(
+apiService.defaults.headers.common['X-APPLICATION-TOKEN'] = getConfigProperty(
   'APP_TOKEN',
   import.meta.env.VITE_APP_TOKEN
 )

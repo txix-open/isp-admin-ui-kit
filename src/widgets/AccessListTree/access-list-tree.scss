@@ -1,9 +1,16 @@
 @use "../../constants/style/styleConst" as *;
 
-.access-list-tree{
+.access-list-tree {
   overflow-y: auto;
   height: calc(100vh - 100px);
-  &__inner-tag{
+
+  &__span {
+    display: flex;
+    flex-wrap: nowrap;
+    white-space: nowrap;
+  }
+
+  &__inner-tag {
     margin-left: $basic-margin;
   }
 }
