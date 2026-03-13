@@ -1,6 +1,6 @@
 import { SearchOutlined } from '@ant-design/icons'
 import { Button, Input, message, Spin, TreeProps } from 'antd'
-import { ChangeEvent, FC, memo, useEffect, useState } from 'react'
+import { ChangeEvent, FC, memo, useMemo, useState } from 'react'
 import { Navigate, useSearchParams } from 'react-router-dom'
 
 import AccessListTree from '@widgets/AccessListTree'
@@ -21,6 +21,7 @@ import { routePaths } from '@routes/routePaths'
 import {
   AccessListDeleteListRequestType,
   AccessListMethodType,
+  BaseEndpoint,
   EndpointType
 } from '@type/accessList.type'
 import { PermissionKeysType } from '@type/roles.type'
@@ -58,10 +59,7 @@ const AppAccessContent: FC<AppAccessContentPropsType> = ({
     isError: isRouteError,
     isSuccess: isRouteSuccess
   } = routeApi.useGetAllRoutesQuery()
-  const { moduleEndpoints, allRouteMap } = routes
-  const [defaultAllRoutes, setDefaultAllRoutes] = useState<
-    Record<string, EndpointType[]>
-  >({})
+  const { moduleEndpoints } = routes
   const [selectedMethod, setSelectedMethod] = useState<AccessListMethodType[]>(
     []
   )
@@ -82,35 +80,78 @@ const AppAccessContent: FC<AppAccessContentPropsType> = ({
   }
 
   const createAllMethodList = (status: boolean) => {
-    return Object.keys(allRouteMap).map((key) => {
-      return {
-        method: key,
-        value: status
-      }
-    })
+    return Object.values(moduleEndpoints)
+      .flat()
+      .map((key) => {
+        return {
+          method: key.path,
+          value: status,
+          httpMethod: key.httpMethod
+        }
+      })
   }
 
   const handleOnCheck: TreeProps['onCheck'] = (_, info): void | never[] => {
-    const { node } = info
+    const node = info.node as any
+
     if (!node.children) {
-      setSelectedMethod((prev) => [
-        ...prev.filter((item) => item.method !== node.key),
-        { method: node.key as string, value: !node.checked }
-      ])
+      setSelectedMethod((prev) => {
+        const newValue = !node.checked
+
+        const currentMethod = methods.find(
+          (m) => m.method === node.path && m.httpMethod === node.httpMethod
+        )
+
+        if (currentMethod?.value === newValue) {
+          return prev.filter(
+            (item) =>
+              !(
+                item.method === node.path && item.httpMethod === node.httpMethod
+              )
+          )
+        }
+
+        const filtered = prev.filter(
+          (item) =>
+            !(item.method === node.path && item.httpMethod === node.httpMethod)
+        )
+        return [
+          ...filtered,
+          {
+            method: node.path,
+            httpMethod: node.httpMethod,
+            value: newValue
+          }
+        ]
+      })
       return
     }
 
-    const newChanges = node.children.map((child) => ({
-      method: child.key as string,
+    const newChanges = node.children.map((child: any) => ({
+      method: child.path,
+      httpMethod: child.httpMethod,
       value: !node.checked
     }))
 
-    setSelectedMethod((prev) => [
-      ...prev.filter(
-        (item) => !node.children?.some((child) => child.key === item.method)
-      ),
-      ...newChanges
-    ])
+    setSelectedMethod((prev) => {
+      const filtered = prev.filter(
+        (item) =>
+          !node.children?.some(
+            (child: any) =>
+              child.path === item.method && child.httpMethod === item.httpMethod
+          )
+      )
+
+      const validChanges = newChanges.filter((change: any) => {
+        const currentMethod = methods.find(
+          (m) =>
+            m.method === change.method && m.httpMethod === change.httpMethod
+        )
+        return currentMethod?.value !== change.value
+      })
+
+      return [...filtered, ...validChanges]
+    })
   }
 
   const handleInputOnChange = (e: ChangeEvent<HTMLInputElement>) => {
@@ -118,10 +159,13 @@ const AppAccessContent: FC<AppAccessContentPropsType> = ({
     setUrlValue(value.trim().toLowerCase(), setSearchParams, paramPrefix)
   }
 
-  const handleRemoveUnknowMethods = (methods: string[]) => {
+  const handleRemoveUnknowMethods = (methods: BaseEndpoint[]) => {
     const sendData: AccessListDeleteListRequestType = {
       appId: id,
-      methods: methods
+      methods: methods.map((obj) => ({
+        method: obj.path,
+        httpMethod: obj.httpMethod
+      }))
     }
     deleteList(sendData)
       .unwrap()
@@ -145,6 +189,7 @@ const AppAccessContent: FC<AppAccessContentPropsType> = ({
       .then(() => {
         openSuccessMessage('Статус методов успешно изменен')
         setShowSaveModal(false)
+        setSelectedMethod([])
       })
       .catch(() => {
         openErrorMessage('Не удалось изменить статус методов')
@@ -157,13 +202,23 @@ const AppAccessContent: FC<AppAccessContentPropsType> = ({
     setSelectedMethod(methods)
   }
 
-  const getAllRoutes = () => {
+  const defaultAllRoutes = useMemo(() => {
     const missingRoute: EndpointType[] = []
     const copyAllRoutes = { ...moduleEndpoints }
 
+    const allRoutesArray = Object.values(moduleEndpoints).flat()
+
     methods.forEach((item) => {
-      if (!allRouteMap[item.method]) {
-        missingRoute.push({ path: item.method } as EndpointType)
+      const hasRoute = allRoutesArray.some(
+        (route) =>
+          route.path === item.method && route.httpMethod === item.httpMethod
+      )
+
+      if (!hasRoute) {
+        missingRoute.push({
+          path: item.method,
+          httpMethod: item.httpMethod
+        } as EndpointType)
       }
     })
 
@@ -171,16 +226,12 @@ const AppAccessContent: FC<AppAccessContentPropsType> = ({
       copyAllRoutes[unknownMethodKey] = missingRoute
     }
     return copyAllRoutes
-  }
-
-  useEffect(() => {
-    const allRoutes = getAllRoutes()
-    setDefaultAllRoutes(allRoutes)
   }, [isSuccess, moduleEndpoints, methods])
 
   const currentMethodStatus = methods.reduce(
     (acc, method) => {
-      acc[method.method] = method.value
+      const key = `${method.httpMethod}_${method.method}`
+      acc[key] = method.value
       return acc
     },
     {} as Record<string, boolean>
@@ -188,11 +239,18 @@ const AppAccessContent: FC<AppAccessContentPropsType> = ({
 
   const changes = {
     allowed: selectedMethod
-      .filter((method) => method.value && !currentMethodStatus[method.method])
-      .map((method) => method.method),
+      .filter((method) => {
+        const key = `${method.httpMethod}_${method.method}`
+        return method.value && !currentMethodStatus[key]
+      })
+      .map((method) => `${method.httpMethod} ${method.method}`),
+
     denied: selectedMethod
-      .filter((method) => !method.value && currentMethodStatus[method.method])
-      .map((method) => method.method)
+      .filter((method) => {
+        const key = `${method.httpMethod}_${method.method}`
+        return !method.value && currentMethodStatus[key]
+      })
+      .map((method) => `${method.httpMethod} ${method.method}`)
   }
 
   const isNoChanges =

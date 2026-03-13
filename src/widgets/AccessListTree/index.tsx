@@ -4,14 +4,23 @@ import { FC, memo, useCallback, useEffect, useState } from 'react'
 
 import { AccessListTreePropsType } from '@widgets/AccessListTree/access-list-tree.type'
 
+import { httpMethodColors } from '@utils/httpMethodColorUtils'
+
 import useRole from '@hooks/useRole'
 
-import { EndpointType } from '@type/accessList.type'
+import {
+  AccessListMethodTypeBase,
+  BaseEndpoint,
+  EndpointType
+} from '@type/accessList.type'
 import { PermissionKeysType } from '@type/roles.type'
 
 import './access-list-tree.scss'
 
 const unknownMethodKey = 'неизвестные методы'
+
+const getNodeKey = (path: string, httpMethod?: string) =>
+  httpMethod ? `${httpMethod}:${path}` : path
 
 const AccessListTree: FC<AccessListTreePropsType> = ({
   searchValue,
@@ -24,17 +33,18 @@ const AccessListTree: FC<AccessListTreePropsType> = ({
   const { hasPermission } = useRole()
   const [expandedKeys, setExpandedKeys] = useState<string[]>([])
 
-  const handleRemoveUnknownMethods = (methods: string[]) => {
+  const handleRemoveUnknownMethods = (methods: BaseEndpoint[]) => {
     if (!onRemoveUnknownMethods) {
       return
     }
     onRemoveUnknownMethods(methods)
   }
 
-  const createTreeData = (data: Record<string, EndpointType[]>) => {
-    const unknownMethods = data[unknownMethodKey]?.map(
-      (objMethod) => objMethod.path
-    )
+  const createTreeData = (
+    data: Record<string, (EndpointType | BaseEndpoint)[]>
+  ) => {
+    const unknownMethods = data[unknownMethodKey]
+
     return Object.keys(data)
       .sort()
       .map((routeKey) => {
@@ -69,37 +79,60 @@ const AccessListTree: FC<AccessListTreePropsType> = ({
       })
   }
 
-  const createTreeNode = useCallback((obj: EndpointType, unknown = false) => {
-    const showRemoveBtn = unknown && onRemoveUnknownMethods
+  const createTreeNode = useCallback(
+    (obj: EndpointType | BaseEndpoint, unknown = false) => {
+      const showRemoveBtn = unknown && onRemoveUnknownMethods
+      const nodeKey = getNodeKey(obj.path, obj.httpMethod)
 
-    return {
-      title: (
-        <span className={`${unknown ? 'unknown-label' : ''}`}>
-          {obj.path}
-          {showRemoveBtn && (
-            <Tooltip title="Удалить">
-              <Popconfirm
-                title="Удалить неизвестный метод?"
-                onConfirm={() => handleRemoveUnknownMethods([obj.path])}
-              >
-                <Button icon={<DeleteOutlined />} />
-              </Popconfirm>
-            </Tooltip>
-          )}
-          {obj.inner ? (
-            <Tag
-              className="access-list-tree__inner-tag"
-              color="processing"
-              bordered={false}
-            >
-              Внутренний
-            </Tag>
-          ) : null}
-        </span>
-      ),
-      key: obj.path
-    }
-  }, [])
+      return {
+        title: (
+          <span
+            className={`${unknown ? 'access-list-tree__span unknown-label' : 'access-list-tree__span'}`}
+          >
+            <div>{obj.path}</div>
+
+            <div>
+              {obj.httpMethod && (
+                <Tag
+                  className="access-list-tree__inner-tag"
+                  color={httpMethodColors[obj.httpMethod]}
+                  bordered={false}
+                >
+                  {obj.httpMethod}
+                </Tag>
+              )}
+            </div>
+
+            {showRemoveBtn && (
+              <Tooltip title="Удалить">
+                <Popconfirm
+                  title="Удалить неизвестный метод?"
+                  onConfirm={() => handleRemoveUnknownMethods([obj])}
+                >
+                  <Button icon={<DeleteOutlined />} />
+                </Popconfirm>
+              </Tooltip>
+            )}
+            <div>
+              {'inner' in obj && obj.inner ? (
+                <Tag
+                  className="access-list-tree__inner-tag"
+                  color="processing"
+                  bordered={false}
+                >
+                  Внутренний
+                </Tag>
+              ) : null}
+            </div>
+          </span>
+        ),
+        key: nodeKey,
+        path: obj.path,
+        httpMethod: obj.httpMethod
+      }
+    },
+    []
+  )
 
   const filteredRoute = () => {
     if (!searchValue) {
@@ -122,19 +155,23 @@ const AccessListTree: FC<AccessListTreePropsType> = ({
   const getCheckedKeys = () => {
     const checkedKeys = new Set<string>()
 
-    methods.forEach(({ method, value }) => {
+    methods.forEach(({ method, httpMethod, value }) => {
       if (value) {
-        checkedKeys.add(method)
+        checkedKeys.add(getNodeKey(method, httpMethod))
       }
     })
 
-    selectedMethod.forEach(({ method, value }: any) => {
-      if (value) {
-        checkedKeys.add(method)
-      } else {
-        checkedKeys.delete(method)
+    selectedMethod.forEach(
+      ({ method, httpMethod, value }: AccessListMethodTypeBase) => {
+        const key = getNodeKey(method, httpMethod)
+
+        if (value) {
+          checkedKeys.add(key)
+        } else {
+          checkedKeys.delete(key)
+        }
       }
-    })
+    )
 
     return Array.from(checkedKeys)
   }

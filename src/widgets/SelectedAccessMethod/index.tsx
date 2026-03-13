@@ -1,6 +1,9 @@
+import { Tag } from 'antd'
 import { FC } from 'react'
 
 import { SelectedAccessMethodPropsType } from '@widgets/SelectedAccessMethod/selected-access-method.type'
+
+import { httpMethodColors } from '@utils/httpMethodColorUtils'
 
 import { AccessListMethodType } from '@type/accessList.type'
 
@@ -11,9 +14,12 @@ const SelectedAccessMethod: FC<SelectedAccessMethodPropsType> = ({
   allRoutes,
   methods
 }) => {
-  const checkIsUnknownMethod = (method: string) => {
+  const checkIsUnknownMethod = (method: AccessListMethodType) => {
     const routes = allRoutes[unknownMethodKey] || []
-    return routes.find((route) => route.path === method)
+    return routes.find(
+      (route) =>
+        route.path === method.method && route.httpMethod === method.httpMethod
+    )
   }
 
   const renderMethodList = () => {
@@ -23,8 +29,8 @@ const SelectedAccessMethod: FC<SelectedAccessMethodPropsType> = ({
       a: AccessListMethodType,
       b: AccessListMethodType
     ) => a.method.localeCompare(b.method)
-    methods.forEach((method) => {
-      const isUnknown = checkIsUnknownMethod(method.method)
+    methods.forEach((method: AccessListMethodType) => {
+      const isUnknown = checkIsUnknownMethod(method)
       if (isUnknown) {
         unknownMethods.push(method)
       } else {
@@ -47,10 +53,19 @@ const SelectedAccessMethod: FC<SelectedAccessMethodPropsType> = ({
       }
       return (
         <span
-          className={`${checkIsUnknownMethod(method.method) ? 'unknown-label' : ''}`}
-          key={method.method}
+          className={`${checkIsUnknownMethod(method) ? 'unknown-label' : ''}`}
+          key={`${method.httpMethod}_${method.method}`}
         >
           {method.method}
+          {method.httpMethod && (
+            <Tag
+              className="access-list-tree__inner-tag"
+              color={httpMethodColors[method.httpMethod]}
+              bordered={false}
+            >
+              {method.httpMethod}
+            </Tag>
+          )}
         </span>
       )
     })
