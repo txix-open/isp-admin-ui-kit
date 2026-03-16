@@ -44,16 +44,17 @@ const AdminBase: FC<AdminBasePropsType> = ({
 
   useEffect(() => {
     return routerConfig.subscribe((state) => {
-      const currentPath = getCleanPath(state.location.pathname)
+      const currentPathname = getCleanPath(state.location.pathname)
+      const fullPath = `${currentPathname}${state.location.search}${state.location.hash}`
       const prevRoute = sessionStorage.getItem('prevRoute')
 
       if (
-        currentPath !== routePaths.error &&
-        currentPath !== routePaths.login &&
-        currentPath !== routePaths.home &&
-        currentPath !== prevRoute
+        currentPathname !== routePaths.error &&
+        currentPathname !== routePaths.login &&
+        currentPathname !== routePaths.home &&
+        fullPath !== prevRoute
       ) {
-        sessionStorage.setItem('prevRoute', currentPath)
+        sessionStorage.setItem('prevRoute', fullPath)
       }
     })
   }, [routerConfig])

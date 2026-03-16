@@ -58,8 +58,14 @@ const LoginPage = () => {
       .then((response) => {
         LocalStorage.set(localStorageKeys.HEADER_NAME, response.headerName)
         LocalStorage.set(localStorageKeys.USER_TOKEN, response.token)
+        const prevRoute = sessionStorage.getItem('prevRoute')
         const redirectUrl =
-          sessionStorage.getItem('prevRoute') || routePaths.home
+          !prevRoute ||
+          prevRoute === routePaths.login ||
+          prevRoute === routePaths.error
+            ? routePaths.home
+            : prevRoute
+        sessionStorage.removeItem('prevRoute')
         navigate(redirectUrl, { replace: true })
       })
       .catch((err: AxiosError<MSPError>) => handleError(err))
