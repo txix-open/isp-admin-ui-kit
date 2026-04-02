@@ -1,9 +1,3 @@
-Я обновил документацию, добавив обязательный шаг инициализации **Monaco Editor** через `loader.config` и `loader.init`, как вы указали. Это вынесено в отдельный важный блок, так как без этого компоненты редактора не будут работать.
-
-Вот актуальная версия **README.md**:
-
----
-
 # isp-admin-ui-kit
 
 [![npm version](https://img.shields.io/npm/v/isp-admin-ui-kit.svg)](https://www.npmjs.com/package/isp-admin-ui-kit)

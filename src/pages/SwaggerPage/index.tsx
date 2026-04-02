@@ -1,57 +1,29 @@
-import { useThemeStore } from '@stoplight/mosaic'
-import { Spin, theme } from 'antd'
-import { useEffect, useState, useMemo } from 'react'
-import { useParams, useResolvedPath } from 'react-router-dom'
+import { Button, Spin, theme } from 'antd'
+import { lazy, Suspense, useEffect, useState } from 'react'
+import { useParams } from 'react-router-dom'
+
+import { downloadFile } from '@utils/downloadFile'
+import { toSafeFileName } from '@utils/toSafeFileName'
 
 import modulesServiceApi from '@services/modulesService'
 import swaggerServiceApi from '@services/swaggerService'
 
-import { API } from '@stoplight/elements'
-
 import './swagger-page.scss'
+
+const SwaggerUI = lazy(() => import('swagger-ui-react'))
 
 const { useToken } = theme
 
 const SwaggerPage = () => {
   const { token } = useToken()
-  const { pathname: basePath } = useResolvedPath('.')
 
   const isDark = token.colorBgBase === '#141414'
-  const setThemeMode = useThemeStore((s) => s.setMode)
-
   const { id } = useParams<{ id: string }>()
 
   const { data: modules = [] } = modulesServiceApi.useGetModulesQuery('modules')
 
   const [swaggerPath, setSwaggerPath] = useState<string>('')
-
-  const { data: swaggerSpec, isLoading } = swaggerServiceApi.useGetSwaggerQuery(
-    swaggerPath,
-    {
-      skip: !swaggerPath
-    }
-  )
-
-  const apiDescriptionDocument = useMemo(() => {
-    if (!swaggerSpec) {
-      return null
-    }
-
-    if (typeof swaggerSpec === 'string') {
-      try {
-        const parsedSpec = JSON.parse(swaggerSpec)
-        return JSON.parse(JSON.stringify(parsedSpec))
-      } catch {
-        return swaggerSpec
-      }
-    }
-
-    return JSON.parse(JSON.stringify(swaggerSpec))
-  }, [swaggerSpec])
-
-  useEffect(() => {
-    import('@stoplight/elements/styles.min.css')
-  }, [])
+  const [moduleName, setModuleName] = useState<string>('module')
 
   useEffect(() => {
     if (!modules.length || !id) {
@@ -62,6 +34,7 @@ const SwaggerPage = () => {
     if (!module) {
       return
     }
+    setModuleName(module.name ?? 'module')
 
     const swaggerEndpoint = module.status
       ?.flatMap((s) => s.endpoints)
@@ -73,8 +46,43 @@ const SwaggerPage = () => {
   }, [modules, id])
 
   useEffect(() => {
-    setThemeMode(isDark ? 'dark' : 'light')
-  }, [isDark, setThemeMode])
+    const root = document.documentElement
+
+    if (isDark) {
+      root.classList.add('dark-mode')
+    } else {
+      root.classList.remove('dark-mode')
+    }
+
+    return () => {
+      root.classList.remove('dark-mode')
+    }
+  }, [isDark])
+
+  const { data: swaggerSpec, isLoading } = swaggerServiceApi.useGetSwaggerQuery(
+    swaggerPath,
+    {
+      skip: !swaggerPath
+    }
+  )
+
+  useEffect(() => {
+    import('swagger-ui-react/swagger-ui.css')
+  }, [])
+
+  const handleDownload = () => {
+    if (!swaggerSpec) {
+      return
+    }
+
+    const safeName = toSafeFileName(moduleName)
+    const json = JSON.stringify(swaggerSpec, null, 2)
+    downloadFile({
+      fileName: `swagger-${safeName}.json`,
+      content: json,
+      mimeType: 'application/json;charset=utf-8'
+    })
+  }
 
   if (isLoading) {
     return (
@@ -87,14 +95,26 @@ const SwaggerPage = () => {
   return (
     <div className="swagger-page">
       {swaggerSpec ? (
-        <div className="swagger-page__content">
-          <API
-            apiDescriptionDocument={apiDescriptionDocument}
-            hideTryIt={true}
-            basePath={basePath}
-            layout="responsive"
-          />
-        </div>
+        <>
+          <div className="swagger-page__toolbar">
+            <Button type="primary" onClick={handleDownload}>
+              Скачать Swagger
+            </Button>
+          </div>
+
+          <div className="swagger-page__content">
+            <Suspense fallback={<Spin />}>
+              <SwaggerUI
+                spec={swaggerSpec}
+                docExpansion="list"
+                defaultModelsExpandDepth={-1}
+                displayOperationId={false}
+                tryItOutEnabled={false}
+                requestSnippetsEnabled={false}
+              />
+            </Suspense>
+          </div>
+        </>
       ) : (
         <div className="swagger-page__no-data">Нет данных Swagger</div>
       )}

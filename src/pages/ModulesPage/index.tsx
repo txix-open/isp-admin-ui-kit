@@ -75,9 +75,6 @@ const ModulesPage = () => {
       case MODULES_TAB_KEYS.swagger:
         return setActiveTab(MODULES_TAB_KEYS.swagger)
     }
-    if (location.pathname.includes('/swagger/')) {
-      setActiveTab(MODULES_TAB_KEYS.swagger)
-    }
   }, [location])
 
   const setSelectedItemId = (id: string): void => {

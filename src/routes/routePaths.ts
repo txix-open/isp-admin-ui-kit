@@ -36,7 +36,7 @@ export const routePaths: Record<RoutePaths, string> = {
   modules: '/modules',
   application: 'application',
   connections: 'connections',
-  swagger: 'swagger/*',
+  swagger: 'swagger',
   configurations: 'configurations',
   allVersions: ':configId/all_versions',
   configEditor: 'configEditor',
