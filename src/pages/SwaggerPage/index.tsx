@@ -1,14 +1,14 @@
-import { Spin, theme } from 'antd'
-import { lazy, Suspense, useEffect, useState, useMemo } from 'react'
-import { useParams, useResolvedPath } from 'react-router-dom'
 import { useThemeStore } from '@stoplight/mosaic'
+import { Spin, theme } from 'antd'
+import { useEffect, useState, useMemo } from 'react'
+import { useParams, useResolvedPath } from 'react-router-dom'
 
 import modulesServiceApi from '@services/modulesService'
 import swaggerServiceApi from '@services/swaggerService'
 
-import './swagger-page.scss'
+import { API } from '@stoplight/elements'
 
-const API = lazy(() => import('@stoplight/elements').then((mod) => ({ default: mod.API })))
+import './swagger-page.scss'
 
 const { useToken } = theme
 
@@ -88,14 +88,12 @@ const SwaggerPage = () => {
     <div className="swagger-page">
       {swaggerSpec ? (
         <div className="swagger-page__content">
-          <Suspense fallback={<Spin />}>
-            <API
-              apiDescriptionDocument={apiDescriptionDocument}
-              hideTryIt={true}
-              basePath={basePath}
-              layout="responsive"
-            />
-          </Suspense>
+          <API
+            apiDescriptionDocument={apiDescriptionDocument}
+            hideTryIt={true}
+            basePath={basePath}
+            layout="responsive"
+          />
         </div>
       ) : (
         <div className="swagger-page__no-data">Нет данных Swagger</div>
