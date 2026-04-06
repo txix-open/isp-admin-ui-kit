@@ -1,40 +1,51 @@
-import { Button, Spin, theme } from 'antd'
-import { lazy, Suspense, useEffect, useState } from 'react'
+import { Spin } from 'antd'
+import {
+  memo,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState
+} from 'react'
 import { useParams } from 'react-router-dom'
-
-import { downloadFile } from '@utils/downloadFile'
-import { toSafeFileName } from '@utils/toSafeFileName'
+import { RedocStandalone } from 'redoc'
 
 import modulesServiceApi from '@services/modulesService'
 import swaggerServiceApi from '@services/swaggerService'
 
+import { Context } from '@stores/index'
+
+import { DARK_OPTIONS, LIGHT_OPTIONS } from './redoc-options'
 import './swagger-page.scss'
+import type { RedocViewPropsType } from './swagger.type'
 
-const SwaggerUI = lazy(() => import('swagger-ui-react'))
-
-const { useToken } = theme
+const RedocView = memo(({ spec, isDark }: RedocViewPropsType) => (
+  <RedocStandalone
+    spec={spec}
+    options={isDark ? DARK_OPTIONS : LIGHT_OPTIONS}
+  />
+))
 
 const SwaggerPage = () => {
-  const { token } = useToken()
+  const { changeTheme: isDark } = useContext(Context)
 
-  const isDark = token.colorBgBase === '#141414'
   const { id } = useParams<{ id: string }>()
-
   const { data: modules = [] } = modulesServiceApi.useGetModulesQuery('modules')
 
-  const [swaggerPath, setSwaggerPath] = useState<string>('')
-  const [moduleName, setModuleName] = useState<string>('module')
+  const [swaggerPath, setSwaggerPath] = useState('')
+  const contentRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     if (!modules.length || !id) {
       return
     }
+
     const module = modules.find((m) => m.id === id)
 
     if (!module) {
       return
     }
-    setModuleName(module.name ?? 'module')
 
     const swaggerEndpoint = module.status
       ?.flatMap((s) => s.endpoints)
@@ -45,20 +56,6 @@ const SwaggerPage = () => {
     }
   }, [modules, id])
 
-  useEffect(() => {
-    const root = document.documentElement
-
-    if (isDark) {
-      root.classList.add('dark-mode')
-    } else {
-      root.classList.remove('dark-mode')
-    }
-
-    return () => {
-      root.classList.remove('dark-mode')
-    }
-  }, [isDark])
-
   const { data: swaggerSpec, isLoading } = swaggerServiceApi.useGetSwaggerQuery(
     swaggerPath,
     {
@@ -66,23 +63,56 @@ const SwaggerPage = () => {
     }
   )
 
-  useEffect(() => {
-    import('swagger-ui-react/swagger-ui.css')
-  }, [])
-
-  const handleDownload = () => {
+  const parsedSpec = useMemo(() => {
     if (!swaggerSpec) {
+      return null
+    }
+
+    try {
+      return typeof swaggerSpec === 'string'
+        ? JSON.parse(swaggerSpec)
+        : swaggerSpec
+    } catch {
+      return null
+    }
+  }, [swaggerSpec])
+
+  const scrollToHash = useCallback(() => {
+    const container = contentRef.current
+    const hash = decodeURIComponent(window.location.hash.slice(1))
+
+    if (!container || !hash) {
+      return
+    }
+    const el = container.querySelector(`[data-section-id="${hash}"]`)
+
+    if (!el) {
       return
     }
 
-    const safeName = toSafeFileName(moduleName)
-    const json = JSON.stringify(swaggerSpec, null, 2)
-    downloadFile({
-      fileName: `swagger-${safeName}.json`,
-      content: json,
-      mimeType: 'application/json;charset=utf-8'
-    })
-  }
+    const top =
+      el.getBoundingClientRect().top -
+      container.getBoundingClientRect().top +
+      container.scrollTop
+
+    container.scrollTo({ top, behavior: 'smooth' })
+  }, [])
+
+  useEffect(() => {
+    if (!contentRef.current || !parsedSpec) {
+      return
+    }
+
+    const orig = history.pushState.bind(history)
+    history.pushState = (...args) => {
+      orig(...args)
+      scrollToHash()
+    }
+
+    return () => {
+      history.pushState = orig
+    }
+  }, [parsedSpec, scrollToHash])
 
   if (isLoading) {
     return (
@@ -93,28 +123,11 @@ const SwaggerPage = () => {
   }
 
   return (
-    <div className="swagger-page">
-      {swaggerSpec ? (
-        <>
-          <div className="swagger-page__toolbar">
-            <Button type="primary" onClick={handleDownload}>
-              Скачать Swagger
-            </Button>
-          </div>
-
-          <div className="swagger-page__content">
-            <Suspense fallback={<Spin />}>
-              <SwaggerUI
-                spec={swaggerSpec}
-                docExpansion="list"
-                defaultModelsExpandDepth={-1}
-                displayOperationId={false}
-                tryItOutEnabled={false}
-                requestSnippetsEnabled={false}
-              />
-            </Suspense>
-          </div>
-        </>
+    <div className={`swagger-page ${isDark ? 'swagger-page--dark' : ''}`}>
+      {parsedSpec ? (
+        <div className="swagger-page__content" ref={contentRef}>
+          <RedocView spec={parsedSpec} isDark={isDark} />
+        </div>
       ) : (
         <div className="swagger-page__no-data">Нет данных Swagger</div>
       )}

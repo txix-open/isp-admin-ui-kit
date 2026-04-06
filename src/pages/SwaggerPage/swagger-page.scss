@@ -1,40 +1,39 @@
 .swagger-page {
   height: calc(100vh - 100px);
-  overflow: hidden;
   display: flex;
   flex-direction: column;
   width: 100%;
 
-  &__loader {
+  &__loader,
+  &__no-data {
     display: flex;
     justify-content: center;
     align-items: center;
     height: 100%;
   }
 
-  &__toolbar {
-    padding: 12px 16px;
-    border-bottom: 1px solid var(--ant-color-border);
+  &__no-data {
+    color: var(--ant-color-text-secondary);
+    font-size: 16px;
   }
 
   &__content {
     flex: 1;
     min-height: 0;
-    display: flex;
-  }
-
-  &__content .swagger-ui {
-    flex: 1;
     overflow-y: auto;
 
-    ul {
-      margin-left: 1.5em;
-      padding-left: 1.5em;
+    a[href='https://redocly.com/redoc/'] {
+      display: none !important;
+    }
+  }
+
+  &--dark .redoc-wrap {
+    li.react-tabs__tab--selected {
+      background-color: transparent;
     }
 
-    ol {
-      margin-left: 1.5em;
-      padding-left: 1.5em;
+    h5, h5 > span {
+      color: white;
     }
   }
 }
