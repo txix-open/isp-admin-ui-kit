@@ -1,5 +1,8 @@
+## 1.9.8
+- Исправлено
+  - на форме (ConfigurationEditorForm) исправлен DatePicker
 ## 1.9.7
-- - Добавлено
+- Добавлено
   - на вкладке Swagger отображение спецификации сделано через redoc, swagger-ui удален
 ## 1.9.6
 - Отменены изменения stoplight/elements

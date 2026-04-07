@@ -15,6 +15,8 @@ import {
 } from 'react'
 import { useParams } from 'react-router-dom'
 
+import CustomDatePicker from '@widgets/CustomDatePicker'
+
 import {
   ArrayFieldTemplatePropsType,
   ConfigurationEditorPropsType,
@@ -375,6 +377,9 @@ const ConfigurationEditorForm: FC<ConfigurationEditorPropsType> = ({
           ObjectFieldTemplate: ObjectFieldTemplate as any,
           ArrayFieldTemplate: ArrayFieldTemplate as any,
           ButtonTemplates: { RemoveButton } as any
+        }}
+        widgets={{
+          'date-time': CustomDatePicker
         }}
         ref={formRef}
         transformErrors={transformErrors as any}
