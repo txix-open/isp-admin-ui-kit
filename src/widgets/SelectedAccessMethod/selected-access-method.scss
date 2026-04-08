@@ -1,13 +1,73 @@
-@use "src/constants/style/styleConst" as *;
+@use 'sass:math';
+@use 'src/constants/style/styleConst' as *;
 
 .selected-access-method {
-  display: flex;
-  flex-direction: column;
-  gap: $basic-margin;
-  padding: $basic-padding;
-  border: 1px dashed $grey;
-
   overflow-y: auto;
-  height: calc(100vh - 100px);
+  height: calc(100vh - 315px);
+  padding-right: math.div($basic-padding, 2);
+  position: relative;
+  scrollbar-color: var(--ant-color-fill-secondary) transparent;
+  box-shadow:
+    0 2px 8px var(--ant-shadow-color),
+    0 0 0 1px var(--ant-color-border);
+  border-radius: 4px;
+  transition: box-shadow 0.2s ease;
 
+  &:hover {
+    box-shadow:
+      0 4px 12px var(--ant-shadow-color),
+      0 0 0 1px var(--ant-color-primary-border);
+  }
+
+  &--empty {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  &__item {
+    padding-inline: 0 !important;
+  }
+
+  &__virtual {
+    position: relative;
+  }
+
+  &__row {
+    position: absolute;
+    left: 0;
+    right: 0;
+    margin: 0 !important;
+    display: flex;
+    align-items: center;
+  }
+
+  &__unknown {
+    color: var(--ant-color-error);
+  }
+
+  &::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: var(--ant-color-fill-secondary) !important;
+    border-radius: 10px;
+    border: 2px solid transparent;
+    background-clip: padding-box;
+    transition: background-color 0.15s ease;
+  }
+
+  &::-webkit-scrollbar-thumb:hover {
+    background: var(--ant-color-fill) !important;
+  }
+
+  &::-webkit-scrollbar-thumb:active {
+    background: var(--ant-color-fill) !important;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
 }
