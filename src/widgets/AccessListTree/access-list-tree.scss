@@ -1,16 +1,100 @@
-@use "../../constants/style/styleConst" as *;
+@use 'sass:math';
+@use '../../constants/style/styleConst' as *;
 
 .access-list-tree {
-  overflow-y: auto;
-  height: calc(100vh - 100px);
+  overflow: hidden;
+  height: calc(100vh - 315px);
+  padding-right: math.div($basic-padding, 2);
+  scrollbar-color: var(--ant-color-fill-secondary) transparent;
+  box-shadow:
+    0 2px 8px var(--ant-shadow-color),
+    0 0 0 1px var(--ant-color-border);
+  border-radius: 4px;
+  transition: box-shadow 0.2s ease;
 
   &__span {
     display: flex;
     flex-wrap: nowrap;
     white-space: nowrap;
+
+    &--changed {
+      background: var(--ant-color-warning-bg);
+      border-radius: 4px;
+      padding: 1px 6px;
+      box-shadow: inset 0 0 0 1px var(--ant-color-warning-border);
+      color: var(--ant-color-warning-text);
+      font-weight: 600;
+
+      .access-list-tree__inner-tag {
+        box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.18);
+      }
+    }
   }
 
   &__inner-tag {
     margin-left: $basic-margin;
+  }
+
+  &__path-highlight {
+    background: var(--ant-color-fill-secondary);
+    color: var(--ant-color-text-base);
+    border-radius: 3px;
+    padding: 0 3px;
+    font-weight: 600;
+    box-shadow: inset 0 -1px 0 var(--ant-color-border);
+  }
+
+  &::-webkit-scrollbar,
+  .ant-tree-list-holder::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+
+  &::-webkit-scrollbar-thumb,
+  .ant-tree-list-holder::-webkit-scrollbar-thumb {
+    background: var(--ant-color-fill-secondary);
+    border-radius: 10px;
+    border: 2px solid transparent;
+    background-clip: padding-box;
+  }
+
+  &::-webkit-scrollbar-thumb:hover,
+  .ant-tree-list-holder::-webkit-scrollbar-thumb:hover {
+    background: var(--ant-color-fill);
+  }
+
+  &::-webkit-scrollbar-track,
+  .ant-tree-list-holder::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .rc-virtual-list-scrollbar {
+    width: 10px !important;
+  }
+
+  .rc-virtual-list-scrollbar-thumb {
+    background: var(--ant-color-fill-secondary) !important;
+    border-radius: 10px !important;
+    border: 2px solid transparent;
+    background-clip: padding-box;
+  }
+
+  .rc-virtual-list-scrollbar-thumb:hover {
+    background: var(--ant-color-fill) !important;
+  }
+
+  .ant-tree-list-scrollbar.ant-tree-list-scrollbar-vertical {
+    width: 10px !important;
+  }
+
+  .ant-tree-list-scrollbar-thumb {
+    background: var(--ant-color-fill-secondary) !important;
+    border-radius: 10px !important;
+    border: 2px solid transparent;
+    background-clip: padding-box;
+  }
+
+  .ant-tree-list-scrollbar-thumb:hover {
+    background: var(--ant-color-fill) !important;
   }
 }

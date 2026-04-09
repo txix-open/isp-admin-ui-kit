@@ -8,5 +8,7 @@ export interface AccessListTreePropsType {
   methods: AccessListMethodType[]
   onCheck: TreeProps['onCheck']
   selectedMethod: AccessListMethodType[]
+  selectedHttpMethods: string[]
+  showChangedOnly: boolean
   onRemoveUnknownMethods?: (methods: BaseEndpoint[]) => void
 }
