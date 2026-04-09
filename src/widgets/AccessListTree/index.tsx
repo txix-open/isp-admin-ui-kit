@@ -1,6 +1,15 @@
 import { DeleteOutlined, WarningOutlined } from '@ant-design/icons'
 import { Button, Popconfirm, Tag, Tooltip, Tree, TreeProps } from 'antd'
-import { FC, memo, useCallback, useEffect, useState } from 'react'
+import {
+  FC,
+  memo,
+  ReactNode,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState
+} from 'react'
 
 import { AccessListTreePropsType } from '@widgets/AccessListTree/access-list-tree.type'
 
@@ -22,16 +31,60 @@ const unknownMethodKey = 'неизвестные методы'
 const getNodeKey = (path: string, httpMethod?: string) =>
   httpMethod ? `${httpMethod}:${path}` : path
 
+const renderHighlightedPath = (path: string, search: string): ReactNode => {
+  if (!search) {
+    return path
+  }
+
+  const source = path.toLowerCase()
+  const query = search.toLowerCase()
+  const parts: ReactNode[] = []
+
+  let startIndex = 0
+  let matchIndex = source.indexOf(query, startIndex)
+
+  while (matchIndex !== -1) {
+    if (matchIndex > startIndex) {
+      parts.push(path.slice(startIndex, matchIndex))
+    }
+
+    const endIndex = matchIndex + query.length
+    parts.push(
+      <mark
+        className="access-list-tree__path-highlight"
+        key={`${path}-${matchIndex}`}
+      >
+        {path.slice(matchIndex, endIndex)}
+      </mark>
+    )
+
+    startIndex = endIndex
+    matchIndex = source.indexOf(query, startIndex)
+  }
+
+  if (startIndex < path.length) {
+    parts.push(path.slice(startIndex))
+  }
+
+  return parts
+}
+
 const AccessListTree: FC<AccessListTreePropsType> = ({
   searchValue,
   defaultAllRoutes,
   methods,
   selectedMethod = [],
+  selectedHttpMethods = [],
+  showChangedOnly = false,
   onCheck = [],
   onRemoveUnknownMethods = undefined
 }) => {
   const { hasPermission } = useRole()
+  const containerRef = useRef<HTMLDivElement>(null)
+  const wasFilteredRef = useRef(false)
+  const expandedBeforeFilterRef = useRef<string[]>([])
   const [expandedKeys, setExpandedKeys] = useState<string[]>([])
+  const [treeHeight, setTreeHeight] = useState(360)
 
   const handleRemoveUnknownMethods = (methods: BaseEndpoint[]) => {
     if (!onRemoveUnknownMethods) {
@@ -79,17 +132,65 @@ const AccessListTree: FC<AccessListTreePropsType> = ({
       })
   }
 
+  const currentMethodStatusMap = useMemo(
+    () =>
+      methods.reduce(
+        (acc, method) => {
+          const key = getNodeKey(method.method, method.httpMethod)
+          acc[key] = method.value
+          return acc
+        },
+        {} as Record<string, boolean>
+      ),
+    [methods]
+  )
+
+  const selectedMethodStatusMap = useMemo(
+    () =>
+      selectedMethod.reduce(
+        (acc, method) => {
+          const key = getNodeKey(method.method, method.httpMethod)
+          acc[key] = method.value
+          return acc
+        },
+        {} as Record<string, boolean>
+      ),
+    [selectedMethod]
+  )
+
+  const isMethodChanged = useCallback(
+    (obj: EndpointType | BaseEndpoint) => {
+      const key = getNodeKey(obj.path, obj.httpMethod)
+      const currentValue = currentMethodStatusMap[key] ?? false
+      const hasOverride = key in selectedMethodStatusMap
+
+      if (!hasOverride) {
+        return false
+      }
+
+      return selectedMethodStatusMap[key] !== currentValue
+    },
+    [currentMethodStatusMap, selectedMethodStatusMap]
+  )
+
   const createTreeNode = useCallback(
     (obj: EndpointType | BaseEndpoint, unknown = false) => {
       const showRemoveBtn = unknown && onRemoveUnknownMethods
       const nodeKey = getNodeKey(obj.path, obj.httpMethod)
+      const changed = isMethodChanged(obj)
 
       return {
         title: (
           <span
-            className={`${unknown ? 'access-list-tree__span unknown-label' : 'access-list-tree__span'}`}
+            className={[
+              'access-list-tree__span',
+              unknown ? 'unknown-label' : '',
+              changed ? 'access-list-tree__span--changed' : ''
+            ]
+              .filter(Boolean)
+              .join(' ')}
           >
-            <div>{obj.path}</div>
+            <div>{renderHighlightedPath(obj.path, searchValue)}</div>
 
             <div>
               {obj.httpMethod && (
@@ -128,29 +229,49 @@ const AccessListTree: FC<AccessListTreePropsType> = ({
         ),
         key: nodeKey,
         path: obj.path,
-        httpMethod: obj.httpMethod
+        httpMethod: obj.httpMethod,
+        changed
       }
     },
-    []
+    [isMethodChanged, onRemoveUnknownMethods, searchValue]
   )
 
-  const filteredRoute = () => {
-    if (!searchValue) {
-      return defaultAllRoutes
-    }
+  const filteredRoutes = useMemo(() => {
     const filteredRoute: Record<string, EndpointType[]> = {}
+
+    const hasHttpFilter = selectedHttpMethods.length > 0
+
     Object.keys(defaultAllRoutes).forEach((groupName) => {
-      const filterArray = defaultAllRoutes[groupName].filter(({ path }) =>
-        path.toLowerCase().includes(searchValue)
-      )
+      const filterArray = defaultAllRoutes[groupName].filter((endpoint) => {
+        const matchesSearch = searchValue
+          ? endpoint.path.toLowerCase().includes(searchValue)
+          : true
+        const matchesHttpMethod = hasHttpFilter
+          ? selectedHttpMethods.includes(endpoint.httpMethod)
+          : true
+        const matchesChanged = showChangedOnly ? isMethodChanged(endpoint) : true
+
+        return matchesSearch && matchesHttpMethod && matchesChanged
+      })
+
       if (filterArray.length) {
         filteredRoute[groupName] = filterArray
       }
     })
-    return filteredRoute
-  }
 
-  const treeData = createTreeData(filteredRoute())
+    return filteredRoute
+  }, [
+    defaultAllRoutes,
+    searchValue,
+    selectedHttpMethods,
+    showChangedOnly,
+    isMethodChanged
+  ])
+
+  const treeData = useMemo(
+    () => createTreeData(filteredRoutes),
+    [filteredRoutes, createTreeNode, onRemoveUnknownMethods]
+  )
 
   const getCheckedKeys = () => {
     const checkedKeys = new Set<string>()
@@ -193,23 +314,43 @@ const AccessListTree: FC<AccessListTreePropsType> = ({
   }
 
   const filteredKeys = filteredCheckedKeys()
+  const isFilteredMode =
+    Boolean(searchValue) || showChangedOnly || selectedHttpMethods.length > 0
+  const groupKeys = useMemo(
+    () => Object.values(treeData).map((node) => node.key),
+    [treeData]
+  )
 
   useEffect(() => {
-    if (!searchValue) {
-      setExpandedKeys([])
-      return
+    if (isFilteredMode && !wasFilteredRef.current) {
+      expandedBeforeFilterRef.current = expandedKeys
+      setExpandedKeys(groupKeys)
+    } else if (!isFilteredMode && wasFilteredRef.current) {
+      setExpandedKeys(expandedBeforeFilterRef.current)
     }
-    const keys = Object.values(treeData).map((node) => node.key)
-    setExpandedKeys(keys)
-  }, [searchValue])
+
+    wasFilteredRef.current = isFilteredMode
+  }, [isFilteredMode, expandedKeys, groupKeys])
+
+  useEffect(() => {
+    const updateHeight = () => {
+      setTreeHeight(Math.max(360, window.innerHeight - 315))
+    }
+
+    updateHeight()
+
+    window.addEventListener('resize', updateHeight)
+    return () => window.removeEventListener('resize', updateHeight)
+  }, [])
 
   return (
-    <div className="access-list-tree">
+    <div ref={containerRef} className="access-list-tree">
       <Tree
         className="app-access-content__main__tree"
         checkable={hasPermission(PermissionKeysType.app_access_edit)}
         checkedKeys={filteredKeys}
         expandedKeys={expandedKeys}
+        height={treeHeight}
         onExpand={(keys) => setExpandedKeys(keys as string[])}
         onCheck={onCheck as TreeProps['onCheck']}
         treeData={treeData}

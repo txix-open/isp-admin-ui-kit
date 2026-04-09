@@ -1,6 +1,18 @@
 import { SearchOutlined } from '@ant-design/icons'
-import { Button, Input, message, Spin, TreeProps } from 'antd'
-import { ChangeEvent, FC, memo, useMemo, useState } from 'react'
+import {
+  Button,
+  Card,
+  Input,
+  message,
+  Progress,
+  Segmented,
+  Space,
+  Spin,
+  Statistic,
+  Tag,
+  TreeProps
+} from 'antd'
+import { ChangeEvent, FC, memo, useEffect, useMemo, useState } from 'react'
 import { Navigate, useSearchParams } from 'react-router-dom'
 
 import AccessListTree from '@widgets/AccessListTree'
@@ -29,12 +41,19 @@ import { PermissionKeysType } from '@type/roles.type'
 import './app-access-content.scss'
 
 const unknownMethodKey = 'неизвестные методы'
+type AccessViewModeType = 'all' | 'changed'
+const getMethodKey = (method: string, httpMethod?: string) =>
+  `${httpMethod || ''}_${method}`
 
 const AppAccessContent: FC<AppAccessContentPropsType> = ({
   id,
   paramPrefix
 }) => {
+  const { CheckableTag } = Tag
   const [showSaveModal, setShowSaveModal] = useState<boolean>(false)
+  const [selectedHttpMethods, setSelectedHttpMethods] = useState<string[]>([])
+  const [viewMode, setViewMode] = useState<AccessViewModeType>('all')
+  const [isModeTransition, setIsModeTransition] = useState(false)
   const [messageApi, contextHolder] = message.useMessage()
   const { hasPermission } = useRole()
 
@@ -101,8 +120,9 @@ const AppAccessContent: FC<AppAccessContentPropsType> = ({
         const currentMethod = methods.find(
           (m) => m.method === node.path && m.httpMethod === node.httpMethod
         )
+        const currentValue = currentMethod?.value ?? false
 
-        if (currentMethod?.value === newValue) {
+        if (currentValue === newValue) {
           return prev.filter(
             (item) =>
               !(
@@ -147,7 +167,8 @@ const AppAccessContent: FC<AppAccessContentPropsType> = ({
           (m) =>
             m.method === change.method && m.httpMethod === change.httpMethod
         )
-        return currentMethod?.value !== change.value
+        const currentValue = currentMethod?.value ?? false
+        return currentValue !== change.value
       })
 
       return [...filtered, ...validChanges]
@@ -228,26 +249,43 @@ const AppAccessContent: FC<AppAccessContentPropsType> = ({
     return copyAllRoutes
   }, [isSuccess, moduleEndpoints, methods])
 
-  const currentMethodStatus = methods.reduce(
-    (acc, method) => {
-      const key = `${method.httpMethod}_${method.method}`
-      acc[key] = method.value
-      return acc
-    },
-    {} as Record<string, boolean>
+  const currentMethodStatus = useMemo(
+    () =>
+      methods.reduce(
+        (acc, method) => {
+          const key = getMethodKey(method.method, method.httpMethod)
+          acc[key] = method.value
+          return acc
+        },
+        {} as Record<string, boolean>
+      ),
+    [methods]
+  )
+
+  const selectedMethodStatusMap = useMemo(
+    () =>
+      selectedMethod.reduce(
+        (acc, method) => {
+          const key = getMethodKey(method.method, method.httpMethod)
+          acc[key] = method.value
+          return acc
+        },
+        {} as Record<string, boolean>
+      ),
+    [selectedMethod]
   )
 
   const changes = {
     allowed: selectedMethod
       .filter((method) => {
-        const key = `${method.httpMethod}_${method.method}`
+        const key = getMethodKey(method.method, method.httpMethod)
         return method.value && !currentMethodStatus[key]
       })
       .map((method) => `${method.httpMethod} ${method.method}`),
 
     denied: selectedMethod
       .filter((method) => {
-        const key = `${method.httpMethod}_${method.method}`
+        const key = getMethodKey(method.method, method.httpMethod)
         return !method.value && currentMethodStatus[key]
       })
       .map((method) => `${method.httpMethod} ${method.method}`)
@@ -255,6 +293,80 @@ const AppAccessContent: FC<AppAccessContentPropsType> = ({
 
   const isNoChanges =
     changes.allowed.length === 0 && changes.denied.length === 0
+
+  const allRouteEndpoints = useMemo(
+    () => Object.values(defaultAllRoutes).flat(),
+    [defaultAllRoutes]
+  )
+
+  const totalMethodsCount = useMemo(
+    () =>
+      new Set(
+        allRouteEndpoints.map((endpoint) =>
+          getMethodKey(endpoint.path, endpoint.httpMethod)
+        )
+      ).size,
+    [allRouteEndpoints]
+  )
+
+  const allowedMethodsCount = useMemo(() => {
+    const keys = new Set<string>([
+      ...allRouteEndpoints.map((endpoint) =>
+        getMethodKey(endpoint.path, endpoint.httpMethod)
+      ),
+      ...methods.map((method) =>
+        getMethodKey(method.method, method.httpMethod)
+      ),
+      ...selectedMethod.map((method) =>
+        getMethodKey(method.method, method.httpMethod)
+      )
+    ])
+
+    let count = 0
+    keys.forEach((key) => {
+      const value =
+        key in selectedMethodStatusMap
+          ? selectedMethodStatusMap[key]
+          : currentMethodStatus[key]
+      if (value) {
+        count += 1
+      }
+    })
+
+    return count
+  }, [
+    allRouteEndpoints,
+    methods,
+    selectedMethod,
+    selectedMethodStatusMap,
+    currentMethodStatus
+  ])
+
+  const changedMethodsCount = changes.allowed.length + changes.denied.length
+  const unknownMethodsCount = defaultAllRoutes[unknownMethodKey]?.length || 0
+  const allowedPercent = totalMethodsCount
+    ? Math.round((allowedMethodsCount / totalMethodsCount) * 100)
+    : 0
+  const uniqueHttpMethods = useMemo(
+    () =>
+      Array.from(
+        new Set(
+          Object.values(defaultAllRoutes)
+            .flat()
+            .map((endpoint) => endpoint.httpMethod)
+        )
+      ).sort(),
+    [defaultAllRoutes]
+  )
+
+  useEffect(() => {
+    setIsModeTransition(true)
+    const timer = setTimeout(() => {
+      setIsModeTransition(false)
+    }, 180)
+
+    return () => clearTimeout(timer)
+  }, [viewMode])
 
   if (isLoading) {
     return <Spin className="spin" />
@@ -274,59 +386,142 @@ const AppAccessContent: FC<AppAccessContentPropsType> = ({
           changes={changes}
         />
       )}
-      <div className="app-access-content__header">
-        <Input
-          prefix={<SearchOutlined />}
-          allowClear
-          className="app-access-content__main__tree-search-input"
-          value={searchValue}
-          placeholder="Найти метод"
-          onChange={handleInputOnChange}
-        />
-        {canWrite && (
-          <div className="app-access-content__header__action-buttons">
-            <Button
-              disabled={!canWrite}
-              onClick={() => {
-                setAllMethods(false)
+      <div className="app-access-content__toolbar">
+        <div className="app-access-content__header">
+          <Input
+            prefix={<SearchOutlined />}
+            allowClear
+            className="app-access-content__main__tree-search-input"
+            value={searchValue}
+            placeholder="Найти метод"
+            onChange={handleInputOnChange}
+          />
+          <Segmented
+            className="app-access-content__view-mode"
+            value={viewMode}
+            options={[
+              {
+                label: (
+                  <span className="app-access-content__view-mode-label">
+                    Все
+                  </span>
+                ),
+                value: 'all'
+              },
+              {
+                label: (
+                  <span className="app-access-content__view-mode-label">
+                    Только изменённые
+                  </span>
+                ),
+                value: 'changed'
+              }
+            ]}
+            onChange={(value) => setViewMode(value as AccessViewModeType)}
+          />
+          {canWrite && (
+            <div className="app-access-content__header__action-buttons">
+              <Button
+                disabled={!canWrite}
+                onClick={() => {
+                  setAllMethods(false)
+                }}
+              >
+                Запретить все
+              </Button>
+              <Button
+                disabled={!canWrite}
+                onClick={() => {
+                  setAllMethods(true)
+                }}
+              >
+                Выбрать все
+              </Button>
+              <Button
+                type="primary"
+                disabled={isNoChanges}
+                onClick={() => {
+                  setShowSaveModal(true)
+                }}
+              >
+                Сохранить
+              </Button>
+            </div>
+          )}
+        </div>
+        <div className="app-access-content__http-filters">
+          {uniqueHttpMethods.map((method) => (
+            <CheckableTag
+              key={method}
+              checked={selectedHttpMethods.includes(method)}
+              onChange={(checked) => {
+                setSelectedHttpMethods((prev) =>
+                  checked ? [...prev, method] : prev.filter((m) => m !== method)
+                )
               }}
             >
-              Запретить все
-            </Button>
+              {method}
+            </CheckableTag>
+          ))}
+          {selectedHttpMethods.length > 0 && (
             <Button
-              disabled={!canWrite}
-              onClick={() => {
-                setAllMethods(true)
-              }}
+              type="link"
+              size="small"
+              onClick={() => setSelectedHttpMethods([])}
             >
-              Выбрать все
+              Сбросить фильтры
             </Button>
-            <Button
-              type="primary"
-              disabled={isNoChanges}
-              onClick={() => {
-                setShowSaveModal(true)
-              }}
-            >
-              Сохранить
-            </Button>
-          </div>
-        )}
+          )}
+        </div>
       </div>
-      <div className="app-access-content__main">
-        <AccessListTree
-          searchValue={searchValue}
-          onCheck={handleOnCheck}
-          defaultAllRoutes={defaultAllRoutes}
-          methods={methods}
-          selectedMethod={selectedMethod}
-          onRemoveUnknownMethods={canWrite && handleRemoveUnknowMethods}
-        />
-        <SelectedAccessMethod
-          unknownMethodKey={unknownMethodKey}
-          methods={methods}
-          allRoutes={defaultAllRoutes}
-        />
+      <Space className="app-access-content__stats" size={16} wrap>
+        <Card
+          size="small"
+          className="app-access-content__stats-card app-access-content__stats-card--progress"
+        >
+          <div className="app-access-content__stats-progress-title">
+            Разрешено {allowedMethodsCount}/{totalMethodsCount}
+          </div>
+          <Progress percent={allowedPercent} size="small" showInfo={false} />
+        </Card>
+        <Card size="small" className="app-access-content__stats-card">
+          <Statistic title="Всего методов" value={totalMethodsCount} />
+        </Card>
+        <Card size="small" className="app-access-content__stats-card">
+          <Statistic title="Изменено" value={changedMethodsCount} />
+        </Card>
+        {unknownMethodsCount > 0 && (
+          <Card size="small" className="app-access-content__stats-card">
+            <Statistic title="Неизвестные" value={unknownMethodsCount} />
+          </Card>
+        )}
+      </Space>
+      <div
+        className={`app-access-content__main ${isModeTransition ? 'app-access-content__main--mode-transition' : ''}`}
+      >
+        <Card className="app-access-content__panel" title="Дерево маршрутов">
+          <AccessListTree
+            searchValue={searchValue}
+            onCheck={handleOnCheck}
+            defaultAllRoutes={defaultAllRoutes}
+            methods={methods}
+            selectedMethod={selectedMethod}
+            selectedHttpMethods={selectedHttpMethods}
+            showChangedOnly={viewMode === 'changed'}
+            onRemoveUnknownMethods={canWrite && handleRemoveUnknowMethods}
+          />
+        </Card>
+        <Card
+          className="app-access-content__panel"
+          title={`Разрешенные методы (${allowedMethodsCount})`}
+        >
+          <SelectedAccessMethod
+            unknownMethodKey={unknownMethodKey}
+            methods={methods}
+            selectedMethod={selectedMethod}
+            allRoutes={defaultAllRoutes}
+          />
+        </Card>
       </div>
     </div>
   )
