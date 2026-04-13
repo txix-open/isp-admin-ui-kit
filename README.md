@@ -1,7 +1,6 @@
 # isp-admin-ui-kit
 
-[![npm version](https://img.shields.io/npm/v/isp-admin-ui-kit.svg)](https://www.npmjs.com/package/isp-admin-ui-kit)
-[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![npm version](https://img.shields.io/npm/v/isp-admin-ui-kit.svg)](https://www.npmjs.com/package/isp-admin-ui-kit) [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
 **isp-admin-ui-kit** — это компонент базовой админ-панели для использования в других проектах. Библиотека предоставляет готовый каркас, навигацию, управление состоянием и типовые страницы, позволяя сосредоточиться на бизнес-логике.
 
@@ -9,7 +8,7 @@
 
 - [Возможности](#-возможности)
 - [Установка и зависимости](#-установка-и-зависимости)
-- [⚙️ Настройка Monaco Editor](#-настройка-monaco-editor)
+- [Настройка Monaco Editor](#-настройка-monaco-editor)
 - [Быстрый старт](#-быстрый-старт)
 - [Настройка компонента AdminBase](#-настройка-компонента-adminbase)
 - [Работа с данными и Store](#-работа-с-данными-и-store)
@@ -74,35 +73,35 @@ npm install @monaco-editor/react antd axios dayjs monaco-editor react react-dom 
 Необходимо выполнить конфигурацию и инициализацию монико-редактора в точке входа вашего приложения (например, `main.tsx` или `index.tsx`) **до** рендеринга компонента `AdminBase`.
 
 ```tsx
-import * as monaco from 'monaco-editor';
-import loader from '@monaco-editor/react';
+import loader from '@monaco-editor/react'
+import * as monaco from 'monaco-editor'
 
 // Конфигурация loader
-loader.config({ monaco });
+loader.config({ monaco })
 
 // Инициализация
 loader.init().then(() => {
-  console.log('Monaco Editor initialized');
+  console.log('Monaco Editor initialized')
   // Здесь можно запустить рендер приложения, если требуется гарантия загрузки
-});
+})
 ```
 
 **Пример полной точки входа (`main.tsx`):**
 
 ```tsx
-import React from 'react';
-import ReactDOM from 'react-dom/client';
-import * as monaco from 'monaco-editor';
-import loader from '@monaco-editor/react';
-import { baseSetupStore, AdminBase } from 'isp-admin-ui-kit';
-import { Provider } from 'react-redux';
-import { BrowserRouter } from 'react-router-dom';
+import loader from '@monaco-editor/react'
+import { baseSetupStore, AdminBase } from 'isp-admin-ui-kit'
+import * as monaco from 'monaco-editor'
+import React from 'react'
+import ReactDOM from 'react-dom/client'
+import { Provider } from 'react-redux'
+import { BrowserRouter } from 'react-router-dom'
 
 // 1. Настройка Monaco
-loader.config({ monaco });
+loader.config({ monaco })
 loader.init().then(() => {
   // 2. Инициализация Store
-  const store = baseSetupStore();
+  const store = baseSetupStore()
 
   // 3. Рендер приложения
   ReactDOM.createRoot(document.getElementById('root')!).render(
@@ -113,18 +112,18 @@ loader.init().then(() => {
         </BrowserRouter>
       </Provider>
     </React.StrictMode>
-  );
-});
+  )
+})
 ```
 
 ## Настройка Monaco Worker (Vite / Rollup)
 
-⚠️ Важно: Если ваше приложение или библиотека собирается через Vite или Rollup, необходимо явно подключить Monaco Workers.
-Без этого редактор может выдавать ошибки или не работать подсветка синтаксиса.
+⚠️ Важно: Если ваше приложение или библиотека собирается через Vite или Rollup, необходимо явно подключить Monaco Workers. Без этого редактор может выдавать ошибки или не работать подсветка синтаксиса.
 
 🔧 Пример настройки
 
 Добавьте конфигурацию до инициализации loader:
+
 ```jsx
 import { loader } from '@monaco-editor/react';
 import * as monaco from 'monaco-editor';
@@ -161,11 +160,11 @@ loader.init();
 После настройки Monaco Editor, базовое подключение выглядит следующим образом:
 
 ```tsx
-import { baseSetupStore, AdminBase } from 'isp-admin-ui-kit';
-import { Provider } from 'react-redux';
-import { BrowserRouter } from 'react-router-dom';
+import { baseSetupStore, AdminBase } from 'isp-admin-ui-kit'
+import { Provider } from 'react-redux'
+import { BrowserRouter } from 'react-router-dom'
 
-const store = baseSetupStore();
+const store = baseSetupStore()
 
 const App = () => {
   return (
@@ -174,8 +173,8 @@ const App = () => {
         <AdminBase />
       </BrowserRouter>
     </Provider>
-  );
-};
+  )
+}
 ```
 
 ---
@@ -186,27 +185,27 @@ const App = () => {
 
 ### Параметры компонента
 
-| Название              | Описание                                                                 | Пример                               |
-|-----------------------|--------------------------------------------------------------------------|--------------------------------------|
-| `customRouters`       | Массив объектов маршрутов.                                               | `[{ route, element, label, key }]`   |
-| `configProviderProps` | Пропсы для `ConfigProvider` (Ant Design).                                | `{ theme: lightTheme, locale: ru }`  |
-| `defaultRoutePath`    | Путь для редиректа с главной страницы (`/`).                             | `"/modules"`                         |
-| `excludePermissions`  | Массив пермишенов для скрытия стандартных страниц.                       | `[PermissionKeysType.user_view]`     |
+| Название | Описание | Пример |
+| --- | --- | --- |
+| `customRouters` | Массив объектов маршрутов. | `[{ route, element, label, key }]` |
+| `configProviderProps` | Пропсы для `ConfigProvider` (Ant Design). | `{ theme: lightTheme, locale: ru }` |
+| `defaultRoutePath` | Путь для редиректа с главной страницы (`/`). | `"/modules"` |
+| `excludePermissions` | Массив пермишенов для скрытия стандартных страниц. | `[PermissionKeysType.user_view]` |
 
 ### Маршрутизация (`customRouters`)
 
 > ⚠️ **Важно:** Для корректной работы пунктов меню значения полей `route` и `key` **должны совпадать**.
 
-| Параметр      | Тип         | Описание                                      |
-|---------------|-------------|-----------------------------------------------|
-| `route`       | `string`    | Путь маршрута (URL).                          |
-| `element`     | `ReactNode` | Компонент, отображаемый по маршруту.          |
-| `label`       | `string`    | Название маршрута (текст в меню).             |
-| `key`         | `string`    | Уникальный ключ маршрута (должен совпадать с `route`). |
-| `permissions` | `string[]`  | Список разрешений для доступа.                |
-| `icon`        | `ReactNode` | Иконка маршрута.                              |
-| `children`    | `Array`     | Вложенные маршруты.                           |
-| `className`   | `string`    | Класс для оформления пункта меню.             |
+| Параметр | Тип | Описание |
+| --- | --- | --- |
+| `route` | `string` | Путь маршрута (URL). |
+| `element` | `ReactNode` | Компонент, отображаемый по маршруту. |
+| `label` | `string` | Название маршрута (текст в меню). |
+| `key` | `string` | Уникальный ключ маршрута (должен совпадать с `route`). |
+| `permissions` | `string[]` | Список разрешений для доступа. |
+| `icon` | `ReactNode` | Иконка маршрута. |
+| `children` | `Array` | Вложенные маршруты. |
+| `className` | `string` | Класс для оформления пункта меню. |
 
 **Пример:**
 
@@ -219,11 +218,11 @@ const customRouters = [
     element: <Dashboard />,
     permissions: ['admin', 'user'],
     icon: <DashboardIcon />,
-    className: 'red-menu',
-  },
-];
+    className: 'red-menu'
+  }
+]
 
-<AdminBase customRouters={customRouters} />;
+;<AdminBase customRouters={customRouters} />
 ```
 
 ### Скрытие базовых страниц (`excludePermissions`)
@@ -231,14 +230,14 @@ const customRouters = [
 Для скрытия стандартных страниц используйте массив `excludePermissions`. Ключи импортируются через `PermissionKeysType`.
 
 ```tsx
-import { PermissionKeysType } from 'isp-admin-ui-kit';
+import { PermissionKeysType } from 'isp-admin-ui-kit'
 
 const excludePermissions = [
   PermissionKeysType.user_view,
-  PermissionKeysType.session_view,
-];
+  PermissionKeysType.session_view
+]
 
-<AdminBase excludePermissions={excludePermissions} />;
+;<AdminBase excludePermissions={excludePermissions} />
 ```
 
 ### Полный пример конфигурации
@@ -249,7 +248,7 @@ const excludePermissions = [
   configProviderProps={{ theme: lightTheme, locale: ru }}
   defaultRoutePath="/dashboard"
   excludePermissions={excludePermissions}
-/>;
+/>
 ```
 
 ---
@@ -259,14 +258,14 @@ const excludePermissions = [
 ### Подключение базового хранилища
 
 ```tsx
-import { baseSetupStore } from 'isp-admin-ui-kit';
-import { Provider } from 'react-redux';
+import { baseSetupStore } from 'isp-admin-ui-kit'
+import { Provider } from 'react-redux'
 
-const store = baseSetupStore();
+const store = baseSetupStore()
 
-<Provider store={store}>
+;<Provider store={store}>
   <App />
-</Provider>;
+</Provider>
 ```
 
 ### Интеграция с кастомным стором
@@ -276,18 +275,19 @@ const store = baseSetupStore();
 ```tsx
 const apiServices = {
   modulesServiceApi,
-  UIReducer,
-};
+  UIReducer
+}
 
-const store = baseSetupStore(apiServices);
+const store = baseSetupStore(apiServices)
 ```
 
 ### Использование базовых API
 
 ```tsx
-import { baseApiServices } from 'isp-admin-ui-kit';
+import { baseApiServices } from 'isp-admin-ui-kit'
 
-const { data, isLoading, isError } = baseApiServices.roleApi.useGetAllRolesQuery();
+const { data, isLoading, isError } =
+  baseApiServices.roleApi.useGetAllRolesQuery()
 ```
 
 ---
@@ -318,9 +318,9 @@ npm install
 npm run build
 ```
 
-### Обновление версии
+### Обновление версии пакета
 
-Чтобы обновить версию пакета:
+Чтобы обновить версию пакета вручную:
 
 1.  Обновите значение `version` в `package.json`.
 2.  Добавьте соответствующую запись в `CHANGELOG.md`.
@@ -329,6 +329,66 @@ npm run build
     git commit -m "up version to X.Y.Z"
     git push
     ```
+
+### Автоматическое обновление проектов
+
+В репозитории представлен скрипт `update-isp-admin-ui-kit.sh` для автоматического обновления версии пакета во всех проектах.
+
+#### Как работает скрипт
+
+Скрипт:
+
+1.  Читаёт конфигурацию из `.env` файла
+2.  Находит текущую версию пакета из `package.json`
+3.  Обновляет зависимость `isp-admin-ui-kit` в указанных проектах
+4.  Выполняет `npm install`
+5.  Добавляет запись в `CHANGELOG.md`
+6.  Подготавливает изменения для коммита
+
+#### Использование
+
+```bash
+# Обновить до текущей версии
+./update-isp-admin-ui-kit.sh
+
+# С обновлением patch версии проекта
+./update-isp-admin-ui-kit.sh --project-patch
+
+# С обновлением minor версии проекта
+./update-isp-admin-ui-kit.sh --project-minor
+
+# С обновлением major версии проекта
+./update-isp-admin-ui-kit.sh --project-major
+```
+
+#### Настройка
+
+Перед первым запуском необходимо настроить конфигурацию:
+
+1.  Создайте файл `.env` на основе примера:
+
+    ```bash
+    cp .env.example .env
+    ```
+
+2.  Отредактируйте `.env`, указав:
+    - `PROJECTS_DIR` — путь к директории с проектами
+    - `PROJECTS` — список проектов через запятую
+
+#### Пример `.env`
+
+```bash
+# Directory where projects are located
+PROJECTS_DIR=/projects-path
+
+# List of projects to update (comma-separated)
+PROJECTS=project1,project2,project3
+```
+
+> **Важно:** Убедитесь, что:
+>
+> - Скрипт имеет права на выполнение: `chmod +x update-isp-admin-ui-kit.sh`
+> - `.env` файл не попадает в git (уже добавлен в `.gitignore`)
 
 ---
 
