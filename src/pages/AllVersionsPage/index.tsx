@@ -161,8 +161,10 @@ const AllVersionsPage = () => {
       key: 'configVersion',
       title: 'Версия',
       dataIndex: 'configVersion',
-      render: (value: string, _, index) => {
-        if (index === 0) {
+      render: (value: string, record) => {
+        const isCurrentVersion = currentConfig?.version === record.configVersion
+
+        if (isCurrentVersion) {
           return (
             <div className="all-version-page__table__current-version-cell">
               <span>{value}</span>
@@ -210,9 +212,9 @@ const AllVersionsPage = () => {
           onClose={() => setShowPreviewModal(false)}
         />
       )}
-      {showCompareModal && (
+      {showCompareModal && currentConfig && (
         <CompareVersionModal
-          currentConfigId={currentConfig?.id || ''}
+          currentConfig={currentConfig}
           config={currentClickVersion}
           open={showCompareModal}
           onClose={() => setShowCompareModal(false)}
