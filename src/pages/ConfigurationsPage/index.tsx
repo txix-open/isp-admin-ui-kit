@@ -81,10 +81,9 @@ const Configurations = () => {
         open={isModalOpen}
         onClose={() => setIsModalOpen(false)}
       />
-      {isCompareModalOpen && (
+      {isCompareModalOpen && currentConfig && (
         <CompareVersionModal
-          currentConfigId={currentConfig.id}
-          config={currentConfig}
+          currentConfig={currentConfig}
           open={isCompareModalOpen}
           onClose={() => setIsCompareModalOpen(false)}
         />
