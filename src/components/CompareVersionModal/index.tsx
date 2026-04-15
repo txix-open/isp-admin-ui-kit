@@ -32,12 +32,16 @@ const CompareVersionModal: FC<CompareVersionModalPropsType> = ({
   open,
   onClose,
   config,
-  currentConfigId
+  currentConfig
 }) => {
   const [selectedItem, setSelectedItem] = useState<VersionType>()
   const { changeTheme } = useContext(Context)
   const { data: versions = [], isLoading: isVersionLoading } =
-    configServiceApi.useGetAllVersionQuery(currentConfigId)
+    configServiceApi.useGetAllVersionQuery(currentConfig?.id || '')
+
+  if (!currentConfig) {
+    return <Spin />
+  }
 
   const { data: allUsers = [], isLoading: isUsersLoading } =
     userServiceApi.useGetAllUsersQuery()
@@ -52,7 +56,9 @@ const CompareVersionModal: FC<CompareVersionModalPropsType> = ({
   }, [selectedItem])
 
   const modifiedValue = useMemo(() => {
-    if (!config?.data) return ''
+    if (!config?.data) {
+      return ''
+    }
     return JSON.stringify(sortObject(config.data), null, 2)
   }, [config])
 
@@ -87,8 +93,10 @@ const CompareVersionModal: FC<CompareVersionModalPropsType> = ({
       key: 'configVersion',
       title: 'Версия',
       dataIndex: 'configVersion',
-      render: (value: string, _, index) => {
-        if (index === 0) {
+      render: (value: string, record) => {
+        const isCurrentVersion = currentConfig?.version === record.configVersion
+
+        if (isCurrentVersion) {
           return (
             <div className="compare-version-modal__content__table__current-version-cell">
               <span>{value}</span>
@@ -96,7 +104,7 @@ const CompareVersionModal: FC<CompareVersionModalPropsType> = ({
             </div>
           )
         }
-        if (config.configVersion === value) {
+        if (config && config.configVersion === record.configVersion) {
           return (
             <div className="compare-version-modal__content__table__current-version-cell">
               <span>{value}</span>
@@ -139,11 +147,7 @@ const CompareVersionModal: FC<CompareVersionModalPropsType> = ({
             <Button onClick={() => setSelectedItem(undefined)}>Назад</Button>
             <div className="compare-version-modal__header">
               <span>Версия: {selectedItem.configVersion}</span>
-              <span>
-                {config?.version
-                  ? `Текущая версия: ${config.version}`
-                  : `Версия: ${config?.configVersion}`}
-              </span>
+              <span>Текущая версия: {currentConfig.version}</span>
             </div>
             <Suspense fallback={<Spin />}>
               <DiffEditor
