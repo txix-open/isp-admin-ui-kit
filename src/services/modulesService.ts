@@ -9,12 +9,19 @@ import { axiosBaseQuery } from '@utils/apiUtils'
 const modulesServiceApi = createApi({
   reducerPath: 'modulesServiceApi',
   refetchOnFocus: false,
-  tagTypes: ['modules', 'schema'],
+  tagTypes: ['modules', 'schema', 'requiredModules'],
   baseQuery: axiosBaseQuery({ baseUrl: apiPaths.baseConfigUrl }),
   endpoints: (builder) => ({
     getModules: builder.query<ModuleType[], string>({
       query: () => ({ url: apiPaths.getModules, data: { limit: 1000 } }),
       providesTags: () => ['modules']
+    }),
+    getRequiredModules: builder.query<ModuleType[], string>({
+      query: () => ({
+        url: apiPaths.getRequiredModules,
+        data: { limit: 1000 }
+      }),
+      providesTags: () => ['requiredModules']
     }),
     removeModule: builder.mutation<void, string>({
       query: (id) => ({
