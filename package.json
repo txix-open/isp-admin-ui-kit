@@ -122,8 +122,10 @@
     "react-hook-form": "^7.54.0",
     "react-redux": "^9.1.0",
     "react-router-dom": "^6.22.3",
+    "redoc": "^2.2.0",
     "yaml": "2.8.3",
-    "redoc": "^2.2.0"
+    "@dagrejs/dagre": "^3.0.0",
+    "reactflow": "^11.11.4"
   },
   "eslintConfig": {
     "extends": [
