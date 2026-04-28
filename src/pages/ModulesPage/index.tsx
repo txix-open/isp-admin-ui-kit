@@ -1,5 +1,5 @@
 import { ExclamationCircleOutlined } from '@ant-design/icons'
-import { Badge, List, message, Spin, Tag, Tooltip } from 'antd'
+import { Badge, Button, List, message, Spin, Tag, Tooltip } from 'antd'
 import { compareVersions } from 'compare-versions'
 import { Column } from 'isp-ui-kit'
 import { useEffect, useState } from 'react'
@@ -105,6 +105,10 @@ const ModulesPage = () => {
       .catch(() => message.error('Не удалось удалить модуль'))
   }
 
+  const handleOpenModuleRelations = (): void => {
+    navigate(routePaths.modulesRelations)
+  }
+
   const versionCompare = (versions: string[]) => {
     const sorted = (versions || ['']).sort(compareVersions)
     const firstVersion = sorted[0]
@@ -186,6 +190,15 @@ const ModulesPage = () => {
   return (
     <section className="modules-page">
       <Column
+        extraTitle={
+          <Button
+            type="primary"
+            size="middle"
+            onClick={handleOpenModuleRelations}
+          >
+            Открыть карту связей
+          </Button>
+        }
         sortableFields={[
           { value: 'name', label: 'Наименование' },
           { value: 'active', label: 'Активные экземпляры' }

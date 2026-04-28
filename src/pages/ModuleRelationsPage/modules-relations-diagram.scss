@@ -1,0 +1,83 @@
+.modules-relations-diagram {
+  padding: 24px;
+  min-height: 100vh;
+
+  &__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+  }
+
+  &__title {
+    margin: 0;
+    font-size: 24px;
+    font-weight: 500;
+  }
+
+  &__stats {
+    margin-bottom: 24px;
+  }
+
+  &__stat-card {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+
+    &-icon {
+      font-size: 24px;
+    }
+
+    &-label {
+      font-size: 12px;
+    }
+
+    &-value {
+      font-size: 24px;
+      font-weight: 600;
+    }
+  }
+
+  &__error {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    padding: 48px 24px;
+    text-align: center;
+    background: inherit;
+  }
+
+  &__legend {
+    display: flex;
+    gap: 24px;
+    margin-bottom: 16px;
+    padding: 12px;
+    border-radius: 8px;
+    flex-wrap: wrap;
+
+    &-title {
+      font-weight: 600;
+    }
+
+    &-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    &-line {
+      width: 40px;
+      height: 2px;
+      background: #fa8c16;
+    }
+  }
+
+  &__loading {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+  }
+}

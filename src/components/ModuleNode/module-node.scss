@@ -1,0 +1,24 @@
+.module-node {
+  &__container {
+    border-radius: 8px;
+    border: 2px solid;
+    width: 200px;
+    overflow: hidden;
+  }
+
+  &__header {
+    padding: 10px 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid;
+
+    &-title {
+      font-weight: 600;
+      font-size: 13px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+  }
+}

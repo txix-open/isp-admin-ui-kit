@@ -4,6 +4,8 @@ import { RouteObject, Navigate } from 'react-router-dom'
 
 import LayoutComponent from '@components/Layout'
 
+import ModulesRelationsDiagram from '@pages/ModuleRelationsPage'
+
 import PrivateRoute from '@routes/PrivateRoute'
 import { generateCustomRoutes } from '@routes/customRoutes'
 import { routePaths } from '@routes/routePaths'
@@ -22,6 +24,7 @@ const SessionsPage = lazy(() => import('@pages/SessionsPage'))
 const SecurityLogPage = lazy(() => import('@pages/SecurityLogPage'))
 const AppAccessPage = lazy(() => import('@pages/AppAccessPage'))
 const ModulesPage = lazy(() => import('@pages/ModulesPage'))
+
 const ApplicationsPage = lazy(() => import('@pages/ApplicationsPage'))
 const AllVersionsPage = lazy(() => import('@pages/AllVersionsPage'))
 const ConfigurationEditorPage = lazy(
@@ -147,6 +150,10 @@ export const getRoutesConfig = (
                   ]
                 }
               ]
+            },
+            {
+              path: routePaths.modulesRelations,
+              element: <ModulesRelationsDiagram />
             },
             {
               path: routePaths.variables,

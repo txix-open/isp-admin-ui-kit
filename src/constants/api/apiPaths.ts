@@ -30,6 +30,7 @@ type PathKeys =
   | 'setOne'
   | 'getAllRoutes'
   | 'getModules'
+  | 'getRequiredModules'
   | 'deleteModule'
   | 'createUpdateService'
   | 'deleteService'
@@ -132,6 +133,7 @@ export const apiPaths: Record<PathKeys, string> = {
   deleteList: '/access_list/delete_list_with_methods',
   // ======= MODULES ======
   getModules: '/module/get_modules_info',
+  getRequiredModules: '/module/get_required_modules',
   deleteModule: '/module/delete_module',
   getByModuleId: '/schema/get_by_module_id',
   // ======= SERVICE ======
