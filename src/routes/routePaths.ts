@@ -12,6 +12,7 @@ type RoutePaths =
   | 'applicationsGroup'
   | 'configuration'
   | 'modules'
+  | 'modulesRelations'
   | 'application'
   | 'connections'
   | 'swagger'
@@ -34,6 +35,7 @@ export const routePaths: Record<RoutePaths, string> = {
   applicationsGroup: '/application_groups',
   configuration: '/configuration',
   modules: '/modules',
+  modulesRelations: '/modules/relations',
   application: 'application',
   connections: 'connections',
   swagger: 'swagger',

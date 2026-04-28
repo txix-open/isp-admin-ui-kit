@@ -1,0 +1,25 @@
+.flow-diagram {
+  width: 100%;
+  height: calc(100vh - 280px);
+  min-height: 500px;
+  border-radius: 8px;
+  border: 1px solid;
+  position: relative;
+
+  &__loading {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 10;
+    border-radius: 8px;
+  }
+}
+
+.react-flow__attribution {
+  display:none;
+}
