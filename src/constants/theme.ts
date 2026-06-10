@@ -1,8 +1,9 @@
 import { theme } from 'antd'
+import type { ThemeConfig } from 'antd'
 
-export const darkTheme = {
+export const darkTheme: ThemeConfig = {
   algorithm: theme.darkAlgorithm,
-  cssVar: true,
+  cssVar: {},
   token: {
     // Цвета фона
     colorBgBase: '#141414', // Базовый фон (body, layout)
@@ -44,9 +45,9 @@ export const darkTheme = {
   }
 }
 
-export const lightTheme = {
+export const lightTheme: ThemeConfig = {
   algorithm: theme.defaultAlgorithm,
-  cssVar: true,
+  cssVar: {},
   token: {
     colorBgLayout: '#FFFFFF'
   }
