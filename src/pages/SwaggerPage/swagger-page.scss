@@ -1,15 +1,15 @@
 .swagger-page {
-  height: calc(100vh - 100px);
+  min-height: 100vh;
   display: flex;
   flex-direction: column;
   width: 100%;
 
   &__loader,
   &__no-data {
+    flex: 1;
     display: flex;
     justify-content: center;
     align-items: center;
-    height: 100%;
   }
 
   &__no-data {
@@ -18,13 +18,33 @@
   }
 
   &__content {
-    flex: 1;
-    min-height: 0;
-    overflow-y: auto;
+    flex: initial;
+    min-height: auto;
+    overflow: visible;
 
     a[href='https://redocly.com/redoc/'] {
       display: none !important;
     }
+  }
+
+  &__mermaid {
+    margin: 16px 0;
+    padding: 16px;
+    overflow-x: auto;
+    border: 1px solid var(--ant-color-border-secondary);
+    border-radius: 8px;
+    background: var(--ant-color-bg-container);
+
+    svg {
+      display: block;
+      max-width: 100%;
+      height: auto;
+      margin: 0 auto;
+    }
+  }
+
+  &__mermaid-error {
+    border: 1px solid var(--ant-color-error);
   }
 
   &--dark .redoc-wrap {
@@ -34,6 +54,32 @@
 
     h5, h5 > span {
       color: white;
+    }
+
+    table {
+      background: #18181b !important;
+      border-color: #3f3f46 !important;
+    }
+
+    thead,
+    tbody,
+    tr,
+    th,
+    td {
+      background: #18181b !important;
+      border-color: #3f3f46 !important;
+      color: #e4e4e7 !important;
+    }
+
+    th {
+      background: #27272a !important;
+      color: #fafafa !important;
+    }
+
+    td code,
+    th code {
+      background: #09090b !important;
+      color: #fde047 !important;
     }
   }
 }
