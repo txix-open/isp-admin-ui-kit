@@ -49,6 +49,10 @@ export const getRoutesConfig = (
       element: <PrivateRoute />,
       children: [
         {
+          path: `${routePaths.modules}/:id/${routePaths.swagger}`,
+          element: lazyElement(SwaggerPage)
+        },
+        {
           path: routePaths.home,
           element: <LayoutComponent customRouters={customRouters} />,
           children: [
@@ -142,10 +146,6 @@ export const getRoutesConfig = (
                     {
                       path: routePaths.connections,
                       element: lazyElement(Connections)
-                    },
-                    {
-                      path: routePaths.swagger,
-                      element: lazyElement(SwaggerPage)
                     }
                   ]
                 }

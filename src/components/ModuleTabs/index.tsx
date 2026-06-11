@@ -1,12 +1,14 @@
 import { Tabs } from 'antd'
 import { memo, useEffect, useMemo } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
+import { useHref, useNavigate, useParams } from 'react-router-dom'
 
 import { MODULES_TAB_KEYS } from '@constants/modules'
 
 import ModuleTabContent from '@widgets/ModuleTabContent'
 
 import { ModuleTabsPropsType } from '@components/ModuleTabs/module-tabs.type'
+
+import { routePaths } from '@routes/routePaths'
 
 const secondColumnItems = [
   { key: 'configurations', name: 'Конфигурации' },
@@ -22,6 +24,9 @@ const ModuleTabs = ({
 }: ModuleTabsPropsType) => {
   const navigate = useNavigate()
   const { id: selectedItemId = '' } = useParams()
+  const swaggerHref = useHref(
+    `${routePaths.modules}/${selectedItemId}/${routePaths.swagger}`
+  )
 
   const hasSwagger = useMemo(
     () =>
@@ -38,6 +43,11 @@ const ModuleTabs = ({
   }, [activeTab, hasSwagger])
 
   const navigateToTab = (tabKey: string) => {
+    if (tabKey === MODULES_TAB_KEYS.swagger) {
+      window.open(swaggerHref, '_blank')
+      return
+    }
+
     const params = new URLSearchParams(searchParams)
     navigate(
       {
@@ -66,8 +76,10 @@ const ModuleTabs = ({
       activeKey={resolvedActiveTab}
       className="modules-page__tabs"
       onChange={(key) => {
-        setActiveTab(key)
         navigateToTab(key)
+        if (key !== MODULES_TAB_KEYS.swagger) {
+          setActiveTab(key)
+        }
       }}
       items={items.map(({ key, name }) => ({
         key,
