@@ -13,7 +13,7 @@ export const LIGHT_OPTIONS = {
       activeTextColor: '#1677ff'
     },
     rightPanel: {
-      width: '50%',
+      width: '40%',
       backgroundColor: '#1f2933',
       textColor: '#e8eaed'
     },
@@ -98,7 +98,7 @@ export const DARK_OPTIONS = {
       color: '#67e8f9'
     },
     rightPanel: {
-      width: '50%',
+      width: '40%',
       backgroundColor: '#27272a',
       servers: {
         overlay: {
@@ -111,6 +111,7 @@ export const DARK_OPTIONS = {
     },
     schema: {
       linesColor: '#d8b4fe',
+      nestedBackground: '#18181b',
       typeNameColor: '#93c5fd',
       typeTitleColor: '#1d4ed8',
       requireLabelColor: '#ef4444'

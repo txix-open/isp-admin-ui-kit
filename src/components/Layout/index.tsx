@@ -1,6 +1,6 @@
-import { ConfigProvider, Layout, Spin } from 'antd'
+import { Layout, Spin } from 'antd'
 import { findRouteWithParents, LayoutMenu, LayoutSider } from 'isp-ui-kit'
-import { useContext, useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Navigate, Outlet, useLocation, useNavigate } from 'react-router-dom'
 
 import { localStorageKeys } from '@constants/localStorageKeys'
@@ -42,7 +42,6 @@ const LayoutComponent = ({ customRouters }: LayoutComponentPropsType) => {
   const location = useLocation()
   const navigate = useNavigate()
   const { hasPermission } = useRole()
-  const { theme } = useContext(ConfigProvider.ConfigContext)
 
   const userToken = LocalStorage.get(localStorageKeys.USER_TOKEN)
 
@@ -82,15 +81,6 @@ const LayoutComponent = ({ customRouters }: LayoutComponentPropsType) => {
 
   const resultMenuConfig = [...menuConfig(firstName), ...customMenuItems]
 
-  useEffect(() => {
-    ConfigProvider.config({
-      holderRender: (children) => (
-        <ConfigProvider prefixCls="static" theme={theme}>
-          {children}
-        </ConfigProvider>
-      )
-    })
-  }, [theme])
   useEffect(() => {
     if (userToken && status === StateProfileStatus.notInit) {
       dispatch(fetchProfile())
