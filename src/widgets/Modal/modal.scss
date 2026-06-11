@@ -17,7 +17,7 @@
     min-height: 170px;
     max-height: 90vh;
     max-width: 90%;
-    background: var(--ant-layout-light-sider-bg);
+    background: var(--ant-color-bg-container);
     color: white;
     z-index: 10;
     border-radius: 16px;
@@ -32,7 +32,7 @@
 
   &__header {
     height: 50px;
-    background: var(--ant-layout-light-sider-bg);
+    background: var(--ant-color-bg-container);
     overflow: hidden;
     border-top-left-radius: 16px;
     border-top-right-radius: 16px;
@@ -62,5 +62,4 @@
 body.modal-open {
   overflow: hidden;
 }
-
 

@@ -43,6 +43,16 @@ const AdminBase: FC<AdminBasePropsType> = ({
   )
 
   useEffect(() => {
+    ConfigProvider.config({
+      holderRender: (children) => (
+        <ConfigProvider locale={ruRu} theme={theme} {...configProviderProps}>
+          {children}
+        </ConfigProvider>
+      )
+    })
+  }, [configProviderProps, theme])
+
+  useEffect(() => {
     return routerConfig.subscribe((state) => {
       const currentPathname = getCleanPath(state.location.pathname)
       const fullPath = `${currentPathname}${state.location.search}${state.location.hash}`

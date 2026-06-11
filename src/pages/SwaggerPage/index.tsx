@@ -5,14 +5,16 @@ import { RedocStandalone } from 'redoc'
 
 import { Context } from '@stores/index'
 
+import { useRedocEnhancements } from './useRedocEnhancements'
+
 import { DARK_OPTIONS, LIGHT_OPTIONS } from './redoc-options'
 import './swagger-page.scss'
 import type { RedocViewPropsType } from './swagger.type'
-import { useRedocEnhancements } from './useRedocEnhancements'
 import { useSwaggerSpec } from './useSwaggerSpec'
 
 const RedocView = memo(({ spec, isDark }: RedocViewPropsType) => (
   <RedocStandalone
+    key={isDark ? 'redoc-dark' : 'redoc-light'}
     spec={spec}
     options={isDark ? DARK_OPTIONS : LIGHT_OPTIONS}
   />
