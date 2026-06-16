@@ -18,8 +18,161 @@
     z-index: 10;
     border-radius: 8px;
   }
+
+  &__edge {
+    .react-flow__edge-path {
+      transition:
+        opacity 0.2s ease,
+        stroke 0.2s ease,
+        stroke-width 0.2s ease;
+    }
+  }
+
+  &__edge--incoming {
+    .react-flow__edge-path {
+      filter: drop-shadow(0 0 3px rgba(22, 119, 255, 0.35));
+    }
+  }
+
+  &__edge--outgoing {
+    .react-flow__edge-path {
+      filter: drop-shadow(0 0 3px rgba(250, 140, 22, 0.35));
+    }
+  }
+
+  &__edge--dimmed {
+    pointer-events: none;
+  }
+
+  &__focus-panel {
+    width: 360px;
+    max-width: calc(100vw - 48px);
+    max-height: min(520px, calc(100vh - 320px));
+    border: 1px solid;
+    border-radius: 8px;
+    padding: 14px;
+    overflow: auto;
+    scrollbar-color: rgba(255, 255, 255, 0.32) transparent;
+    scrollbar-width: thin;
+  }
+
+  &__focus-panel-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 10px;
+  }
+
+  &__focus-panel-title {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 16px;
+    font-weight: 600;
+  }
+
+  &__focus-panel-counters {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 12px;
+  }
+
+  &__focus-panel-counter {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    min-width: 58px;
+    padding: 3px 8px;
+    border-left: 3px solid;
+    border-radius: 4px;
+    background: rgba(127, 127, 127, 0.08);
+    font-size: 12px;
+    font-weight: 600;
+  }
+
+  &__focus-panel-section {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+
+    & + & {
+      margin-top: 12px;
+    }
+  }
+
+  &__focus-panel-label {
+    font-size: 12px;
+    font-weight: 600;
+    opacity: 0.7;
+  }
+
+  &__focus-panel-list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    max-height: 210px;
+    overflow: auto;
+    padding-right: 8px;
+    scrollbar-color: rgba(255, 255, 255, 0.32) transparent;
+    scrollbar-gutter: stable;
+    scrollbar-width: thin;
+  }
+
+  &__focus-panel-link {
+    min-width: 0;
+    width: 100%;
+    border: 1px solid rgba(127, 127, 127, 0.28);
+    border-radius: 6px;
+    padding: 6px 10px;
+    background: rgba(127, 127, 127, 0.06);
+    cursor: pointer;
+    overflow: hidden;
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 18px;
+    min-height: 32px;
+    text-align: left;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    transition:
+      border-color 0.2s ease,
+      background 0.2s ease;
+
+    &:hover {
+      border-color: #1677ff;
+      background: rgba(22, 119, 255, 0.08);
+    }
+  }
+
+  &__focus-panel,
+  &__focus-panel-list {
+    &::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+
+    &::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    &::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.28);
+      border-radius: 999px;
+    }
+
+    &::-webkit-scrollbar-thumb:hover {
+      background: rgba(255, 255, 255, 0.42);
+    }
+  }
+
+  &__focus-panel-empty {
+    font-size: 13px;
+    opacity: 0.55;
+  }
 }
 
 .react-flow__attribution {
-  display:none;
+  display: none;
 }
