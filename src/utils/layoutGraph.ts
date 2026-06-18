@@ -1,5 +1,5 @@
 import Dagre from '@dagrejs/dagre'
-import { Node, Edge } from 'reactflow'
+import { type Edge, type Node } from 'reactflow'
 
 import {
   DAGRE_GRAPH_CONFIG,
@@ -7,7 +7,10 @@ import {
   NODE_HEIGHT
 } from '@constants/modulesRelationsDiagram'
 
-export const layoutGraph = (nodes: Node[], edges: Edge[]): Node[] => {
+export const layoutGraph = <TNode extends Node, TEdge extends Edge>(
+  nodes: TNode[],
+  edges: TEdge[]
+): TNode[] => {
   const dagreGraph = new Dagre.graphlib.Graph()
   dagreGraph.setDefaultEdgeLabel(() => ({}))
   dagreGraph.setGraph(DAGRE_GRAPH_CONFIG)
