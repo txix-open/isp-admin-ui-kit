@@ -3,7 +3,12 @@
     border-radius: 8px;
     border: 2px solid;
     width: 200px;
+    cursor: pointer;
     overflow: hidden;
+    transition:
+      border-color 0.2s ease,
+      box-shadow 0.2s ease,
+      opacity 0.2s ease;
   }
 
   &__header {
@@ -20,5 +25,19 @@
       text-overflow: ellipsis;
       white-space: nowrap;
     }
+  }
+
+  &__meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 6px 12px 8px;
+    font-size: 12px;
+    font-weight: 500;
+  }
+
+  &__meta-item {
+    min-width: 44px;
   }
 }
