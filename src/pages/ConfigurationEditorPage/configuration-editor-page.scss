@@ -10,15 +10,6 @@
   overflow: auto;
   padding-bottom: 80px;
 
-  .ant-tabs-nav {
-    width: 250px;
-
-    .ant-tabs-tab-btn {
-      text-align: left;
-      white-space: normal;
-    }
-  }
-
   &::-webkit-scrollbar {
     display: none;
   }
@@ -49,37 +40,69 @@
   }
 
   .rjsf {
-    display: flex;
+    display: block;
+    width: 100%;
+    min-width: 0;
 
     .form-group {
       width: 100%;
+    }
+
+    .ant-form-item {
+      margin-bottom: 16px;
     }
 
     .ant-form-item-label {
       text-align: start;
       max-width: 100%;
       text-overflow: ellipsis;
+      padding: 0 0 4px;
+      line-height: 20px;
 
-      label {
-        display: inline;
+      > label {
+        display: inline-flex;
+        align-items: center;
+        height: auto;
+        min-height: 20px;
+        line-height: 20px;
       }
     }
 
-    .ant-tabs-right {
+    .configuration-editor-page__root-tabs.ant-tabs-right {
+      display: flex;
       width: 100%;
-      justify-content: space-between;
+      min-width: 0;
+      align-items: stretch;
+
+      > .ant-tabs-content-holder {
+        flex: 1 1 auto;
+        min-width: 0;
+      }
+
+      > .ant-tabs-nav {
+        width: 250px;
+        flex: 0 0 250px;
+
+        .ant-tabs-tab-btn {
+          text-align: left;
+          white-space: normal;
+        }
+      }
+
+      .ant-tabs-content,
+      .ant-tabs-tabpane {
+        width: 100%;
+        min-width: 0;
+      }
     }
 
-    .ant-col-8 .ant-form-item-label {
-      margin-right: $basic-margin *2;
-    }
-
-    .ant-form-item-row {
-      flex-direction: column;
+    .ant-form-item-control-input {
+      min-height: 32px;
     }
 
     .collapseArray_item_content {
       width: 100%;
+      min-width: 0;
       
       .ant-btn {
         position: relative;
@@ -106,19 +129,24 @@
 
     .collapseArray_item {
       display: flex;
+      align-items: flex-start;
       width: 100%;
       margin-bottom: 24px;
 
       .ant-form-item {
-        height: 100%;
         align-items: baseline;
         align-content: end;
-        margin: 0;
+        margin-bottom: 16px;
       }
 
       .anticon-delete {
         margin-left: auto;
         padding-left: 8px;
+      }
+
+      > .ant-btn {
+        flex: 0 0 auto;
+        margin-left: 8px;
       }
     }
 
@@ -149,33 +177,23 @@
         margin-left: 8px;
       }
     }
-    .collapseArray_item {
-      align-items: center;
-    }
   }
 
   .collapse {
     .configEditor_collapseObject {
       border-radius: 6px;
-      .ant-row {
-        display: grid;
 
-        grid-template-columns: minmax(0, 30%) minmax(0, 70%) auto;
+      .ant-row {
         .ant-col {
-          height: 100%;
           align-content: center;
           padding-bottom: 5px;
 
           .ant-form-item {
-            height: 100%;
             align-items: baseline;
             align-content: end;
-            margin: 0;
+            margin-bottom: 16px;
           }
         }
-      }
-      .ant-form-item-row {
-        display: flex;
       }
     }
   }

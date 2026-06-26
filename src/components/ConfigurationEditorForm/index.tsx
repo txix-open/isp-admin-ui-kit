@@ -18,6 +18,7 @@ import { useParams } from 'react-router-dom'
 import CustomDatePicker from '@widgets/CustomDatePicker'
 
 import {
+  ArrayFieldItemTemplatePropsType,
   ArrayFieldTemplatePropsType,
   ConfigurationEditorPropsType,
   DescriptionPropsType,
@@ -38,8 +39,8 @@ import {
 const { Text: AntdText } = Typography
 
 const ConfigurationEditorForm: FC<ConfigurationEditorPropsType> = ({
-  bufConfig = {},
-  jsonSchema = {},
+  bufConfig,
+  jsonSchema,
   submitRef,
   setDisableSendBtn = () => {},
   currentConfig
@@ -160,17 +161,25 @@ const ConfigurationEditorForm: FC<ConfigurationEditorPropsType> = ({
     return id.split('_').length
   }
 
+  const getFieldId = (
+    fieldPathId?: { $id?: string },
+    idSchema?: { $id?: string }
+  ) => fieldPathId?.$id || idSchema?.$id || 'root'
+
   const ArrayFieldTemplate: FC<ArrayFieldTemplatePropsType> = ({
     items,
     onAddClick,
     canAdd,
     title,
+    fieldPathId,
     idSchema
   }) => {
+    const fieldId = getFieldId(fieldPathId, idSchema)
+
     return (
-      <Collapse defaultActiveKey={idSchema.$id}>
+      <Collapse defaultActiveKey={fieldId}>
         <Collapse.Panel
-          key={idSchema.$id}
+          key={fieldId}
           className="collapseArray"
           header={
             <Space
@@ -197,21 +206,32 @@ const ConfigurationEditorForm: FC<ConfigurationEditorPropsType> = ({
             </Space>
           }
         >
-          {items &&
-            items.map((element) => (
-              <div key={element.index} className="collapseArray_item">
-                <div className="collapseArray_item_content">
-                  {element.children}
-                </div>
-                <Button
-                  type="link"
-                  icon={<DeleteOutlined />}
-                  onClick={element.onDropIndexClick(element.index)}
-                />
-              </div>
-            ))}
+          {items}
         </Collapse.Panel>
       </Collapse>
+    )
+  }
+
+  const ArrayFieldItemTemplate: FC<ArrayFieldItemTemplatePropsType> = ({
+    children,
+    itemKey,
+    index,
+    hasToolbar,
+    buttonsProps
+  }) => {
+    const canRemove = hasToolbar && buttonsProps?.hasRemove
+
+    return (
+      <div key={itemKey || index} className="collapseArray_item">
+        <div className="collapseArray_item_content">{children}</div>
+        {canRemove && (
+          <Button
+            type="link"
+            icon={<DeleteOutlined />}
+            onClick={buttonsProps?.onRemoveItem}
+          />
+        )}
+      </div>
     )
   }
 
@@ -224,17 +244,21 @@ const ConfigurationEditorForm: FC<ConfigurationEditorPropsType> = ({
     const {
       properties,
       schema,
+      fieldPathId,
       idSchema,
       onAddClick,
+      onAddProperty,
       activeTabKey,
       handleTabsChange,
       title
     } = props
-    const depth = getDepth(idSchema.$id)
+    const fieldId = getFieldId(fieldPathId, idSchema)
+    const schemaProperties = schema.properties || {}
+    const depth = getDepth(fieldId)
 
     const renderComplexTabs = (propsComplex: any[]) => {
       return propsComplex.map((element) => ({
-        label: schema.properties[element.name]?.title || element.name,
+        label: schemaProperties[element.name]?.title || element.name,
         key: element.name,
         children: schema.additionalProperties ? (
           properties.map((element: any) => (
@@ -255,7 +279,7 @@ const ConfigurationEditorForm: FC<ConfigurationEditorPropsType> = ({
 
     const processProperties = (properties: any) => {
       properties.forEach((prop: any) => {
-        const fieldType = schema.properties[prop.name]?.type
+        const fieldType = schemaProperties[prop.name]?.type
         const isComplex =
           !fieldType || fieldType === 'array' || fieldType === 'object'
         if (isComplex) {
@@ -271,9 +295,10 @@ const ConfigurationEditorForm: FC<ConfigurationEditorPropsType> = ({
     }
     processProperties(properties)
 
-    if (idSchema.$id === 'root') {
+    if (fieldId === 'root') {
       return (
         <Tabs
+          className="configuration-editor-page__root-tabs"
           activeKey={activeTabKey}
           tabPosition="right"
           onChange={handleTabsChange}
@@ -294,13 +319,15 @@ const ConfigurationEditorForm: FC<ConfigurationEditorPropsType> = ({
     }
 
     if (schema.additionalProperties) {
+      const handleAddProperty = onAddProperty || onAddClick?.(schema)
+
       return (
         <Collapse
           className="collapse"
-          defaultActiveKey={depth > 1 ? '' : idSchema.$id}
+          defaultActiveKey={depth > 1 ? '' : fieldId}
         >
           <Collapse.Panel
-            key={idSchema.$id}
+            key={fieldId}
             className="configEditor_collapseObject"
             header={
               <Space
@@ -317,7 +344,7 @@ const ConfigurationEditorForm: FC<ConfigurationEditorPropsType> = ({
                   icon={<PlusOutlined />}
                   onClick={(e) => {
                     e.stopPropagation()
-                    onAddClick(schema)()
+                    handleAddProperty?.()
                   }}
                 />
               </Space>
@@ -339,10 +366,10 @@ const ConfigurationEditorForm: FC<ConfigurationEditorPropsType> = ({
       return (
         <Collapse
           className="collapse"
-          defaultActiveKey={depth > 1 ? '' : idSchema.$id}
+          defaultActiveKey={depth > 1 ? '' : fieldId}
         >
           <Collapse.Panel
-            key={idSchema.$id}
+            key={fieldId}
             className="configEditor_collapseObject"
             header={<Tooltip title={title}>{title}</Tooltip>}
           >
@@ -368,14 +395,15 @@ const ConfigurationEditorForm: FC<ConfigurationEditorPropsType> = ({
     <section className="configuration-editor-page__form">
       <Form
         formContext={{
-          labelCol: { span: 8 },
-          wrapperCol: { span: 30 },
+          labelCol: { span: 24 },
+          wrapperCol: { span: 24 },
           layout: 'vertical'
         }}
         uiSchema={uiSchema}
         templates={{
           ObjectFieldTemplate: ObjectFieldTemplate as any,
           ArrayFieldTemplate: ArrayFieldTemplate as any,
+          ArrayFieldItemTemplate: ArrayFieldItemTemplate as any,
           ButtonTemplates: { RemoveButton } as any
         }}
         widgets={{
