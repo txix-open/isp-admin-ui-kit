@@ -43,17 +43,25 @@ export interface FieldTemplatePropsType {
 }
 
 export interface ArrayFieldTemplatePropsType {
-  items: {
-    index: number
-    children: ReactNode
-    onDropIndexClick: (index: number) => () => void
-  }[]
+  items: ReactNode[]
   onAddClick: (event: MouseEvent) => void
   canAdd: boolean
   title: string
   titleField?: ComponentType<any>
-  idSchema: { $id: string }
+  fieldPathId?: { $id: string }
+  idSchema?: { $id: string }
   schema: { description?: string }
+}
+
+export interface ArrayFieldItemTemplatePropsType {
+  children: ReactNode
+  itemKey?: string
+  index: number
+  hasToolbar?: boolean
+  buttonsProps?: {
+    hasRemove?: boolean
+    onRemoveItem?: (event?: any) => void
+  }
 }
 
 export interface ObjectFieldTemplatePropertyType {
@@ -70,17 +78,21 @@ export interface SchemaPropertiesType {
 
 export interface ObjectFieldTemplatePropsType {
   properties: ObjectFieldTemplatePropertyType[]
-  idSchema: {
+  fieldPathId?: {
+    $id: string
+  }
+  idSchema?: {
     $id: string
   }
   schema: {
-    properties: SchemaPropertiesType
-    additionalProperties: boolean | { type: string }
+    properties?: SchemaPropertiesType
+    additionalProperties?: boolean | { type: string }
   }
-  onAddClick: (schema: any) => () => void
+  onAddClick?: (schema: any) => () => void
+  onAddProperty?: () => void
   title: string
-  activeTabKey: string
-  handleTabsChange: (key: string) => void
+  activeTabKey?: string
+  handleTabsChange?: (key: string) => void
 }
 
 export interface RemoveButtonProps extends ButtonProps {
