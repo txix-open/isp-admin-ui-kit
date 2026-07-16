@@ -9,22 +9,24 @@ export const axiosBaseQuery =
   (
     { baseUrl }: { baseUrl: string } = { baseUrl: '' }
   ): BaseQueryFn<
-    {
+    Pick<
+      AxiosRequestConfig,
+      'url' | 'method' | 'data' | 'params' | 'responseType' | 'headers'
+    > & {
       url: string
-      method?: AxiosRequestConfig['method']
-      data?: AxiosRequestConfig['data']
-      params?: AxiosRequestConfig['params']
     },
     unknown,
     unknown
   > =>
-  async ({ url, method = 'post', data, params }) => {
+  async ({ url, method = 'post', data, params, responseType, headers }) => {
     try {
       const result = await apiService({
         url: baseUrl + url,
         method,
         data,
-        params
+        params,
+        responseType,
+        headers
       })
       return { data: result.data }
     } catch (axiosError) {
