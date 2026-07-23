@@ -1,5 +1,4 @@
-import { Divider, message, Table } from 'antd'
-import { ColumnsType } from 'antd/es/table'
+import { Divider, message, Table, TableColumnType, TableProps } from 'antd'
 import { FormInput } from 'isp-ui-kit'
 import { useEffect, useState } from 'react'
 import { Controller, useForm } from 'react-hook-form'
@@ -13,9 +12,10 @@ import AgreementModal from '@widgets/AgreementModal'
 
 import { RolesContentPropsType } from '@components/RolesContent/roles-content.type'
 
+import { useColumnSearch } from '@hooks/useColumnsSearch'
 import useRole from '@hooks/useRole'
 
-import { PermissionKeysType, RoleType } from '@type/roles.type'
+import { PermissionKeysType, PermissionType, RoleType } from '@type/roles.type'
 
 import './roles-content.scss'
 
@@ -25,16 +25,9 @@ const newRole: Partial<RoleType> = {
   permissions: []
 }
 
-const columns: ColumnsType = [
-  {
-    title: 'Действие',
-    dataIndex: 'name'
-  },
-  {
-    title: 'Ключ в системе',
-    dataIndex: 'key'
-  }
-]
+type PermissionTableOnChange = NonNullable<TableProps<PermissionType>['onChange']>
+type PermissionTableFilters = Parameters<PermissionTableOnChange>[1]
+
 const RolesContent = ({
   role,
   permissions,
@@ -53,9 +46,11 @@ const RolesContent = ({
     mode: 'onChange'
   })
   const { hasPermission } = useRole()
+  const { getColumnSearchProps } = useColumnSearch<PermissionType>()
   const { id: selectedItemId } = useParams()
 
   const [openModal, setOpenModal] = useState<boolean>(false)
+  const [filteredInfo, setFilteredInfo] = useState<PermissionTableFilters>({})
   const isUpdateRole = hasPermission(PermissionKeysType.role_update)
   const isCreateRole = hasPermission(PermissionKeysType.role_add)
 
@@ -81,6 +76,23 @@ const RolesContent = ({
     setOpenModal(false)
   }
 
+  const columns: TableColumnType<PermissionType>[] = [
+    {
+      title: 'Действие',
+      dataIndex: 'name',
+      ...getColumnSearchProps('name', filteredInfo)
+    },
+    {
+      title: 'Ключ в системе',
+      dataIndex: 'key',
+      ...getColumnSearchProps('key', filteredInfo)
+    }
+  ]
+
+  const handleTableChange: PermissionTableOnChange = (_, filters) => {
+    setFilteredInfo(filters)
+  }
+
   const renderFormTable = () => (
     <Controller
       control={control}
@@ -89,7 +101,9 @@ const RolesContent = ({
         <Table
           columns={columns}
           dataSource={permissions}
-          pagination={{ pageSize: 10 }}
+          onChange={handleTableChange}
+          pagination={false}
+          rowKey="key"
           scroll={{
             y: 'calc(100vh - 270px)'
           }}
