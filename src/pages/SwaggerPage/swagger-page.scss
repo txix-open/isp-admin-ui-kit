@@ -1,8 +1,11 @@
 .swagger-page {
-  min-height: 100vh;
+  height: 100vh;
+  min-height: 0;
   display: flex;
   flex-direction: column;
   width: 100%;
+  overflow-x: hidden;
+  overflow-y: auto;
 
   &__loader,
   &__no-data {
@@ -18,9 +21,8 @@
   }
 
   &__content {
-    flex: initial;
-    min-height: auto;
-    overflow: visible;
+    flex: 0 0 auto;
+    min-height: 100%;
 
     a[href='https://redocly.com/redoc/'] {
       display: none !important;
