@@ -24,10 +24,10 @@ const SwaggerPage = () => {
   const { changeTheme: isDark } = useContext(Context)
 
   const { id } = useParams<{ id: string }>()
-  const contentRef = useRef<HTMLDivElement>(null)
+  const pageRef = useRef<HTMLDivElement>(null)
   const { parsedSpec, isLoading } = useSwaggerSpec(id)
 
-  useRedocEnhancements(contentRef, parsedSpec, isDark)
+  useRedocEnhancements(pageRef, parsedSpec, isDark)
 
   if (isLoading) {
     return (
@@ -38,9 +38,12 @@ const SwaggerPage = () => {
   }
 
   return (
-    <div className={`swagger-page ${isDark ? 'swagger-page--dark' : ''}`}>
+    <div
+      className={`swagger-page ${isDark ? 'swagger-page--dark' : ''}`}
+      ref={pageRef}
+    >
       {parsedSpec ? (
-        <div className="swagger-page__content" ref={contentRef}>
+        <div className="swagger-page__content">
           <RedocView spec={parsedSpec} isDark={isDark} />
         </div>
       ) : (

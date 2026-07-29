@@ -47,13 +47,9 @@
   &__focus-panel {
     width: 360px;
     max-width: calc(100vw - 48px);
-    max-height: min(520px, calc(100vh - 320px));
     border: 1px solid;
     border-radius: 8px;
     padding: 14px;
-    overflow: auto;
-    scrollbar-color: rgba(255, 255, 255, 0.32) transparent;
-    scrollbar-width: thin;
   }
 
   &__focus-panel-header {
@@ -115,7 +111,7 @@
     max-height: 210px;
     overflow: auto;
     padding-right: 8px;
-    scrollbar-color: rgba(255, 255, 255, 0.32) transparent;
+    scrollbar-color: var(--ant-color-text-quaternary, rgba(127, 127, 127, 0.45)) transparent;
     scrollbar-gutter: stable;
     scrollbar-width: thin;
   }
@@ -146,7 +142,6 @@
     }
   }
 
-  &__focus-panel,
   &__focus-panel-list {
     &::-webkit-scrollbar {
       width: 8px;
@@ -158,18 +153,22 @@
     }
 
     &::-webkit-scrollbar-thumb {
-      background: rgba(255, 255, 255, 0.28);
+      background: var(--ant-color-text-quaternary, rgba(127, 127, 127, 0.45));
       border-radius: 999px;
     }
 
     &::-webkit-scrollbar-thumb:hover {
-      background: rgba(255, 255, 255, 0.42);
+      background: var(--ant-color-text-tertiary, rgba(127, 127, 127, 0.65));
     }
   }
 
   &__focus-panel-empty {
     font-size: 13px;
     opacity: 0.55;
+  }
+
+  &__tooltip {
+    pointer-events: none;
   }
 }
 

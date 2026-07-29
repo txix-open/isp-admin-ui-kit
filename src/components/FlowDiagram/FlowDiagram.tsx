@@ -5,6 +5,7 @@ import {
   ExpandOutlined
 } from '@ant-design/icons'
 import { Button, Spin, Tooltip, theme } from 'antd'
+import { type WheelEvent } from 'react'
 import ReactFlow, { Background, Panel, ReactFlowProvider } from 'reactflow'
 
 import {
@@ -26,6 +27,13 @@ const FlowDiagramContent = ({
   isLoading
 }: FlowDiagramPropsType) => {
   const { token } = theme.useToken()
+  const getTooltipContainer = (triggerNode: HTMLElement) =>
+    (triggerNode.closest('.flow-diagram__focus-panel') as HTMLElement | null) ??
+    triggerNode.parentElement ??
+    document.body
+  const stopFlowWheel = (event: WheelEvent<HTMLDivElement>) => {
+    event.stopPropagation()
+  }
   const {
     edges,
     handleClearSelection,
@@ -87,7 +95,11 @@ const FlowDiagramContent = ({
               }}
             >
               <div className="flow-diagram__focus-panel-header">
-                <Tooltip title={selectedModule.id}>
+                <Tooltip
+                  classNames={{ root: 'flow-diagram__tooltip' }}
+                  getPopupContainer={getTooltipContainer}
+                  title={selectedModule.id}
+                >
                   <span className="flow-diagram__focus-panel-title">
                     {selectedModule.name}
                   </span>
@@ -120,10 +132,18 @@ const FlowDiagramContent = ({
                 <span className="flow-diagram__focus-panel-label">
                   Зависит от
                 </span>
-                <div className="flow-diagram__focus-panel-list">
+                <div
+                  className="flow-diagram__focus-panel-list nowheel nopan"
+                  onWheelCapture={stopFlowWheel}
+                >
                   {outgoingModules.length ? (
                     outgoingModules.map((module) => (
-                      <Tooltip key={module.key} title={module.id}>
+                      <Tooltip
+                        classNames={{ root: 'flow-diagram__tooltip' }}
+                        getPopupContainer={getTooltipContainer}
+                        key={module.key}
+                        title={module.id}
+                      >
                         <button
                           className="flow-diagram__focus-panel-link"
                           onClick={module.onSelect}
@@ -144,10 +164,18 @@ const FlowDiagramContent = ({
                 <span className="flow-diagram__focus-panel-label">
                   Требуется для
                 </span>
-                <div className="flow-diagram__focus-panel-list">
+                <div
+                  className="flow-diagram__focus-panel-list nowheel nopan"
+                  onWheelCapture={stopFlowWheel}
+                >
                   {incomingModules.length ? (
                     incomingModules.map((module) => (
-                      <Tooltip key={module.key} title={module.id}>
+                      <Tooltip
+                        classNames={{ root: 'flow-diagram__tooltip' }}
+                        getPopupContainer={getTooltipContainer}
+                        key={module.key}
+                        title={module.id}
+                      >
                         <button
                           className="flow-diagram__focus-panel-link"
                           onClick={module.onSelect}
