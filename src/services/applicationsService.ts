@@ -6,7 +6,6 @@ import { SearchAppByTokenType } from '@ui/SearchAppByToken'
 
 import {
   ApplicationAppType,
-  ApplicationsServiceType,
   NewApplicationAppType,
   UpdateApplicationAppType
 } from '@pages/ApplicationsPage/applications.type'
@@ -19,10 +18,7 @@ const applicationsApi = createApi({
   tagTypes: ['Applications', 'ApplicationsSearch'],
   baseQuery: axiosBaseQuery({ baseUrl: apiPaths.baseSystemUrl }),
   endpoints: (builder) => ({
-    getAllApplicationsService: builder.query<
-      ApplicationAppType[],
-      { id: string }
-    >({
+    getAllApplicationsService: builder.query<ApplicationAppType[], void>({
       query: () => ({ url: apiPaths.getAllApplications }),
       providesTags: () => ['Applications']
     }),
@@ -39,7 +35,7 @@ const applicationsApi = createApi({
     }),
 
     getApplicationsServiceById: builder.query<
-      ApplicationsServiceType,
+      ApplicationAppType,
       { id: number }
     >({
       query: (id) => ({
@@ -49,26 +45,27 @@ const applicationsApi = createApi({
       providesTags: () => ['Applications']
     }),
 
-    getApplicationsByServiceId: builder.query<
-      ApplicationsServiceType[],
+    getApplicationsByAppGroup: builder.query<
+      ApplicationAppType[],
       { id: number }
     >({
       query: (id) => ({
-        url: apiPaths.getApplicationsByServiceId,
+        url: apiPaths.getApplicationsByAppGroup,
         data: id
       }),
       providesTags: () => ['Applications']
     }),
 
-    updateApplicationsService: builder.mutation<void, UpdateApplicationAppType>(
-      {
-        query: (updateApplications) => ({
-          url: apiPaths.updateApplication,
-          data: updateApplications
-        }),
-        invalidatesTags: ['Applications']
-      }
-    ),
+    updateApplicationsService: builder.mutation<
+      ApplicationAppType,
+      UpdateApplicationAppType
+    >({
+      query: (updateApplications) => ({
+        url: apiPaths.updateApplication,
+        data: updateApplications
+      }),
+      invalidatesTags: ['Applications']
+    }),
 
     removeApplicationsService: builder.mutation<void, number[]>({
       query: ([id]) => ({
