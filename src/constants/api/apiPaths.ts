@@ -8,6 +8,7 @@ type PathKeys =
   | 'deleteRole'
   | 'login'
   | 'logout'
+  | 'loginOAuth'
   | 'getProfile'
   | 'getUsers'
   | 'createUser'
@@ -90,6 +91,7 @@ export const apiPaths: Record<PathKeys, string> = {
   // ======= AUTH ======
   login: apiWithBaseURL('/admin/auth/login'),
   logout: apiWithBaseURL('/admin/auth/logout'),
+  loginOAuth: apiWithBaseURL('/admin/ui_settings/sudir'),
   // ======= PROFILE ======
   getProfile: apiWithBaseURL('/admin/user/get_profile'),
   getUI: apiWithBaseURL('/admin/user/get_design'),
