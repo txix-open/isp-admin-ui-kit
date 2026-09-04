@@ -10,6 +10,7 @@ import accessListApi from '@services/accessListService'
 import applicationsGroupApi from '@services/applicationsGroupService'
 import applicationsApi from '@services/applicationsService'
 import configServiceApi from '@services/configService'
+import gitConfigurationApi from '@services/gitConfigurationService'
 import modulesServiceApi from '@services/modulesService'
 import roleApi from '@services/roleService'
 import routeApi from '@services/routeService'
@@ -51,6 +52,7 @@ export const baseApiServices = {
   sessionServiceApi,
   variablesApi,
   swaggerServiceApi,
+  gitConfigurationApi,
   UIReducer,
   profileReducer
 }
