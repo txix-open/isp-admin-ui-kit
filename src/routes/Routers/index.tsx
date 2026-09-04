@@ -24,6 +24,7 @@ const SessionsPage = lazy(() => import('@pages/SessionsPage'))
 const SecurityLogPage = lazy(() => import('@pages/SecurityLogPage'))
 const AppAccessPage = lazy(() => import('@pages/AppAccessPage'))
 const ModulesPage = lazy(() => import('@pages/ModulesPage'))
+const GitConfigurationPage = lazy(() => import('@pages/GitConfigurationPage'))
 
 const ApplicationsPage = lazy(() => import('@pages/ApplicationsPage'))
 const AllVersionsPage = lazy(() => import('@pages/AllVersionsPage'))
@@ -162,6 +163,10 @@ export const getRoutesConfig = (
             {
               path: `${routePaths.variables}/:id`,
               element: lazyElement(VariableEditor)
+            },
+            {
+              path: routePaths.gitConfiguration,
+              element: lazyElement(GitConfigurationPage)
             },
             ...generateCustomRoutes(customRouters)
           ]
