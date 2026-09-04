@@ -1,0 +1,92 @@
+.git-configuration-page {
+  width: 100%;
+  overflow-x: auto;
+  height: 100vh;
+
+  &__wrap {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    padding: 16px;
+    min-width: 750px;
+
+    &__selects {
+      display: flex;
+      align-items: flex-end;
+      gap: 8px;
+    }
+
+    &__select-field {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    &__select-label {
+      font-size: 14px;
+      padding-bottom: 10px;
+    }
+
+    &__info {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      padding: 16px;
+
+      &-row {
+        display: flex;
+        gap: 8px;
+      }
+    }
+
+    &__file-form {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+
+      > * {
+        flex: 1 1 0;
+        min-width: 0;
+      }
+
+      .ant-form-item {
+        margin-bottom: 0;
+      }
+
+      .ant-form-item-control {
+        flex: 1;
+        max-width: 100%;
+      }
+
+      .ant-form-item-control-input-content {
+        width: 100%;
+      }
+
+      .ant-select,
+      .ant-input {
+        width: 100%;
+      }
+    }
+
+    &__actions {
+      display: flex;
+      gap: 8px;
+    }
+
+    &__file {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+
+      &-title {
+        margin: 0;
+      }
+    }
+
+  }
+
+  &__help-icon {
+    margin-left: 4px;
+    color: var(--ant-color-text-tertiary);
+  }
+}
