@@ -1,6 +1,6 @@
 {
   "name": "isp-admin-ui-kit",
-  "version": "1.10.7",
+  "version": "1.11.0",
   "description": "react ui lib for admin-panels",
   "main": "dist/cjs/index.js",
   "module": "dist/esm/index.js",
