@@ -3,7 +3,8 @@ import {
   FileProtectOutlined,
   FunctionOutlined,
   ProductOutlined,
-  ProfileOutlined
+  ProfileOutlined,
+  GithubOutlined
 } from '@ant-design/icons'
 
 import DefaultUser from '@components/Icons/DefaultUser'
@@ -85,5 +86,12 @@ export const menuConfig = (name: string) => [
       PermissionKeysType.security_log_view,
       PermissionKeysType.role_view
     ]
+  },
+  {
+    key: 'git_configuration',
+    label: 'Git конфигурация',
+    icon: <GithubOutlined />,
+    route: routePaths.gitConfiguration,
+    permissions: [PermissionKeysType.config_edit]
   }
 ]
