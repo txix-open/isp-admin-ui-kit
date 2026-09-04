@@ -16,12 +16,15 @@ const Modal = ({
   loading = false
 }: ModalPropsType) => {
   const handleKeyDown = (event: KeyboardEvent) => {
-    if (event.key === 'Escape') {
+    if (event.key === 'Escape' && !loading) {
       onClose()
     }
   }
 
   const closeModal = () => {
+    if (loading) {
+      return
+    }
     onClose()
     document.body.classList.remove('modal-open')
   }
@@ -49,7 +52,7 @@ const Modal = ({
         <div className="modal__content">{children}</div>
         {footer && (
           <div className="modal__footer">
-            <Button type="default" onClick={closeModal}>
+            <Button type="default" onClick={closeModal} disabled={loading}>
               {footer.onCanselText}
             </Button>
             <Button type="primary" onClick={onOk} loading={loading}>
