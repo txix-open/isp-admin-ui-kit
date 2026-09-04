@@ -20,6 +20,7 @@ type RoutePaths =
   | 'allVersions'
   | 'configEditor'
   | 'variables'
+  | 'gitConfiguration'
 
 export const routePaths: Record<RoutePaths, string> = {
   home: '/',
@@ -42,5 +43,6 @@ export const routePaths: Record<RoutePaths, string> = {
   configurations: 'configurations',
   allVersions: ':configId/all_versions',
   configEditor: 'configEditor',
-  variables: '/variables'
+  variables: '/variables',
+  gitConfiguration: '/git_configuration'
 }
