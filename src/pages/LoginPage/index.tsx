@@ -2,6 +2,7 @@ import { LockOutlined, UserOutlined } from '@ant-design/icons'
 import { Button, Divider, Layout } from 'antd'
 import { AxiosError } from 'axios'
 import { FormInput, useAuth } from 'isp-ui-kit'
+import { ReactNode } from 'react'
 import { useForm } from 'react-hook-form'
 import { useNavigate } from 'react-router-dom'
 
@@ -25,7 +26,12 @@ import './login-page.scss'
 const passwordLoginEnabled = getConfigProperty('ENABLE_PASSWORD_LOGIN', true)
 
 const LoginPage = () => {
-  const { login, isLoading } = useAuth()
+  const oAuthLoginEnabled = getConfigProperty('ENABLE_OAUTH_LOGIN', true)
+  const oAuthLoginButtonText = getConfigProperty(
+    'OAUTH_LOGIN_BUTTON_TEXT',
+    'Войти с помощью OAuth'
+  )
+  const { login, isLoading, oAuthLogin } = useAuth()
   const { handleSubmit, control, setError } = useForm<LoginRequest>({
     mode: 'onChange'
   })
@@ -67,6 +73,29 @@ const LoginPage = () => {
             : prevRoute
         sessionStorage.removeItem('prevRoute')
         navigate(redirectUrl, { replace: true })
+      })
+      .catch((err: AxiosError<MSPError>) => handleError(err))
+  }
+
+  const handleSubmitOAuthForm = (): void => {
+    oAuthLogin(
+      apiPaths.loginOAuth,
+      {
+        clientName: getConfigProperty(
+          'CLIENT_NAME',
+          import.meta.env.VITE_CLIENT_NAME
+        )
+      },
+      {
+        'X-APPLICATION-TOKEN': getConfigProperty(
+          'APP_TOKEN',
+          import.meta.env.VITE_APP_TOKEN
+        )
+      }
+    )
+      .then((response) => {
+        LocalStorage.set(localStorageKeys.OAUTH_LOGIN, true)
+        window.location.href = response.loginUrl
       })
       .catch((err: AxiosError<MSPError>) => handleError(err))
   }
@@ -113,6 +142,25 @@ const LoginPage = () => {
     )
   }
 
+  const renderOAuthAuthBtn = (): ReactNode => {
+    if (!oAuthLoginEnabled) {
+      return null
+    }
+
+    return (
+      <Button
+        data-cy="submit-oAuth-btn"
+        disabled={isLoading}
+        loading={isLoading}
+        type="text"
+        className="login-page__content__submit-oAuth-btn"
+        onClick={handleSubmitOAuthForm}
+      >
+        {oAuthLoginButtonText}
+      </Button>
+    )
+  }
+
   return (
     <Layout>
       <section className="login-page">
@@ -122,6 +170,7 @@ const LoginPage = () => {
           </h1>
           <Divider />
           {renderInternalAuthForm()}
+          {renderOAuthAuthBtn()}
         </form>
       </section>
     </Layout>
