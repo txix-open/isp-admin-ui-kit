@@ -1,7 +1,6 @@
 export interface ApplicationsGroupType {
   createdAt: string
   description: string
-  domainId: number
   id: number
   name: string
   updatedAt: string
@@ -16,11 +15,6 @@ export type UpdateApplicationsGroupType = Omit<
   'createdAt' | 'updatedAt'
 >
 
-export interface ApplicationsServiceType {
-  app: ApplicationAppType
-  tokens: ApplicationTokenType[]
-}
-
 export type NewApplicationTokenType = {
   appId: number
   expireTimeMs: number
@@ -34,7 +28,6 @@ export interface ApplicationAppType {
   applicationGroupId: number
   type: string
   updatedAt: string
-  serviceId: number
 }
 
 export interface UpdateApplicationAppType {
@@ -46,7 +39,7 @@ export interface UpdateApplicationAppType {
 
 export type NewApplicationAppType = Omit<
   ApplicationAppType,
-  'createdAt' | 'updatedAt' | 'serviceId'
+  'createdAt' | 'updatedAt'
 >
 export type RevokeTokenType = {
   appId: number

@@ -32,17 +32,12 @@ type PathKeys =
   | 'getModules'
   | 'getRequiredModules'
   | 'deleteModule'
-  | 'createUpdateService'
-  | 'deleteService'
-  | 'getAllService'
-  | 'getServiceById'
-  | 'getServicesByDomainId'
   | 'createApplication'
   | 'updateApplication'
   | 'deleteApplication'
   | 'getApplicationById'
   | 'getAllApplications'
-  | 'getApplicationsByServiceId'
+  | 'getApplicationsByAppGroup'
   | 'getApplicationGetApplicationByToken'
   | 'getNextAppId'
   | 'createToken'
@@ -111,10 +106,10 @@ export const apiPaths: Record<PathKeys, string> = {
   setLogEvents: '/log/set_events',
   // ======= APPLICATIONS ======
   getSystemTree: '/application/get_system_tree',
-  getAllApplications: '/application/get_all',
+  getAllApplications: '/application/get_applications',
   createApplication: '/application/create_application',
   updateApplication: '/application/update_application',
-  getApplicationsByServiceId: '/application/get_applications_by_service_id',
+  getApplicationsByAppGroup: '/application/get_by_app_group',
   deleteApplication: '/application/delete_applications',
   getApplicationById: '/application/get_application_by_id',
   getNextAppId: '/application/next_id',
@@ -136,12 +131,6 @@ export const apiPaths: Record<PathKeys, string> = {
   getRequiredModules: '/module/get_required_modules',
   deleteModule: '/module/delete_module',
   getByModuleId: '/schema/get_by_module_id',
-  // ======= SERVICE ======
-  getServiceById: '/service/get_service_by_id',
-  getAllService: '/service/get_service',
-  deleteService: '/service/delete_service',
-  createUpdateService: '/service/create_update_service',
-  getServicesByDomainId: '/service/get_services_by_domain_id',
   // ======= TOKENS ======
   createToken: '/token/create_token',
   getTokensByAppId: '/token/get_tokens_by_app_id',

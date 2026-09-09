@@ -16,34 +16,12 @@ const applicationsGroupApi = createApi({
   tagTypes: ['ApplicationsGroup'],
   baseQuery: axiosBaseQuery({ baseUrl: apiPaths.baseSystemUrl }),
   endpoints: (builder) => ({
-    getApplicationsGroupByDomainId: builder.query<
-      ApplicationsGroupType[],
-      { id: number }
-    >({
-      query: (id) => ({
-        url: apiPaths.getServicesByDomainId,
-        data: id
-      }),
-      providesTags: () => ['ApplicationsGroup']
-    }),
-
     getApplicationGroupGetByIdList: builder.query<
       ApplicationsGroupType[],
       { id: number }
     >({
       query: (id) => ({
         url: apiPaths.getByIdListApplicationGroup,
-        data: id
-      }),
-      providesTags: () => ['ApplicationsGroup']
-    }),
-
-    getApplicationsGroupByServiceId: builder.query<
-      ApplicationsGroupType[],
-      { id: number }
-    >({
-      query: (id) => ({
-        url: apiPaths.getServiceById,
         data: id
       }),
       providesTags: () => ['ApplicationsGroup']
