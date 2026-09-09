@@ -46,8 +46,8 @@ const ApplicationsContent: FC<ApplicationsContentPropTypes> = ({
 
   const {
     data: applications = [],
-    isLoading: isLoadingApplicationsContent = []
-  } = applicationsApi.useGetApplicationsByServiceIdQuery({
+    isLoading: isLoadingApplicationsContent = false
+  } = applicationsApi.useGetApplicationsByAppGroupQuery({
     id: selectedItemId
   })
 
@@ -88,9 +88,9 @@ const ApplicationsContent: FC<ApplicationsContentPropTypes> = ({
 
   const currentApp = useMemo(() => {
     const element = applications.find(
-      (application) => application.app.id.toString() === appId
+      (application) => application.id.toString() === appId
     )
-    return element ? element.app : undefined
+    return element
   }, [applications, appId])
 
   const updateApplicationModal = () => {
@@ -264,9 +264,7 @@ const ApplicationsContent: FC<ApplicationsContentPropTypes> = ({
         onAddItem={addApplicationModal}
         onRemoveItem={() => handleRemoveApplicationApp(Number(appId))}
         items={filterFirstColumnItems(
-          applications?.map((el) => {
-            return el.app
-          }) as unknown as ColumnItem<ApplicationAppType>[],
+          applications as unknown as ColumnItem<ApplicationAppType>[],
           searchAppValue
         )}
         renderItems={renderColumnItems}

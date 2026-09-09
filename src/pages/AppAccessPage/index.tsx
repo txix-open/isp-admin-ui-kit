@@ -45,7 +45,7 @@ const AppAccessPage = () => {
     data = [],
     isLoading,
     isError
-  } = applicationsApi.useGetAllApplicationsServiceQuery({ id: selectedItemId })
+  } = applicationsApi.useGetAllApplicationsServiceQuery()
 
   useEffect(() => {
     if (!canRead) {

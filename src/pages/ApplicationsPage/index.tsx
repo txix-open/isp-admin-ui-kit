@@ -111,8 +111,7 @@ const ApplicationsPage = () => {
   const handleAddApplicationGroup = (data: ApplicationsGroupType) => {
     const newService: NewApplicationsGroupType = {
       name: data.name,
-      description: data.description,
-      domainId: 1
+      description: data.description
     }
     createApplicationsGroup(newService)
       .unwrap()
@@ -136,7 +135,6 @@ const ApplicationsPage = () => {
     const updateService: UpdateApplicationsGroupType = {
       name: data.name,
       description: data.description,
-      domainId: 1,
       id: Number(selectedItemId)
     }
 
