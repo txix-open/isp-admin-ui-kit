@@ -45,7 +45,9 @@ export enum PermissionKeysType {
   role_delete = 'role_delete', // Удаление роли
 
   security_log_view = 'security_log_view',
-  ALWAYS_VIEW = 'ALWAYS_VIEW' // Просмотр экрана "Просмотр журналов ИБ"
+  ALWAYS_VIEW = 'ALWAYS_VIEW', // Просмотр экрана "Просмотр журналов ИБ"
+
+  config_edit = 'config_edit' // Просмотр экрана "Git конфигурация"
 }
 
 export interface RoleType {
