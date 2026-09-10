@@ -38,6 +38,7 @@
   "scripts": {
     "build": "rollup -c && tsc-alias -p tsconfig.json",
     "build:prod": "BUILD_SOURCEMAP=false rollup -c && tsc-alias -p tsconfig.json",
+    "pack:stand": "npm run build:prod && npm pack",
     "watch": "rollup -c -w",
     "prepare": "husky  || true",
     "pub": "npm run build:prod && npm publish",
