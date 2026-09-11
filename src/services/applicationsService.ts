@@ -6,6 +6,7 @@ import { SearchAppByTokenType } from '@ui/SearchAppByToken'
 
 import {
   ApplicationAppType,
+  ApplicationsGroupType,
   NewApplicationAppType,
   UpdateApplicationAppType
 } from '@pages/ApplicationsPage/applications.type'
@@ -19,7 +20,39 @@ const applicationsApi = createApi({
   baseQuery: axiosBaseQuery({ baseUrl: apiPaths.baseSystemUrl }),
   endpoints: (builder) => ({
     getAllApplicationsService: builder.query<ApplicationAppType[], void>({
-      query: () => ({ url: apiPaths.getAllApplications, data: [0] }),
+      async queryFn(_arg, _queryApi, _extraOptions, baseQuery) {
+        const applicationsGroupsResult = await baseQuery({
+          url: apiPaths.getAllApplicationGroup
+        })
+
+        if (applicationsGroupsResult.error) {
+          return { error: applicationsGroupsResult.error }
+        }
+
+        const applicationsGroups =
+          applicationsGroupsResult.data as ApplicationsGroupType[]
+        const applicationsResults = await Promise.all(
+          applicationsGroups.map((group) =>
+            baseQuery({
+              url: apiPaths.getApplicationsByAppGroup,
+              data: { id: group.id }
+            })
+          )
+        )
+        const applicationsError = applicationsResults.find(
+          (result) => result.error
+        )
+
+        if (applicationsError?.error) {
+          return { error: applicationsError.error }
+        }
+
+        return {
+          data: applicationsResults.flatMap(
+            (result) => result.data as ApplicationAppType[]
+          )
+        }
+      },
       providesTags: () => ['Applications']
     }),
 
