@@ -19,7 +19,7 @@ const applicationsApi = createApi({
   baseQuery: axiosBaseQuery({ baseUrl: apiPaths.baseSystemUrl }),
   endpoints: (builder) => ({
     getAllApplicationsService: builder.query<ApplicationAppType[], void>({
-      query: () => ({ url: apiPaths.getAllApplications }),
+      query: () => ({ url: apiPaths.getAllApplications, data: [0] }),
       providesTags: () => ['Applications']
     }),
 
