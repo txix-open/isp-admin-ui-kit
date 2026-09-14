@@ -1,7 +1,10 @@
 import { message } from 'antd'
 import axios, { AxiosError } from 'axios'
 
-import { localStorageKeys } from '@constants/localStorageKeys'
+import {
+  localStorageKeys,
+  sessionStorageKeys
+} from '@constants/localStorageKeys'
 
 import { getConfigProperty } from '@utils/configUtils'
 import { LocalStorage } from '@utils/localStorageUtils'
@@ -41,9 +44,13 @@ apiService.interceptors.response.use(
   (error: AxiosError<MSPError>) => {
     if (error.response && error.response.status === 401) {
       localClear()
-      const prevRoute = sessionStorage.getItem('prevRoute') || ''
+      const prevRoute =
+        sessionStorage.getItem(sessionStorageKeys.PREV_ROUTE) || ''
       message.error('Ваша сессия истекла"').then()
-      sessionStorage.setItem('prevRoute', getCleanPath(prevRoute))
+      sessionStorage.setItem(
+        sessionStorageKeys.PREV_ROUTE,
+        getCleanPath(prevRoute)
+      )
       window.location.href = routePaths.login
     }
 

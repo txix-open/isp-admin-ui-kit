@@ -3,6 +3,7 @@ import ruRu from 'antd/locale/ru_RU'
 import { FC, useEffect, useMemo, useState } from 'react'
 import { createBrowserRouter, RouterProvider } from 'react-router-dom'
 
+import { sessionStorageKeys } from '@constants/localStorageKeys'
 import { darkTheme, lightTheme } from '@constants/theme'
 
 import { AdminBasePropsType } from '@components/admin-base.type'
@@ -56,7 +57,7 @@ const AdminBase: FC<AdminBasePropsType> = ({
     return routerConfig.subscribe((state) => {
       const currentPathname = getCleanPath(state.location.pathname)
       const fullPath = `${currentPathname}${state.location.search}${state.location.hash}`
-      const prevRoute = sessionStorage.getItem('prevRoute')
+      const prevRoute = sessionStorage.getItem(sessionStorageKeys.PREV_ROUTE)
 
       if (
         currentPathname !== routePaths.error &&
@@ -64,7 +65,7 @@ const AdminBase: FC<AdminBasePropsType> = ({
         currentPathname !== routePaths.home &&
         fullPath !== prevRoute
       ) {
-        sessionStorage.setItem('prevRoute', fullPath)
+        sessionStorage.setItem(sessionStorageKeys.PREV_ROUTE, fullPath)
       }
     })
   }, [routerConfig])
