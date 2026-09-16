@@ -1,5 +1,5 @@
 import { LockOutlined, UserOutlined } from '@ant-design/icons'
-import { Button, Divider, Layout } from 'antd'
+import { Button, Divider, Layout, message } from 'antd'
 import { AxiosError } from 'axios'
 import { FormInput, useAuth } from 'isp-ui-kit'
 import { ReactNode } from 'react'
@@ -26,10 +26,14 @@ import './login-page.scss'
 const passwordLoginEnabled = getConfigProperty('ENABLE_PASSWORD_LOGIN', true)
 
 const LoginPage = () => {
-  const oAuthLoginEnabled = getConfigProperty('ENABLE_OAUTH_LOGIN', true)
+  const [messageApi, contextHolder] = message.useMessage()
+  const oAuthLoginEnabled = getConfigProperty(
+    'ENABLE_OAUTH_LOGIN',
+    import.meta.env.VITE_ENABLE_OAUTH_LOGIN
+  )
   const oAuthLoginButtonText = getConfigProperty(
     'OAUTH_LOGIN_BUTTON_TEXT',
-    'Войти с помощью OAuth'
+    import.meta.env.VITE_OAUTH_LOGIN_BUTTON_TEXT
   )
   const { login, isLoading, oAuthLogin } = useAuth()
   const { handleSubmit, control, setError } = useForm<LoginRequest>({
@@ -97,7 +101,7 @@ const LoginPage = () => {
         LocalStorage.set(localStorageKeys.OAUTH_LOGIN, true)
         window.location.href = response.loginUrl
       })
-      .catch((err: AxiosError<MSPError>) => handleError(err))
+      .catch(() => messageApi.error(messages.serverError))
   }
 
   const renderInternalAuthForm = () => {
@@ -164,6 +168,7 @@ const LoginPage = () => {
   return (
     <Layout>
       <section className="login-page">
+        {contextHolder}
         <form className="login-page__content">
           <h1 data-cy="login-title" className="login-page__content__title">
             Вход в систему
