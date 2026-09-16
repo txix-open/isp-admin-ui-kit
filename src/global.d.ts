@@ -5,6 +5,7 @@ interface ImportMeta {
 interface ImportMetaEnv {
   readonly VITE_APP_TOKEN: string
   readonly BASE_URL: string
+  readonly VITE_CLIENT_NAME: string
 }
 
 declare module 'json-schema-view-js'
