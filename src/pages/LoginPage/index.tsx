@@ -8,7 +8,10 @@ import { useNavigate } from 'react-router-dom'
 
 import { apiPaths } from '@constants/api/apiPaths'
 import { ValidationRules } from '@constants/form/validationRules'
-import { localStorageKeys } from '@constants/localStorageKeys'
+import {
+  localStorageKeys,
+  sessionStorageKeys
+} from '@constants/localStorageKeys'
 import { messages } from '@constants/messages'
 
 import ClearStateOnLogin from '@pages/LoginPage/ClearStateOnLogin'
@@ -68,14 +71,14 @@ const LoginPage = () => {
       .then((response) => {
         LocalStorage.set(localStorageKeys.HEADER_NAME, response.headerName)
         LocalStorage.set(localStorageKeys.USER_TOKEN, response.token)
-        const prevRoute = sessionStorage.getItem('prevRoute')
+        const prevRoute = sessionStorage.getItem(sessionStorageKeys.PREV_ROUTE)
         const redirectUrl =
           !prevRoute ||
           prevRoute === routePaths.login ||
           prevRoute === routePaths.error
             ? routePaths.home
             : prevRoute
-        sessionStorage.removeItem('prevRoute')
+        sessionStorage.removeItem(sessionStorageKeys.PREV_ROUTE)
         navigate(redirectUrl, { replace: true })
       })
       .catch((err: AxiosError<MSPError>) => handleError(err))
