@@ -1,0 +1,27 @@
+.module-guard {
+  &__fallback {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 60vh;
+
+    &__error {
+      .ant-result-body {
+        padding: 0;
+        background-color: var(--ant-layout-body-bg);
+      }
+
+      &__btn {
+        justify-content: center;
+        display: flex;
+      }
+    }
+
+    ul {
+      margin: 12px 0 0;
+      padding-left: 24px;
+      list-style: disc;
+      text-align: left;
+    }
+  }
+}
