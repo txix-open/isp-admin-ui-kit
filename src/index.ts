@@ -7,6 +7,11 @@ import {
 
 import AdminBase from '@components/AdminBase'
 
+import ModuleGuard, {
+  ModuleGuardFallbackType,
+  ModuleGuardPropsType
+} from '@routes/ModuleGuard'
+
 import { PermissionKeysType } from '@type/roles.type'
 
 import {
@@ -24,5 +29,8 @@ export {
   filterFirstColumnItems,
   PermissionKeysType,
   sortObject,
-  axiosBaseQuery
+  axiosBaseQuery,
+  ModuleGuard,
+  ModuleGuardFallbackType,
+  ModuleGuardPropsType
 }
