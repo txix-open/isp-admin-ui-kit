@@ -11,6 +11,7 @@ export interface AddressType {
 
 export interface EndpointType {
   extra: Record<string, unknown>
+  httpMethod?: string
   inner: boolean
   path: string
   userAuthRequired: boolean
