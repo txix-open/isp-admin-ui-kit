@@ -35,6 +35,19 @@
     margin-left: $basic-margin;
   }
 
+  &__method-tag {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 68px;
+    flex-shrink: 0;
+
+    .access-list-tree__inner-tag {
+      margin-left: 0;
+      margin-right: $basic-margin;
+    }
+  }
+
   &__path-highlight {
     background: var(--ant-color-fill-secondary);
     color: var(--ant-color-text-base);
