@@ -7,6 +7,7 @@ export interface CustomMenuItemType {
   key: string
   className?: string
   permissions: string[]
+  requiredModules?: string[]
   icon?: ReactNode
   route?: string | string[]
   element?: any

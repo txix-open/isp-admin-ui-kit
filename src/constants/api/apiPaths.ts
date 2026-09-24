@@ -67,6 +67,14 @@ type PathKeys =
   | 'getAllApplicationGroup'
   | 'getByIdListApplicationGroup'
   | 'updateApplicationGroup'
+  | 'configGitMerge'
+  | 'configMerge'
+  | 'credentials'
+  | 'credentialsToken'
+  | 'gitCommits'
+  | 'gitDir'
+  | 'gitFile'
+  | 'baseGitConfigurationUrl'
 
 const BASE_URL = import.meta.env.BASE_URL?.replace(/\/$/, '') || ''
 export const API_BASE_URL = `${BASE_URL}/api`
@@ -78,6 +86,7 @@ export const apiPaths: Record<PathKeys, string> = {
   baseUserUrl: apiWithBaseURL('/admin/user'),
   baseSystemUrl: apiWithBaseURL('/system'),
   baseConfigUrl: apiWithBaseURL('/config'),
+  baseGitConfigurationUrl: apiWithBaseURL('/isp-git-config-service'),
   // ======= ROLES ======
   getAllRoles: '/role/all',
   createRole: '/role/create',
@@ -153,5 +162,13 @@ export const apiPaths: Record<PathKeys, string> = {
   createVariable: '/variable/create',
   deleteVariable: '/variable/delete',
   updateVariable: '/variable/update',
-  upsertVariables: '/variable/upsert'
+  upsertVariables: '/variable/upsert',
+  // ======= GITCONFIGURATION ======
+  configGitMerge: '/config/git/merge',
+  configMerge: '/config/merge',
+  credentials: '/credentials',
+  credentialsToken: '/credentials/token',
+  gitCommits: '/git/commits',
+  gitDir: '/git/dir',
+  gitFile: '/git/file'
 }

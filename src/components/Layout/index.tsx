@@ -1,7 +1,13 @@
 import { Layout, Spin } from 'antd'
 import { findRouteWithParents, LayoutMenu, LayoutSider } from 'isp-ui-kit'
-import { useEffect, useState } from 'react'
-import { Navigate, Outlet, useLocation, useNavigate } from 'react-router-dom'
+import { useEffect, useMemo, useState } from 'react'
+import {
+  Navigate,
+  Outlet,
+  matchPath,
+  useLocation,
+  useNavigate
+} from 'react-router-dom'
 
 import { localStorageKeys } from '@constants/localStorageKeys'
 
@@ -21,6 +27,7 @@ import useRole from '@hooks/useRole'
 import { fetchProfile, fetchUI } from '@stores/redusers/ActionCreators'
 import { StateProfileStatus } from '@stores/redusers/ProfileSlice'
 
+import ModuleGuard from '@routes/ModuleGuard'
 import { routePaths } from '@routes/routePaths'
 
 import { PermissionKeysType } from '@type/roles.type'
@@ -28,6 +35,28 @@ import { PermissionKeysType } from '@type/roles.type'
 import './layout.scss'
 
 const { Content } = Layout
+
+const getCustomMenuItems = (
+  routers: CustomMenuItemType[]
+): CustomMenuItemType[] => {
+  return routers.map((route) => {
+    const menuItem: CustomMenuItemType = {
+      label: route.label,
+      key: route.key,
+      route: route.route,
+      className: route.className ? route.className : '',
+      permissions: route.permissions,
+      requiredModules: route.requiredModules,
+      icon: route.icon
+    }
+
+    if (route.children && route.children.length > 0) {
+      menuItem.children = getCustomMenuItems(route.children)
+    }
+
+    return menuItem
+  })
+}
 
 const LayoutComponent = ({ customRouters }: LayoutComponentPropsType) => {
   const [collapsed, setCollapsed] = useState<boolean>(
@@ -55,31 +84,66 @@ const LayoutComponent = ({ customRouters }: LayoutComponentPropsType) => {
     return !hasPermission(permission)
   }
 
-  const getCustomMenuItems = (
-    routers: CustomMenuItemType[]
-  ): CustomMenuItemType[] => {
-    return routers.map((route) => {
-      const menuItem: CustomMenuItemType = {
-        label: route.label,
-        key: route.key,
-        route: route.route,
-        className: route.className ? route.className : '',
-        permissions: route.permissions,
-        icon: route.icon
+  const resultMenuConfig = useMemo(
+    () => [...menuConfig(firstName), ...getCustomMenuItems(customRouters)],
+    [firstName, customRouters]
+  )
+
+  const activeRequiredModules = useMemo(() => {
+    let staticMatch: string[] | null = null
+    let patternMatch: string[] | null = null
+    let prefixMatch: string[] | null = null
+
+    const hasDynamicSegments = (pattern: string) =>
+      pattern
+        .split('/')
+        .filter(Boolean)
+        .some((segment) => segment === '*' || segment.startsWith(':'))
+
+    const visit = (items: CustomMenuItemType[], inherited: string[]) => {
+      for (const item of items) {
+        const accumulated = Array.from(
+          new Set([...inherited, ...(item.requiredModules || [])])
+        )
+        const paths = item.route
+          ? Array.isArray(item.route)
+            ? item.route
+            : [item.route]
+          : []
+
+        for (const rawPath of paths) {
+          if (!rawPath) {
+            continue
+          }
+
+          const path = rawPath.startsWith('/') ? rawPath : `/${rawPath}`
+
+          if (matchPath(path, location.pathname)) {
+            if (staticMatch === null) {
+              if (!hasDynamicSegments(path)) {
+                staticMatch = accumulated
+              } else if (patternMatch === null) {
+                patternMatch = accumulated
+              }
+            }
+          } else if (
+            prefixMatch === null &&
+            location.pathname.startsWith(`${path}/`)
+          ) {
+            prefixMatch = accumulated
+          }
+        }
+
+        if (item.children && item.children.length > 0) {
+          visit(item.children, accumulated)
+        }
       }
+    }
 
-      if (route.children && route.children.length > 0) {
-        menuItem.children = getCustomMenuItems(route.children)
-      }
+    visit(resultMenuConfig, [])
 
-      return menuItem
-    })
-  }
-
-  const customMenuItems: CustomMenuItemType[] =
-    getCustomMenuItems(customRouters)
-
-  const resultMenuConfig = [...menuConfig(firstName), ...customMenuItems]
+    return staticMatch ?? patternMatch ?? prefixMatch ?? []
+  }, [location.pathname, resultMenuConfig])
 
   useEffect(() => {
     if (userToken && status === StateProfileStatus.notInit) {
@@ -137,7 +201,13 @@ const LayoutComponent = ({ customRouters }: LayoutComponentPropsType) => {
         </LayoutSider>
         <Layout className="site-layout">
           <Content className="site-layout__content">
-            <Outlet />
+            {activeRequiredModules.length > 0 ? (
+              <ModuleGuard requiredModules={activeRequiredModules}>
+                <Outlet />
+              </ModuleGuard>
+            ) : (
+              <Outlet />
+            )}
           </Content>
         </Layout>
       </Layout>
