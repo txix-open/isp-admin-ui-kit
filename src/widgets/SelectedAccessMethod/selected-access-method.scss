@@ -46,6 +46,26 @@
     color: var(--ant-color-error);
   }
 
+  &__row-content {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    min-width: 0;
+  }
+
+  &__method-tag {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 68px;
+    flex-shrink: 0;
+    margin-right: $basic-margin;
+  }
+
+  &__text {
+    min-width: 0;
+  }
+
   &::-webkit-scrollbar {
     width: 10px;
     height: 10px;

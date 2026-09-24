@@ -190,10 +190,8 @@ const AccessListTree: FC<AccessListTreePropsType> = ({
               .filter(Boolean)
               .join(' ')}
           >
-            <div>{renderHighlightedPath(obj.path, searchValue)}</div>
-
-            <div>
-              {obj.httpMethod && (
+            {obj.httpMethod && (
+              <span className="access-list-tree__method-tag">
                 <Tag
                   className="access-list-tree__inner-tag"
                   color={httpMethodColors[obj.httpMethod]}
@@ -201,8 +199,9 @@ const AccessListTree: FC<AccessListTreePropsType> = ({
                 >
                   {obj.httpMethod}
                 </Tag>
-              )}
-            </div>
+              </span>
+            )}
+            <div>{renderHighlightedPath(obj.path, searchValue)}</div>
 
             {showRemoveBtn && (
               <Tooltip title="Удалить">

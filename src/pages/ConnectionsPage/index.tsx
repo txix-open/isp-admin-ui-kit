@@ -14,6 +14,8 @@ import {
   ModuleType
 } from '@pages/ModulesPage/module.type'
 
+import { httpMethodColors } from '@utils/httpMethodColorUtils'
+
 import useRole from '@hooks/useRole'
 
 import modulesServiceApi from '@services/modulesService'
@@ -55,14 +57,21 @@ const Connections = () => {
     if (endpoints && endpoints.length) {
       return (
         <ul className="connection-page__endpoint-list">
-          {endpoints.map(({ path, inner }) => (
+          {endpoints.map(({ path, httpMethod, inner }) => (
             <li className="connection-page__endpoint-list__item" key={path}>
+              {httpMethod && (
+                <span className="connection-page__method-tag">
+                  <Tag color={httpMethodColors[httpMethod]} variant="filled">
+                    {httpMethod}
+                  </Tag>
+                </span>
+              )}
               {path}
               {inner && (
                 <Tag
                   className="connection-page__inner-tag"
                   color="processing"
-                  bordered={false}
+                  variant="filled"
                 >
                   Внутренний
                 </Tag>

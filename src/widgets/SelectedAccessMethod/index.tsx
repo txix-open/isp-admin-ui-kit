@@ -1,4 +1,4 @@
-import { Empty, Space, Tag, Typography } from 'antd'
+import { Empty, Tag, Typography } from 'antd'
 import { FC, useEffect, useMemo, useRef, useState } from 'react'
 
 import { SelectedAccessMethodPropsType } from '@widgets/SelectedAccessMethod/selected-access-method.type'
@@ -151,26 +151,32 @@ const SelectedAccessMethod: FC<SelectedAccessMethodPropsType> = ({
               className="selected-access-method__item selected-access-method__row"
               style={{ top, height: rowHeight }}
             >
-              <Space size={8} wrap>
+              <div className="selected-access-method__row-content">
+                {method.httpMethod && (
+                  <span className="selected-access-method__method-tag">
+                    <Tag
+                      color={httpMethodColors[method.httpMethod]}
+                      bordered={false}
+                    >
+                      {method.httpMethod}
+                    </Tag>
+                  </span>
+                )}
                 <Text
                   ellipsis
-                  className={
-                    isUnknown ? 'selected-access-method__unknown' : undefined
-                  }
+                  className={[
+                    'selected-access-method__text',
+                    isUnknown
+                      ? 'selected-access-method__unknown'
+                      : undefined
+                  ]
+                    .filter(Boolean)
+                    .join(' ')}
                   title={method.method}
                 >
                   {method.method}
                 </Text>
-                {method.httpMethod && (
-                  <Tag
-                    className="access-list-tree__inner-tag"
-                    color={httpMethodColors[method.httpMethod]}
-                    bordered={false}
-                  >
-                    {method.httpMethod}
-                  </Tag>
-                )}
-              </Space>
+              </div>
             </div>
           )
         })}
