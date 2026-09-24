@@ -67,7 +67,15 @@ const GitConfigurationPage = () => {
   const dispatch = useAppDispatch()
   const { role, hasPermission } = useRole()
   const navigate = useNavigate()
-  const isPageAvailable = hasPermission(PermissionKeysType.config_edit)
+  const isPageAvailable =
+    hasPermission(PermissionKeysType.git_configuration_view) &&
+    hasPermission(PermissionKeysType.module_view)
+  const canEditCredentials = hasPermission(
+    PermissionKeysType.git_configuration_credentials_edit
+  )
+  const canMergeConfiguration = hasPermission(
+    PermissionKeysType.git_configuration_merge
+  )
 
   const { control, watch, reset, setValue, handleSubmit } =
     useForm<GitFileFormType>()
@@ -267,7 +275,7 @@ const GitConfigurationPage = () => {
   }
 
   const handleApplyFile = async (formData?: GitFileFormType) => {
-    if (isFileLoading) {
+    if (!canMergeConfiguration || isFileLoading) {
       return
     }
 
@@ -310,6 +318,10 @@ const GitConfigurationPage = () => {
   }
 
   const handleCreateCredentials = (data: CredentialsType) => {
+    if (!canEditCredentials) {
+      return
+    }
+
     createCredentials(data)
       .unwrap()
       .then(() => {
@@ -320,7 +332,7 @@ const GitConfigurationPage = () => {
   }
 
   const handleUpdateCredentials = (data: CredentialsType) => {
-    if (!currentCredential) {
+    if (!canEditCredentials || !currentCredential) {
       return
     }
 
@@ -342,7 +354,7 @@ const GitConfigurationPage = () => {
   }
 
   const handleDeleteCredentials = () => {
-    if (!currentCredential) {
+    if (!canEditCredentials || !currentCredential) {
       return
     }
 
@@ -386,18 +398,20 @@ const GitConfigurationPage = () => {
             </span>
           }
           extra={
-            <Button
-              type="primary"
-              icon={<PlusOutlined />}
-              onClick={() =>
-                setShowCredentialsModal({
-                  ...showCredentialsModal,
-                  addModal: true
-                })
-              }
-            >
-              Добавить GIT
-            </Button>
+            canEditCredentials && (
+              <Button
+                type="primary"
+                icon={<PlusOutlined />}
+                onClick={() =>
+                  setShowCredentialsModal({
+                    ...showCredentialsModal,
+                    addModal: true
+                  })
+                }
+              >
+                Добавить GIT
+              </Button>
+            )
           }
         >
           <p className="git-configuration-page__hint">
@@ -423,34 +437,36 @@ const GitConfigurationPage = () => {
                 style={{ width: '100%' }}
               />
             </div>
-            <div className="git-configuration-page__select-actions">
-              <Button
-                icon={<EditOutlined />}
-                disabled={!currentCredential}
-                onClick={() =>
-                  setShowCredentialsModal({
-                    ...showCredentialsModal,
-                    updateModal: true
-                  })
-                }
-              >
-                Редактировать GIT
-              </Button>
-              <Popconfirm
-                okText="Удалить"
-                title="Вы действительно хотите удалить этот GIT?"
-                onConfirm={handleDeleteCredentials}
-              >
+            {canEditCredentials && (
+              <div className="git-configuration-page__select-actions">
                 <Button
-                  danger
-                  icon={<DeleteOutlined />}
+                  icon={<EditOutlined />}
                   disabled={!currentCredential}
-                  loading={isDeleteCredentialsLoading}
+                  onClick={() =>
+                    setShowCredentialsModal({
+                      ...showCredentialsModal,
+                      updateModal: true
+                    })
+                  }
                 >
-                  Удалить GIT
+                  Редактировать GIT
                 </Button>
-              </Popconfirm>
-            </div>
+                <Popconfirm
+                  okText="Удалить"
+                  title="Вы действительно хотите удалить этот GIT?"
+                  onConfirm={handleDeleteCredentials}
+                >
+                  <Button
+                    danger
+                    icon={<DeleteOutlined />}
+                    disabled={!currentCredential}
+                    loading={isDeleteCredentialsLoading}
+                  >
+                    Удалить GIT
+                  </Button>
+                </Popconfirm>
+              </div>
+            )}
           </div>
 
           {currentCredential && (
@@ -647,29 +663,31 @@ const GitConfigurationPage = () => {
               description="Выберите файл и нажмите «Отобразить», чтобы увидеть содержимое"
             />
           )}
-          <div className="git-configuration-page__actions">
-            <Button
-              type="primary"
-              icon={<CheckOutlined />}
-              onClick={() => {
-                void handleSubmit(handleApplyFile)()
-              }}
-              disabled={
-                !fileContent ||
-                !selectedCredentialName ||
-                !moduleName?.trim() ||
-                isFileLoading
-              }
-              loading={isMergeLoading}
-            >
-              Применить
-            </Button>
-          </div>
+          {canMergeConfiguration && (
+            <div className="git-configuration-page__actions">
+              <Button
+                type="primary"
+                icon={<CheckOutlined />}
+                onClick={() => {
+                  void handleSubmit(handleApplyFile)()
+                }}
+                disabled={
+                  !fileContent ||
+                  !selectedCredentialName ||
+                  !moduleName?.trim() ||
+                  isFileLoading
+                }
+                loading={isMergeLoading}
+              >
+                Применить
+              </Button>
+            </div>
+          )}
         </Card>
 
         <GitConfigurationModal
           title="Добавить GIT"
-          open={showCredentialsModal.addModal}
+          open={canEditCredentials && showCredentialsModal.addModal}
           onOk={handleCreateCredentials}
           loading={isCreateCredentialsLoading}
           onClose={() =>
@@ -682,7 +700,7 @@ const GitConfigurationPage = () => {
         <GitConfigurationModal
           title="Редактировать GIT"
           credentials={currentCredential}
-          open={showCredentialsModal.updateModal}
+          open={canEditCredentials && showCredentialsModal.updateModal}
           onOk={handleUpdateCredentials}
           loading={isUpdateCredentialsLoading}
           onClose={() =>

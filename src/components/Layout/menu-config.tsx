@@ -92,7 +92,9 @@ export const menuConfig = (name: string) => [
     label: 'Git конфигурация',
     icon: <GithubOutlined />,
     route: routePaths.gitConfiguration,
-    permissions: [PermissionKeysType.config_edit],
-    requiredModules: ['isp-git-config-service']
+    permissions: [
+      PermissionKeysType.git_configuration_view,
+      PermissionKeysType.module_view
+    ]
   }
 ]
