@@ -45,4 +45,12 @@
   &__inner-tag{
     margin-left: $basic-margin !important;
   }
+
+  &__method-tag {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 68px;
+    margin-right: $basic-margin !important;
+  }
 }
