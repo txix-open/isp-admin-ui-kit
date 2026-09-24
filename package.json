@@ -1,6 +1,6 @@
 {
   "name": "isp-admin-ui-kit",
-  "version": "1.11.3",
+  "version": "1.13.0",
   "description": "react ui lib for admin-panels",
   "main": "dist/cjs/index.js",
   "module": "dist/esm/index.js",
@@ -38,6 +38,7 @@
   "scripts": {
     "build": "rollup -c && tsc-alias -p tsconfig.json",
     "build:prod": "BUILD_SOURCEMAP=false rollup -c && tsc-alias -p tsconfig.json",
+    "pack:stand": "npm run build:prod && npm pack",
     "watch": "rollup -c -w",
     "prepare": "husky  || true",
     "pub": "npm run build:prod && npm publish",
