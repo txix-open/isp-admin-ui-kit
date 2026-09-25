@@ -25,7 +25,9 @@ const newRole: Partial<RoleType> = {
   permissions: []
 }
 
-type PermissionTableOnChange = NonNullable<TableProps<PermissionType>['onChange']>
+type PermissionTableOnChange = NonNullable<
+  TableProps<PermissionType>['onChange']
+>
 type PermissionTableFilters = Parameters<PermissionTableOnChange>[1]
 
 const RolesContent = ({
@@ -162,7 +164,7 @@ const RolesContent = ({
           />
           <FormInput
             data-cy="roles-content__input__external-group"
-            label="Группы ЕСК"
+            label="Группы ФРИИПа"
             name="externalGroup"
             control={control}
           />

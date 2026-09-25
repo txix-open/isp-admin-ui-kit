@@ -47,9 +47,9 @@ export enum PermissionKeysType {
   security_log_view = 'security_log_view',
   ALWAYS_VIEW = 'ALWAYS_VIEW', // Просмотр экрана "Просмотр журналов ИБ"
 
-  git_configuration_credentials_edit = 'git_configuration_credentials_edit', // Просмотр экрана "Git конфигурация"
-  git_configuration_view = 'git_configuration_view', // Просмотр экрана "Git конфигурация"
-  git_configuration_merge = 'git_configuration_submit' // Просмотр экрана "Git конфигурация"
+  git_configuration_credentials_edit = 'git_configuration_credentials_edit', // Редактирование данных Git репозитория
+  git_configuration_view = 'git_configuration_view', // Просмотр экрана Git конфигураций
+  git_configuration_merge = 'git_configuration_merge' // Применения Git конфигурации
 }
 
 export interface RoleType {
