@@ -13,7 +13,9 @@ import { routePaths } from '@routes/routePaths'
 
 import { PermissionKeysType } from '@type/roles.type'
 
-export const menuConfig = (name: string) => [
+import type { CustomMenuItemType } from './layout.type'
+
+export const menuConfig = (name: string): CustomMenuItemType[] => [
   {
     label: name || '',
     key: 'profile',
@@ -53,6 +55,7 @@ export const menuConfig = (name: string) => [
   {
     key: 'sessionManagement',
     label: 'Пользователи и роли',
+    visibilityMode: 'children',
     icon: <ProfileOutlined />,
     children: [
       {
@@ -80,15 +83,11 @@ export const menuConfig = (name: string) => [
         permissions: [PermissionKeysType.role_view]
       }
     ],
-    permissions: [
-      PermissionKeysType.user_view,
-      PermissionKeysType.session_view,
-      PermissionKeysType.security_log_view,
-      PermissionKeysType.role_view
-    ]
+    permissions: []
   },
   {
     key: 'git_configuration',
+    permissionMode: 'all',
     label: 'Git конфигурация',
     icon: <GithubOutlined />,
     route: routePaths.gitConfiguration,

@@ -13,6 +13,7 @@ import { localStorageKeys } from '@constants/localStorageKeys'
 
 import Header from '@widgets/Header'
 
+import { filterMenuByPermissions } from '@components/Layout/filter-menu'
 import {
   CustomMenuItemType,
   LayoutComponentPropsType
@@ -30,8 +31,6 @@ import { StateProfileStatus } from '@stores/redusers/ProfileSlice'
 import ModuleGuard from '@routes/ModuleGuard'
 import { routePaths } from '@routes/routePaths'
 
-import { PermissionKeysType } from '@type/roles.type'
-
 import './layout.scss'
 
 const { Content } = Layout
@@ -46,6 +45,8 @@ const getCustomMenuItems = (
       route: route.route,
       className: route.className ? route.className : '',
       permissions: route.permissions,
+      permissionMode: route.permissionMode,
+      visibilityMode: route.visibilityMode,
       requiredModules: route.requiredModules,
       icon: route.icon
     }
@@ -74,19 +75,14 @@ const LayoutComponent = ({ customRouters }: LayoutComponentPropsType) => {
 
   const userToken = LocalStorage.get(localStorageKeys.USER_TOKEN)
 
-  const onHideMenuItem = (permission: string | string[]) => {
-    if (permission === PermissionKeysType.ALWAYS_VIEW) {
-      return false
-    }
-    if (Array.isArray(permission)) {
-      return !permission.some((perm) => hasPermission(perm))
-    }
-    return !hasPermission(permission)
-  }
-
   const resultMenuConfig = useMemo(
     () => [...menuConfig(firstName), ...getCustomMenuItems(customRouters)],
     [firstName, customRouters]
+  )
+
+  const visibleMenuConfig = filterMenuByPermissions(
+    resultMenuConfig,
+    hasPermission
   )
 
   const activeRequiredModules = useMemo(() => {
@@ -193,9 +189,9 @@ const LayoutComponent = ({ customRouters }: LayoutComponentPropsType) => {
         <LayoutSider collapsed={collapsed} onCollapse={handleCollapsedChange}>
           <Header collapsed={collapsed} />
           <LayoutMenu
-            onHideMenuItem={onHideMenuItem}
+            onHideMenuItem={() => false}
             currentPath={location.pathname}
-            menuConfig={resultMenuConfig}
+            menuConfig={visibleMenuConfig}
             onClickItem={handleItemChange}
           />
         </LayoutSider>
