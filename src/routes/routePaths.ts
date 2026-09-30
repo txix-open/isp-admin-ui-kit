@@ -3,6 +3,7 @@ type RoutePaths =
   | 'notFound'
   | 'error'
   | 'login'
+  | 'sudir'
   | 'profile'
   | 'users'
   | 'sessions'
@@ -27,6 +28,7 @@ export const routePaths: Record<RoutePaths, string> = {
   error: '/error',
   notFound: '*',
   login: '/login',
+  sudir: '/sudir',
   profile: '/profile',
   users: '/users',
   sessions: '/sessions',

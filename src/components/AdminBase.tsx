@@ -62,6 +62,7 @@ const AdminBase: FC<AdminBasePropsType> = ({
       if (
         currentPathname !== routePaths.error &&
         currentPathname !== routePaths.login &&
+        currentPathname !== routePaths.sudir &&
         currentPathname !== routePaths.home &&
         fullPath !== prevRoute
       ) {
