@@ -71,6 +71,7 @@ const LoginPage = () => {
       .then((response) => {
         LocalStorage.set(localStorageKeys.HEADER_NAME, response.headerName)
         LocalStorage.set(localStorageKeys.USER_TOKEN, response.token)
+        LocalStorage.remove(localStorageKeys.OAUTH_LOGIN)
         const prevRoute = sessionStorage.getItem(sessionStorageKeys.PREV_ROUTE)
         const redirectUrl =
           !prevRoute ||
@@ -101,6 +102,7 @@ const LoginPage = () => {
       }
     )
       .then((response) => {
+        if (!response.loginUrl) throw new Error('Missing OAuth login URL')
         LocalStorage.set(localStorageKeys.OAUTH_LOGIN, true)
         window.location.href = response.loginUrl
       })

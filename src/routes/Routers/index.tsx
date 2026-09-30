@@ -12,6 +12,7 @@ import { routePaths } from '@routes/routePaths'
 
 // Ленивые импорты
 const LoginPage = lazy(() => import('@pages/LoginPage'))
+const OAuthCallbackPage = lazy(() => import('@pages/OAuthCallbackPage'))
 const ProfilePage = lazy(() => import('@pages/ProfilePage'))
 const UsersPage = lazy(() => import('@pages/UsersPage'))
 const RolesPage = lazy(() => import('@pages/RolesPage'))
@@ -180,6 +181,10 @@ export const getRoutesConfig = (
     {
       path: routePaths.login,
       element: lazyElement(LoginPage)
+    },
+    {
+      path: routePaths.sudir,
+      element: lazyElement(OAuthCallbackPage)
     },
     {
       path: routePaths.notFound,

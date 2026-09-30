@@ -13,51 +13,54 @@ const useLogout = () => {
   const { logout, isLoading, oAuthLogout } = useAuth()
   const navigate = useNavigate()
   const headerName = LocalStorage.get(localStorageKeys.HEADER_NAME)
+  const userToken = LocalStorage.get(localStorageKeys.USER_TOKEN)
   const isOAuthLogin = LocalStorage.get(localStorageKeys.OAUTH_LOGIN)
+  const baseHeaders: Record<string, string> = {
+    'Content-Type': 'application/json',
+    'X-APPLICATION-TOKEN': getConfigProperty(
+      'APP_TOKEN',
+      import.meta.env.VITE_APP_TOKEN
+    )
+  }
+  if (headerName && userToken) {
+    baseHeaders[headerName] = userToken
+  }
 
-  const clearAuthState = () => {
+  const getOAuthLogoutUrl = async (): Promise<string | undefined> => {
+    if (!isOAuthLogin) return undefined
+    const response = await oAuthLogout(
+      apiPaths.loginOAuth,
+      {
+        clientName: getConfigProperty(
+          'CLIENT_NAME',
+          import.meta.env.VITE_CLIENT_NAME
+        )
+      },
+      baseHeaders
+    )
+    if (!response.logoutUrl) throw new Error('Missing OAuth logout URL')
+    return response.logoutUrl
+  }
+
+  const cleanupAndRedirect = (logoutUrl?: string) => {
     LocalStorage.remove(localStorageKeys.USER_TOKEN)
     LocalStorage.remove(localStorageKeys.HEADER_NAME)
+    LocalStorage.remove(localStorageKeys.OAUTH_LOGIN)
     sessionStorage.clear()
-  }
 
-  const logoutUser = () => {
-    if (isOAuthLogin) {
-      oAuthLogout(
-        apiPaths.loginOAuth,
-        {
-          clientName: import.meta.env.VITE_CLIENT_NAME
-        },
-        {
-          'Content-Type': 'application/json',
-          'X-APPLICATION-TOKEN': getConfigProperty(
-            'APP_TOKEN',
-            import.meta.env.VITE_APP_TOKEN
-          ),
-          [headerName]: LocalStorage.get(localStorageKeys.USER_TOKEN)
-        }
-      )
-        .then((data) => {
-          LocalStorage.remove(localStorageKeys.OAUTH_LOGIN)
-          clearAuthState()
-          window.location.href = data.logoutUrl
-        })
-        .catch(() => {})
+    if (logoutUrl) {
+      window.location.href = logoutUrl
     } else {
-      logout(apiPaths.logout, {
-        'X-APPLICATION-TOKEN': getConfigProperty(
-          'APP_TOKEN',
-          import.meta.env.VITE_APP_TOKEN
-        ),
-        [headerName]: LocalStorage.get(localStorageKeys.USER_TOKEN)
-      })
-        .then(() => {
-          clearAuthState()
-          navigate(routePaths.login, { replace: true })
-        })
-        .catch(() => {})
+      navigate(routePaths.login, { replace: true })
     }
   }
+
+  const logoutUser = async (): Promise<void> => {
+    const logoutUrl = await getOAuthLogoutUrl()
+    await logout(apiPaths.logout, baseHeaders)
+    cleanupAndRedirect(logoutUrl)
+  }
+
   return { isLoading, logoutUser }
 }
 
