@@ -56,6 +56,11 @@ const applicationsApi = createApi({
       providesTags: () => ['Applications']
     }),
 
+    applicationsGetAll: builder.query<ApplicationAppType[], void>({
+      query: () => ({ url: apiPaths.applicationsGetAll }),
+      providesTags: () => ['Applications']
+    }),
+
     createApplicationService: builder.mutation<
       ApplicationAppType,
       NewApplicationAppType

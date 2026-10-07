@@ -1,5 +1,5 @@
 import { message, Spin } from 'antd'
-import { Column, EmptyData, ColumnItem } from 'isp-ui-kit'
+import { Column, EmptyData, ColumnItem, SortItemType } from 'isp-ui-kit'
 import { useEffect, useMemo, useState } from 'react'
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
 
@@ -21,6 +21,7 @@ import { filterFirstColumnItems } from '@utils/firstColumnUtils'
 import useRole from '@hooks/useRole'
 
 import applicationsGroupApi from '@services/applicationsGroupService'
+import applicationsApi from '@services/applicationsService'
 
 import { routePaths } from '@routes/routePaths'
 
@@ -29,19 +30,34 @@ import { PermissionKeysType } from '@type/roles.type'
 import AppGroupModal from 'src/components/AppGroupModal'
 
 import './applications-page.scss'
+import { useAppDispatch } from '@hooks/redux'
+
+const searchFieldOptions = [
+  { value: 'group', label: 'По группам' },
+  { value: 'app', label: 'По приложениям' }
+] as unknown as SortItemType<ApplicationsGroupType>[]
 
 const ApplicationsPage = () => {
   const navigate = useNavigate()
+  const dispatch = useAppDispatch()
   const { id: selectedItemId = '' } = useParams()
   const [searchParams, setSearchParams] = useSearchParams('')
   const { hasPermission } = useRole()
   const [currentApplicationsApp, setCurrentApplicationsApp] = useState(0)
+  const searchType: 'group' | 'app' =
+    searchParams.get('searchType') === 'app' || searchParams.get('appSearch')
+      ? 'app'
+      : 'group'
+  const isAppSearch = searchType === 'app'
 
   const {
     data: applicationsGroup = [],
     isError: isErrorApplicationsGroup,
     isLoading: isLoadingApplicationsGroup
   } = applicationsGroupApi.useGetAllApplicationsGroupQuery()
+
+  const { data: applicationsGetAll = [] } =
+    applicationsApi.useApplicationsGetAllQuery()
 
   const [createApplicationsGroup] =
     applicationsGroupApi.useCreateApplicationsGroupMutation()
@@ -76,7 +92,9 @@ const ApplicationsPage = () => {
     updateModal: false
   })
   const columnName = 'applications-group'
-  const searchValue = searchParams.get('search') || ''
+  const groupSearchValue = searchParams.get('search') || ''
+  const appSearchValue = searchParams.get('appSearch') || ''
+  const searchValue = isAppSearch ? appSearchValue : groupSearchValue
   const sortValue = searchParams.get(`${columnName}-sort`) || ''
   const directionValue = searchParams.get(`${columnName}-direction`) || ''
 
@@ -85,6 +103,77 @@ const ApplicationsPage = () => {
       applicationsGroup.find((group) => group.id.toString() === selectedItemId),
     [applicationsGroup, selectedItemId]
   )
+
+  const columnItems = useMemo(
+    () =>
+      filterFirstColumnItems(
+        applicationsGroup as unknown as ColumnItem<ApplicationsGroupType>[],
+        groupSearchValue
+      ),
+    [applicationsGroup, groupSearchValue]
+  )
+
+  const navigateToApplication = (value: string) => {
+    const normalizedValue = value.trim().toLowerCase()
+    const application = normalizedValue
+      ? applicationsGetAll.find(
+          (app) =>
+            app.name.toLowerCase().trim().includes(normalizedValue) ||
+            app.id.toString() === normalizedValue
+        )
+      : undefined
+    const params = new URLSearchParams(searchParams)
+    params.delete('appSearchColumn')
+
+    if (normalizedValue) {
+      params.set('appSearch', normalizedValue)
+    } else {
+      params.delete('appSearch')
+    }
+
+    if (!application) {
+      setSearchParams(params)
+      return
+    }
+
+    const { id: applicationId, applicationGroupId } = application
+    setCurrentApplicationsApp(applicationId)
+    navigate({
+      pathname: `${routePaths.applicationsGroup}/${applicationGroupId}/${routePaths.application}/${applicationId}`,
+      search: params.toString()
+    })
+  }
+
+  const handleChangeSearchField = (value: string) => {
+    const nextSearchType = value === 'app' ? 'app' : 'group'
+
+    if (nextSearchType === searchType) {
+      return
+    }
+
+    setCurrentApplicationsApp(0)
+    setSearchParams((prev) => {
+      prev.delete('search')
+      prev.delete('appSearch')
+
+      if (nextSearchType === 'app') {
+        prev.set('searchType', nextSearchType)
+      } else {
+        prev.delete('searchType')
+      }
+
+      return prev
+    })
+  }
+
+  const handleSearchValue = (value: string) => {
+    if (isAppSearch) {
+      navigateToApplication(value)
+      return
+    }
+
+    setUrlValue(value, setSearchParams, 'search')
+  }
 
   if (isErrorApplicationsGroup) {
     return <EmptyData />
@@ -157,6 +246,7 @@ const ApplicationsPage = () => {
       .unwrap()
       .then(() => {
         message.success('Элемент удален')
+        dispatch(applicationsApi.util.invalidateTags(['Applications']))
         navigate(routePaths.applicationsGroup)
       })
       .catch(() => message.error('Ошибка удаления элемента'))
@@ -191,6 +281,9 @@ const ApplicationsPage = () => {
           { value: 'createdAt', label: 'Дата создания' },
           { value: 'updatedAt', label: 'Дата обновления' }
         ]}
+        searchFields={searchFieldOptions}
+        searchFieldValue={searchType}
+        onChangeSearchField={handleChangeSearchField}
         sortValue={sortValue as keyof ApplicationsGroupType}
         onChangeSortValue={(value) =>
           setUrlValue(value, setSearchParams, `${columnName}-sort`)
@@ -207,10 +300,7 @@ const ApplicationsPage = () => {
         showAddBtn={canAddGroup}
         onAddItem={addApplicationModal}
         onRemoveItem={handleRemoveApplicationsGtoup}
-        items={filterFirstColumnItems(
-          applicationsGroup as unknown as ColumnItem<ApplicationsGroupType>[],
-          searchValue
-        )}
+        items={columnItems}
         renderItems={(item) => <ListItem item={item} />}
         searchValue={searchValue}
         selectedItemId={selectedItemId}
@@ -223,9 +313,7 @@ const ApplicationsPage = () => {
             navigate
           )
         }}
-        onChangeSearchValue={(value) =>
-          setUrlValue(value, setSearchParams, 'search')
-        }
+        onChangeSearchValue={handleSearchValue}
       />
       {renderMainContent()}
       <AppGroupModal
