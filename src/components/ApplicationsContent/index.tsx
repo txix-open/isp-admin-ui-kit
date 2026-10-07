@@ -63,7 +63,9 @@ const ApplicationsContent: FC<ApplicationsContentPropTypes> = ({
   })
   const [searchParams, setSearchParams] = useSearchParams('')
   const columnName = 'applications-content'
-  const searchAppValue = searchParams.get('appSearch') || ''
+  const searchAppValue = searchParams.get('appSearchColumn') || ''
+  const firstColumnSearchValue = searchParams.get('appSearch') || ''
+  const appFilterValue = searchAppValue || firstColumnSearchValue
   const sortValue = searchParams.get(`${columnName}-sort`) || ''
   const directionValue = searchParams.get(`${columnName}-direction`) || ''
   const navigate = useNavigate()
@@ -265,7 +267,7 @@ const ApplicationsContent: FC<ApplicationsContentPropTypes> = ({
         onRemoveItem={() => handleRemoveApplicationApp(Number(appId))}
         items={filterFirstColumnItems(
           applications as unknown as ColumnItem<ApplicationAppType>[],
-          searchAppValue
+          appFilterValue
         )}
         renderItems={renderColumnItems}
         searchValue={searchAppValue}
@@ -280,7 +282,18 @@ const ApplicationsContent: FC<ApplicationsContentPropTypes> = ({
           )
         }}
         onChangeSearchValue={(value: string) => {
-          setUrlValue(value.trim().toLowerCase(), setSearchParams, 'appSearch')
+          const normalizedValue = value.trim().toLowerCase()
+          setSearchParams((prev) => {
+            prev.delete('appSearch')
+
+            if (normalizedValue) {
+              prev.set('appSearchColumn', normalizedValue)
+            } else {
+              prev.delete('appSearchColumn')
+            }
+
+            return prev
+          })
         }}
       />
       {renderTokenContent()}

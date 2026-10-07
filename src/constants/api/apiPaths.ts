@@ -76,6 +76,7 @@ type PathKeys =
   | 'gitDir'
   | 'gitFile'
   | 'baseGitConfigurationUrl'
+  | 'applicationsGetAll'
 
 const BASE_URL = import.meta.env.BASE_URL?.replace(/\/$/, '') || ''
 export const API_BASE_URL = `${BASE_URL}/api`
@@ -130,6 +131,7 @@ export const apiPaths: Record<PathKeys, string> = {
   createApplicationGroup: '/application_group/create',
   deleteListApplicationGroup: '/application_group/delete_list',
   getAllApplicationGroup: '/application_group/get_all',
+  applicationsGetAll: '/application/get_all',
   getByIdListApplicationGroup: '/application_group/get_by_id_list',
   updateApplicationGroup: '/application_group/update',
   getApplicationGetApplicationByToken: '/application/get_application_by_token',
