@@ -6,9 +6,10 @@ export interface RolesContentPropsType {
   role?: Partial<RoleType>
   title?: string
   immutable?: boolean
+  onCancel?: () => void
   permissions: PermissionType[]
   saveRole: (
     formValue: RoleType | NewRoleType,
     setError: UseFormSetError<RoleType | NewRoleType>
-  ) => void
+  ) => Promise<boolean>
 }

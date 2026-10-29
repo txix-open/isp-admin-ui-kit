@@ -1,179 +1,218 @@
 import { LogoutOutlined } from '@ant-design/icons'
 import {
+  Alert,
   Button,
-  Popconfirm,
-  Spin,
-  Table,
+  Empty,
   message,
-  Pagination,
+  Popconfirm,
+  Result,
+  Table,
+  Tag,
   Tooltip
 } from 'antd'
 import { ColumnsType } from 'antd/es/table'
 import dayjs from 'dayjs'
-import { useEffect, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
 
 import { dateFormats } from '@constants/date'
 import { SessionStatusKeysType, sessionStatuses } from '@constants/statuses'
 
+import PageLayout from '@components/PageLayout'
+
+import { notifyApiError } from '@utils/apiErrorNotifications'
 import { getUserFullName } from '@utils/userUtils/getFullNameUtil'
 
+import usePagePagination from '@hooks/usePagePagination'
 import useRole from '@hooks/useRole'
 
 import sessionServiceApi from '@services/sessionService'
 import userServiceApi from '@services/userService'
 
-import { routePaths } from '@routes/routePaths'
-
 import { PermissionKeysType } from '@type/roles.type'
 import { SessionType } from '@type/session.type'
-
-import './sessions-page.scss'
 
 const limit = 10
 
 const SessionsPage = () => {
-  const [offset, setOffset] = useState<number>(0)
-  const { data, isLoading: isLoadingSession } =
-    sessionServiceApi.useGetAllSessionsQuery({ limit, offset })
-  const [revokeSession] = sessionServiceApi.useRevokeSessionMutation()
-  const { data: allUsers = [], isLoading: isUsersLoading } =
-    userServiceApi.useGetAllUsersQuery()
-  const { role, hasPermission } = useRole()
-  const navigate = useNavigate()
-  const [currentPage, setCurrentPage] = useState(1)
+  const { hasPermission } = useRole()
+  const canView = hasPermission(PermissionKeysType.session_view)
+  const canViewUsers = hasPermission(PermissionKeysType.user_view)
+  const canRevoke = hasPermission(PermissionKeysType.session_revoke)
+  const { page, offset, changePage } = usePagePagination(limit)
+  const query = sessionServiceApi.useGetAllSessionsQuery(
+    { limit, offset },
+    { skip: !canView }
+  )
+  const usersQuery = userServiceApi.useGetAllUsersQuery(undefined, {
+    skip: !canView || !canViewUsers
+  })
+  const [revokeSession, revokeState] =
+    sessionServiceApi.useRevokeSessionMutation()
+  // currentData prevents showing the previous page under a new page number.
+  const data = query.currentData
 
-  const isLoading = isUsersLoading || isLoadingSession
-
-  const isPageAvailable = hasPermission(PermissionKeysType.session_view)
-  const hasRevokePermission = hasPermission(PermissionKeysType.session_revoke)
-
-  useEffect(() => {
-    if (!isPageAvailable) {
-      navigate(routePaths.home)
-    }
-  }, [isPageAvailable])
-
-  useEffect(() => {
-    if (!role) {
-      navigate(routePaths.error)
-    }
-  }, [role])
-
-  const handleChangePagination = (page: number) => {
-    setCurrentPage(page)
-    const currentOffset = (page - 1) * limit
-    setOffset(currentOffset)
-  }
-
-  const handleRevokeSessions = (id: number) => {
-    revokeSession(id)
+  const handleRevoke = (id: number) => {
+    if (!canRevoke || revokeState.isLoading) return
+    return revokeSession(id)
       .unwrap()
-      .then(() => message.success('Сессия успешно завершена'))
-      .catch(() => message.error('Не удалось завершить сессию'))
-  }
-
-  if (isLoading || !data) {
-    return <Spin />
+      .then(() => {
+        message.success('Сессия успешно завершена')
+      })
+      .catch((error) => {
+        notifyApiError(error, 'Не удалось завершить сессию')
+      })
   }
 
   const columns: ColumnsType<SessionType> = [
     {
       title: 'Пользователь',
       dataIndex: 'userId',
-      key: 'userId',
-      render: (value) => {
-        const user = allUsers.find((el) => el.id === value)
-        return user && getUserFullName(user)
+      render: (id) => {
+        const user = usersQuery.data?.find(
+          (item) => String(item.id) === String(id)
+        )
+        return user ? getUserFullName(user) : `Пользователь #${id}`
       }
     },
+    { title: 'ID сессии', dataIndex: 'id', width: 110 },
     {
-      title: 'Идентификатор',
-      dataIndex: 'id',
-      key: 'id'
-    },
-    {
-      title: 'Дата начала сессии',
+      title: 'Начало сессии',
       dataIndex: 'createdAt',
-      key: 'createdAt',
-      render: (value) => {
-        return dayjs(value).format(dateFormats.fullFormat)
-      }
+      render: (value) => dayjs(value).format(dateFormats.fullFormat)
     },
     {
-      title: 'Дата окончания сессии',
+      title: 'Окончание сессии',
       dataIndex: 'expiredAt',
-      key: 'expiredAt',
-      render: (value) => {
-        return dayjs(value).format(dateFormats.fullFormat)
-      }
+      render: (value) => dayjs(value).format(dateFormats.fullFormat)
     },
     {
       title: 'Статус',
       dataIndex: 'status',
-      key: 'status',
-      render: (value: SessionStatusKeysType) => sessionStatuses[value]
+      width: 140,
+      render: (status: SessionStatusKeysType) => (
+        <Tag
+          color={
+            status === SessionStatusKeysType.allowed ? 'success' : 'default'
+          }
+        >
+          {sessionStatuses[status] ?? status}
+        </Tag>
+      )
     },
-    {
-      dataIndex: 'actions',
-      key: 'actions',
-      render: (_, record) => {
-        if (record.status !== SessionStatusKeysType.allowed) {
-          return null
-        }
-        return (
-          <>
-            {hasRevokePermission && (
-              <Popconfirm
-                title="Закончить эту сессию?"
-                onConfirm={() => handleRevokeSessions(record.id)}
-              >
-                <Tooltip key="LogoutOutlined" title="Закончить сессию">
-                  <Button
-                    data-cy="sessions-page__content__table__logout-btn"
-                    icon={<LogoutOutlined />}
-                  />
-                </Tooltip>
-              </Popconfirm>
-            )}
-          </>
-        )
-      }
-    }
+    ...(canRevoke
+      ? [
+          {
+            title: 'Действия',
+            key: 'actions',
+            width: 100,
+            render: (_: unknown, record: SessionType) =>
+              record.status === SessionStatusKeysType.allowed && (
+                <Popconfirm
+                  title="Завершить эту сессию?"
+                  description="Пользователю потребуется войти снова."
+                  okText="Завершить"
+                  cancelText="Отмена"
+                  onConfirm={() => handleRevoke(record.id)}
+                >
+                  <Tooltip title="Завершить сессию">
+                    <Button
+                      data-cy="sessions-page__content__table__logout-btn"
+                      aria-label={`Завершить сессию #${record.id}`}
+                      icon={<LogoutOutlined />}
+                      disabled={revokeState.isLoading}
+                      loading={
+                        revokeState.isLoading &&
+                        revokeState.originalArgs === record.id
+                      }
+                    />
+                  </Tooltip>
+                </Popconfirm>
+              )
+          }
+        ]
+      : [])
   ]
 
-  const { totalCount, items } = data
+  if (!canView)
+    return (
+      <Result status="403" title="Нет доступа к пользовательским сессиям" />
+    )
+
   return (
-    <section className="sessions-page">
-      <header className="sessions-page__header">
-        <span
-          data-cy="sessions-page__header__title"
-          className="sessions-page__header__title"
-        >
-          Пользовательские сессии
-        </span>
-      </header>
-      <section className="sessions-page__content">
-        <div className="sessions-page__content__wrap-table">
-          <Table
-            className="sessions-page__content__table"
-            rowKey={(record) => record.id}
-            pagination={false}
-            dataSource={items}
-            columns={columns}
-          />
-        </div>
-        <div className="sessions-page__content__pagination">
-          <Pagination
-            showSizeChanger={false}
-            current={currentPage}
-            total={totalCount}
-            pageSize={limit}
-            onChange={handleChangePagination}
-          />
-        </div>
-      </section>
-    </section>
+    <PageLayout
+      className="sessions-page"
+      title="Пользовательские сессии"
+      context="Пользователи и роли"
+      description="История входов, сроки действия и завершение активных сессий."
+      actions={
+        <Button onClick={() => query.refetch()} loading={query.isFetching}>
+          Обновить
+        </Button>
+      }
+    >
+      {query.isError && (
+        <Alert
+          type="error"
+          showIcon
+          title={
+            data
+              ? 'Не удалось обновить сессии. Показаны ранее загруженные данные.'
+              : 'Не удалось загрузить сессии'
+          }
+          action={
+            <Button onClick={() => query.refetch()} loading={query.isFetching}>
+              Повторить
+            </Button>
+          }
+        />
+      )}
+      {usersQuery.isError && (
+        <Alert
+          type="warning"
+          showIcon
+          title="Имена пользователей недоступны. Показаны идентификаторы."
+          action={
+            <Button
+              onClick={() => usersQuery.refetch()}
+              loading={usersQuery.isFetching}
+            >
+              Повторить
+            </Button>
+          }
+        />
+      )}
+      <p className="page-layout__summary" role="status">
+        {query.isFetching
+          ? 'Загрузка сессий…'
+          : data
+            ? `Всего сессий: ${data.totalCount}`
+            : 'Список сессий недоступен'}
+      </p>
+      <Table<SessionType>
+        className="page-layout__table"
+        rowKey="id"
+        loading={query.isFetching}
+        dataSource={data?.items ?? []}
+        columns={columns}
+        scroll={{ x: 1000 }}
+        pagination={{
+          current: page,
+          total: data?.totalCount ?? query.data?.totalCount ?? 0,
+          pageSize: limit,
+          showSizeChanger: false,
+          onChange: changePage
+        }}
+        locale={{
+          emptyText: query.isError ? (
+            'Список недоступен. Повторите загрузку.'
+          ) : (
+            <Empty
+              image={Empty.PRESENTED_IMAGE_SIMPLE}
+              description="Сессий пока нет"
+            />
+          )
+        }}
+      />
+    </PageLayout>
   )
 }
 

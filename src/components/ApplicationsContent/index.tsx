@@ -1,21 +1,37 @@
-import { FileProtectOutlined } from '@ant-design/icons'
-import { List, message, Spin, Tooltip } from 'antd'
-import { EmptyData, Column, ColumnItem } from 'isp-ui-kit'
-import { Dispatch, FC, SetStateAction, useMemo, useState } from 'react'
+import {
+  ArrowLeftOutlined,
+  FileProtectOutlined,
+  PlusOutlined,
+  ReloadOutlined
+} from '@ant-design/icons'
+import {
+  Alert,
+  Button,
+  Empty,
+  List,
+  message,
+  Popconfirm,
+  Result,
+  Spin,
+  Tooltip
+} from 'antd'
+import { Column } from 'isp-ui-kit'
+import { useEffect, useRef } from 'react'
+import { UseFormSetError } from 'react-hook-form'
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
 
-import SearchAppByToken from '@ui/SearchAppByToken'
-
 import AppModal from '@components/AppModal'
+import { PageHeader } from '@components/PageLayout'
 import TokenContent from '@components/TokenContent'
 
 import {
   ApplicationAppType,
-  NewApplicationAppType,
-  UpdateApplicationAppType
+  ApplicationsGroupType
 } from '@pages/ApplicationsPage/applications.type'
+import { useApplicationDialog } from '@pages/ApplicationsPage/useApplicationDialog'
 
-import { setUrlValue, setSelectedItemId } from '@utils/columnLayoutUtils'
+import { ignoreApiError, notifyApiError } from '@utils/apiErrorNotifications'
+import { setUrlValue } from '@utils/columnLayoutUtils'
 import { filterFirstColumnItems } from '@utils/firstColumnUtils'
 
 import useRole from '@hooks/useRole'
@@ -26,303 +42,323 @@ import { routePaths } from '@routes/routePaths'
 
 import { PermissionKeysType } from '@type/roles.type'
 
+import ApplicationEmptyPanel from './ApplicationEmptyPanel'
 import './applications-content.scss'
 
-interface ApplicationsContentPropTypes {
-  selectedItemId: number
-  currentApplicationsApp: number
-  setCurrentApplicationsApp: Dispatch<SetStateAction<number>>
-}
-
-const ApplicationsContent: FC<ApplicationsContentPropTypes> = ({
-  selectedItemId,
-  setCurrentApplicationsApp
+const ApplicationsContent = ({
+  group,
+  onBackToGroups
+}: {
+  group: ApplicationsGroupType
+  onBackToGroups: () => void
 }) => {
-  const { hasPermission } = useRole()
-  const [isExistsId, setIsExistsId] = useState<{
-    field: keyof ApplicationAppType
-    message: string
-  } | null>(null)
-
-  const {
-    data: applications = [],
-    isLoading: isLoadingApplicationsContent = false
-  } = applicationsApi.useGetApplicationsByAppGroupQuery({
-    id: selectedItemId
-  })
-
-  const [createApplicationService] =
-    applicationsApi.useCreateApplicationServiceMutation()
-  const [updateApplication] =
-    applicationsApi.useUpdateApplicationsServiceMutation()
-  const [removeApplicationsService] =
-    applicationsApi.useRemoveApplicationsServiceMutation()
-  const [showApplicationsModal, setShowApplicationsModal] = useState({
-    addModal: false,
-    updateModal: false
-  })
-  const [searchParams, setSearchParams] = useSearchParams('')
-  const columnName = 'applications-content'
-  const searchAppValue = searchParams.get('appSearchColumn') || ''
-  const firstColumnSearchValue = searchParams.get('appSearch') || ''
-  const appFilterValue = searchAppValue || firstColumnSearchValue
-  const sortValue = searchParams.get(`${columnName}-sort`) || ''
-  const directionValue = searchParams.get(`${columnName}-direction`) || ''
-  const navigate = useNavigate()
   const { appId = '' } = useParams()
-
-  const canAddApp = hasPermission(PermissionKeysType.application_group_app_add)
-  const canUpdateApp = hasPermission(
-    PermissionKeysType.application_group_app_edit
-  )
-  const canRemoveApp = hasPermission(
+  const columnHeading = useRef<HTMLHeadingElement>(null)
+  useEffect(() => {
+    if (!appId) columnHeading.current?.focus({ preventScroll: true })
+  }, [group.id, appId])
+  const [params, setParams] = useSearchParams()
+  const { dialog, openDialog, closeDialog } = useApplicationDialog()
+  const { hasPermission } = useRole()
+  const navigate = useNavigate()
+  const query = applicationsApi.useGetApplicationsByAppGroupQuery({
+    id: group.id
+  })
+  const applications = query.currentData ?? []
+  const app = applications.find((item) => String(item.id) === appId)
+  const [createApp, createState] =
+    applicationsApi.useCreateApplicationServiceMutation()
+  const [updateApp, updateState] =
+    applicationsApi.useUpdateApplicationsServiceMutation()
+  const [removeApp, removeState] =
+    applicationsApi.useRemoveApplicationsServiceMutation()
+  const busy =
+    createState.isLoading || updateState.isLoading || removeState.isLoading
+  const canAdd = hasPermission(PermissionKeysType.application_group_app_add)
+  const canEdit = hasPermission(PermissionKeysType.application_group_app_edit)
+  const canRemove = hasPermission(
     PermissionKeysType.application_group_app_delete
-  )
-  const isTokenPageAvailable = hasPermission(
-    PermissionKeysType.application_group_token_view
   )
   const canViewToken = hasPermission(
     PermissionKeysType.application_group_token_view
   )
-  const isAppAccessPageAvailable = hasPermission(
-    PermissionKeysType.app_access_view
-  )
+  const canViewAccess = hasPermission(PermissionKeysType.app_access_view)
+  const search = params.get('appSearchColumn') || params.get('appSearch') || ''
 
-  const currentApp = useMemo(() => {
-    const element = applications.find(
-      (application) => application.id.toString() === appId
+  const openApp = (id: string, replace = false) => {
+    const next = new URLSearchParams(params)
+    next.delete('dialog')
+    navigate(
+      {
+        pathname: `${routePaths.applicationsGroup}/${group.id}${id ? `/application/${id}` : ''}`,
+        search: next.toString()
+      },
+      { replace }
     )
-    return element
-  }, [applications, appId])
-
-  const updateApplicationModal = () => {
-    setShowApplicationsModal({
-      ...showApplicationsModal,
-      updateModal: true
-    })
   }
-  const addApplicationModal = () => {
-    setShowApplicationsModal({
-      ...showApplicationsModal,
-      addModal: true
-    })
-  }
-  const renderTokenContent = () => {
-    if (!appId) {
-      return (
-        <div className="empty-data__wrap">
-          {canViewToken && <SearchAppByToken />}
-          <EmptyData />
-        </div>
-      )
-    }
-
-    if (!isTokenPageAvailable) {
-      return (
-        <div className="empty-data">
-          <h1>Нет доступа к разделу</h1>
-        </div>
-      )
-    }
-
-    return <TokenContent key={appId} id={Number(appId)} />
-  }
-
-  const handleUpdateApplicationApp = (data: ApplicationAppType) => {
-    if (currentApp) {
-      const updateApplications: UpdateApplicationAppType = {
-        newId: data.id,
-        oldId: currentApp.id,
-        name: data.name,
-        description: data.description
-      }
-      updateApplication(updateApplications)
-        .unwrap()
-        .then(() => {
-          setShowApplicationsModal({
-            ...showApplicationsModal,
-            updateModal: false
-          })
-          navigate(
-            `${routePaths.applicationsGroup}/${selectedItemId}/${routePaths.application}/${data.id}`,
-            { replace: true }
-          )
-          setIsExistsId(null)
-          message.success('Элемент сохранен')
-        })
-        .catch((e) => {
-          if (e.response.data.errorCode === 604) {
-            setIsExistsId({
-              field: 'id',
-              message: 'Приложение с таким идентификатором уже существует'
-            })
-          } else {
-            message.error('Ошибка обновления элемента')
-            setIsExistsId(null)
-          }
-        })
-    }
-  }
-
-  const handleCreateApplicationApp = (data: ApplicationAppType) => {
-    const newApplicationApp: NewApplicationAppType = {
-      name: data.name,
-      id: data.id,
-      description: data.description,
-      applicationGroupId: selectedItemId,
-      type: 'SYSTEM'
-    }
-
-    createApplicationService(newApplicationApp)
-      .unwrap()
+  const saveApp = (
+    values: ApplicationAppType,
+    setError: UseFormSetError<ApplicationAppType>
+  ) => {
+    const isNew = dialog === 'new-app'
+    if (busy || (isNew ? !canAdd : !canEdit) || (!isNew && !app))
+      return Promise.resolve()
+    const request = isNew
+      ? createApp({
+          id: values.id,
+          name: values.name,
+          description: values.description,
+          applicationGroupId: group.id,
+          type: 'SYSTEM'
+        }).unwrap()
+      : updateApp({
+          oldId: app!.id,
+          newId: values.id,
+          name: values.name,
+          description: values.description
+        }).unwrap()
+    return request
       .then(() => {
-        message.success('Элемент сохранен')
-        setShowApplicationsModal({
-          ...showApplicationsModal,
-          addModal: false
-        })
-      })
-      .catch((e) => {
-        if (e.response.data.errorCode === 604) {
-          setIsExistsId({
-            field: 'id',
-            message: 'Приложение с таким идентификатором уже существует'
-          })
-        } else {
-          message.error('Ошибка создания элемента')
-        }
-      })
-  }
-
-  const handleRemoveApplicationApp = (id: number) =>
-    removeApplicationsService([id])
-      .unwrap()
-      .then(() => {
-        message.success('Элемент удален')
-        navigate(
-          `${routePaths.applicationsGroup}/${selectedItemId}/${routePaths.application}`
+        openApp(String(values.id), true)
+        message.success(
+          isNew ? 'Приложение создано' : 'Изменения приложения сохранены'
         )
       })
-      .catch(() => message.error('Ошибка удаления элемента'))
-
-  const renderColumnItems = (item: ColumnItem<any>) => {
+      .catch((error) => {
+        if (Number(error.response?.data?.errorCode) === 604) {
+          ignoreApiError(error)
+          setError(
+            'id',
+            { type: 'server', message: 'Приложение с таким ID уже существует' },
+            { shouldFocus: true }
+          )
+        } else notifyApiError(error, 'Не удалось сохранить приложение')
+      })
+  }
+  const deleteApp = () => {
+    if (!app || !canRemove || busy) return
+    return removeApp([app.id])
+      .unwrap()
+      .then(() => {
+        openApp('', true)
+        message.success('Приложение удалено')
+      })
+      .catch((error) => notifyApiError(error, 'Не удалось удалить приложение'))
+  }
+  const renderDetails = () => {
+    if (query.isLoading || (query.isFetching && !query.currentData))
+      return (
+        <Spin description="Загрузка приложений">
+          <div style={{ minHeight: 160 }} />
+        </Spin>
+      )
+    if (query.isError && !query.currentData)
+      return <Empty description="Приложения недоступны. Повторите загрузку." />
+    if (!appId)
+      return (
+        <ApplicationEmptyPanel
+          searchToken={canViewToken}
+          description="Выберите приложение, чтобы увидеть его данные и токены"
+        />
+      )
+    if (!app)
+      return (
+        <Result
+          status="404"
+          title="Приложение не найдено в этой группе"
+          extra={<Button onClick={() => openApp('')}>К приложениям</Button>}
+        />
+      )
     return (
-      <List.Item>
-        <Tooltip mouseEnterDelay={1.3} title={item.name}>
-          <List.Item.Meta
-            title={item.name}
-            description={<span>id: {item.id}</span>}
-          />
-          {isAppAccessPageAvailable && (
-            <div
-              className="link-btn"
-              onClick={(e) => {
-                e.stopPropagation()
-                navigate(`${routePaths.appAccess}/${item.id}`)
-              }}
+      <>
+        <PageHeader
+          focusOnMount
+          level={2}
+          title={app.name}
+          context={`Приложение · ID ${app.id} · Группа: ${group.name}`}
+          description={app.description || 'Описание не задано'}
+          back={
+            <Button
+              className="applications-content__back"
+              onClick={() => openApp('')}
             >
-              <Tooltip title="Доступы приложений">
-                <FileProtectOutlined />
-              </Tooltip>
-            </div>
-          )}
-        </Tooltip>
-      </List.Item>
+              К приложениям
+            </Button>
+          }
+          actions={
+            <>
+              {canViewAccess && (
+                <Button
+                  icon={<FileProtectOutlined />}
+                  onClick={() => navigate(`${routePaths.appAccess}/${app.id}`)}
+                >
+                  Доступы
+                </Button>
+              )}
+              {canEdit && (
+                <Button disabled={busy} onClick={() => openDialog('edit-app')}>
+                  Изменить приложение
+                </Button>
+              )}
+              {canRemove && (
+                <Popconfirm
+                  title={`Удалить приложение «${app.name}»?`}
+                  description="Это действие нельзя отменить."
+                  okText="Удалить"
+                  cancelText="Отмена"
+                  onConfirm={deleteApp}
+                >
+                  <Button
+                    danger
+                    loading={removeState.isLoading}
+                    disabled={busy}
+                  >
+                    Удалить
+                  </Button>
+                </Popconfirm>
+              )}
+            </>
+          }
+        />
+        {canViewToken ? (
+          <TokenContent id={app.id} />
+        ) : (
+          <Empty description="Нет права просматривать токены этого приложения" />
+        )}
+      </>
     )
   }
 
-  if (!selectedItemId) {
-    return <EmptyData />
-  }
-  if (selectedItemId)
-    if (isLoadingApplicationsContent) {
-      return <Spin className="spin" />
-    }
-
   return (
-    <section className="applications-content">
-      <Column
-        sortableFields={[
-          { value: 'name', label: 'Наименование' },
-          { value: 'id', label: 'Идентификатор' },
-          { value: 'createdAt', label: 'Дата создания' },
-          { value: 'updatedAt', label: 'Дата обновления' }
-        ]}
-        sortValue={sortValue as keyof ApplicationAppType}
-        onChangeSortValue={(value) =>
-          setUrlValue(value, setSearchParams, `${columnName}-sort`)
-        }
-        directionValue={directionValue}
-        onChangeDirectionValue={(value) =>
-          setUrlValue(value, setSearchParams, `${columnName}-direction`)
-        }
-        columnKey="applications-content"
-        title="Приложения"
-        searchPlaceholder="Введите имя или id"
-        onUpdateItem={updateApplicationModal}
-        showUpdateBtn={canUpdateApp}
-        showRemoveBtn={canRemoveApp}
-        showAddBtn={canAddApp}
-        onAddItem={addApplicationModal}
-        onRemoveItem={() => handleRemoveApplicationApp(Number(appId))}
-        items={filterFirstColumnItems(
-          applications as unknown as ColumnItem<ApplicationAppType>[],
-          appFilterValue
-        )}
-        renderItems={renderColumnItems}
-        searchValue={searchAppValue}
-        selectedItemId={appId}
-        setSelectedItemId={(itemId: string) => {
-          setCurrentApplicationsApp(Number(itemId))
-          setSelectedItemId(
-            `${routePaths.applicationsGroup}/${selectedItemId}/${routePaths.application}`,
-            itemId.toString(),
-            searchParams.toString(),
-            navigate
-          )
-        }}
-        onChangeSearchValue={(value: string) => {
-          const normalizedValue = value.trim().toLowerCase()
-          setSearchParams((prev) => {
-            prev.delete('appSearch')
-
-            if (normalizedValue) {
-              prev.set('appSearchColumn', normalizedValue)
-            } else {
-              prev.delete('appSearchColumn')
+    <section
+      className="applications-content"
+      data-app-selected={Boolean(appId)}
+    >
+      {query.isError && (
+        <Alert
+          type="error"
+          showIcon
+          title={
+            query.currentData
+              ? 'Не удалось обновить приложения. Показаны ранее загруженные данные.'
+              : 'Не удалось загрузить приложения группы'
+          }
+          action={
+            <Button onClick={() => query.refetch()} loading={query.isFetching}>
+              Повторить
+            </Button>
+          }
+        />
+      )}
+      <div className="applications-content__panels">
+        <div className="applications-content__list">
+          <Column<ApplicationAppType>
+            columnKey="applications-content"
+            title={
+              <div className="applications-content__column-title">
+                <Tooltip title="К группам">
+                  <Button
+                    className="applications-page__back"
+                    type="text"
+                    size="small"
+                    aria-label="К группам"
+                    icon={<ArrowLeftOutlined />}
+                    onClick={onBackToGroups}
+                  />
+                </Tooltip>
+                <h3 ref={columnHeading} tabIndex={-1}>
+                  Приложения
+                </h3>
+                <Tooltip title="Обновить приложения">
+                  <Button
+                    type="text"
+                    size="small"
+                    aria-label="Обновить приложения"
+                    icon={<ReloadOutlined />}
+                    onClick={() => query.refetch()}
+                    loading={query.isFetching}
+                  />
+                </Tooltip>
+                {canAdd && (
+                  <Tooltip title="Новое приложение">
+                    <Button
+                      type="primary"
+                      size="small"
+                      aria-label="Новое приложение"
+                      icon={<PlusOutlined />}
+                      onClick={() => openDialog('new-app')}
+                      disabled={busy}
+                    />
+                  </Tooltip>
+                )}
+              </div>
             }
-
-            return prev
-          })
-        }}
-      />
-      {renderTokenContent()}
-      <AppModal
-        isExistsId={isExistsId}
-        app={currentApp}
-        onOk={handleUpdateApplicationApp}
-        title="Редактировать приложение"
-        open={showApplicationsModal.updateModal}
-        onClose={() =>
-          setShowApplicationsModal({
-            ...showApplicationsModal,
-            updateModal: false
-          })
-        }
-      />
-      <AppModal
-        isExistsId={isExistsId}
-        isNew
-        onOk={handleCreateApplicationApp}
-        title="Добавить приложение"
-        open={showApplicationsModal.addModal}
-        onClose={() =>
-          setShowApplicationsModal({
-            ...showApplicationsModal,
-            addModal: false
-          })
-        }
-      />
+            items={filterFirstColumnItems(applications, search)}
+            isLoading={query.isLoading}
+            sortableFields={[
+              { value: 'name', label: 'Название' },
+              { value: 'id', label: 'Идентификатор' },
+              { value: 'createdAt', label: 'Дата создания' },
+              { value: 'updatedAt', label: 'Дата обновления' }
+            ]}
+            sortValue={
+              params.get(
+                'applications-content-sort'
+              ) as keyof ApplicationAppType
+            }
+            onChangeSortValue={(value) =>
+              setUrlValue(value, setParams, 'applications-content-sort')
+            }
+            directionValue={params.get('applications-content-direction') ?? ''}
+            onChangeDirectionValue={(value) =>
+              setUrlValue(value, setParams, 'applications-content-direction')
+            }
+            searchValue={search}
+            searchPlaceholder="Название или ID приложения"
+            onChangeSearchValue={(value) => {
+              const next = new URLSearchParams(params)
+              next.delete('appSearch')
+              if (value) next.set('appSearchColumn', value)
+              else next.delete('appSearchColumn')
+              setParams(next, { replace: true })
+            }}
+            selectedItemId={appId}
+            setSelectedItemId={openApp}
+            showAddBtn={false}
+            showUpdateBtn={false}
+            showRemoveBtn={false}
+            renderItems={(item) => (
+              <List.Item>
+                <Tooltip title={item.name}>
+                  <List.Item.Meta
+                    title={item.name}
+                    description={`ID: ${item.id}`}
+                  />
+                </Tooltip>
+              </List.Item>
+            )}
+          />
+        </div>
+        <div key={appId} className="applications-content__details">
+          {renderDetails()}
+        </div>
+      </div>
+      {((dialog === 'new-app' && canAdd) ||
+        (dialog === 'edit-app' && app && canEdit)) && (
+        <AppModal
+          key={`${dialog}-${appId}`}
+          open
+          title={
+            dialog === 'new-app'
+              ? 'Новое приложение'
+              : 'Редактирование приложения'
+          }
+          groupName={group.name}
+          app={dialog === 'edit-app' ? app : undefined}
+          onClose={closeDialog}
+          onOk={saveApp}
+        />
+      )}
     </section>
   )
 }

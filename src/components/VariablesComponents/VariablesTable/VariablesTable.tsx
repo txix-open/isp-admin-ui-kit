@@ -1,61 +1,120 @@
-import { Button, Table } from 'antd'
-import { useState } from 'react'
+import { Button, Empty, Table } from 'antd'
+import { useSearchParams } from 'react-router-dom'
 
-import { getColumns } from '@components/VariablesComponents/VariablesTable/variable-table-columns'
-
-import './variables-table.scss'
+import { useVariableColumns } from './variable-table-columns'
 import {
-  Sorts,
-  VariablesTablePropsType,
-  OnChange,
-  Filters
-} from './variables-table.type'
+  matchesVariableFilters,
+  readVariableTableState
+} from './variableTableState'
+import './variables-table.scss'
+import type { OnChange, VariablesTablePropsType } from './variables-table.type'
+
+const pageSize = 50
 
 const VariablesTable = ({
   dataTable,
-  onRemoveVariable
+  onRemoveVariable,
+  loading,
+  unavailable,
+  removingName
 }: VariablesTablePropsType) => {
-  const [currentPage, setCurrentPage] = useState(1)
-  const [filteredInfo, setFilteredInfo] = useState<Filters>({})
-  const [sortedInfo, setSortedInfo] = useState<Sorts>({})
-
-  const hasActiveFilters = Object.values(filteredInfo).some((value) => value)
-  const hasActiveSorting = sortedInfo.order
-
-  const isClearDisabled = !hasActiveFilters && !hasActiveSorting
+  const [params, setParams] = useSearchParams()
+  const state = readVariableTableState(params)
+  const hasFilters = Boolean(state.name || state.value)
+  const filteredCount = dataTable.filter((variable) =>
+    matchesVariableFilters(variable, state)
+  ).length
+  const page = Math.min(
+    state.page,
+    Math.max(1, Math.ceil(filteredCount / pageSize))
+  )
+  const columns = useVariableColumns(
+    { columnKey: state.sort, order: state.order },
+    {
+      name: state.name ? [state.name] : null,
+      value: state.value ? [state.value] : null
+    },
+    onRemoveVariable,
+    removingName
+  )
 
   const clearAll = () => {
-    setFilteredInfo({})
-    setSortedInfo({})
+    const next = new URLSearchParams(params)
+    for (const key of ['name', 'value', 'sort', 'order', 'page'])
+      next.delete(key)
+    setParams(next, { replace: true })
   }
 
-  const handleChange: OnChange = (_, filters, sorter) => {
-    setFilteredInfo(filters)
-    setSortedInfo(sorter as Sorts)
+  const handleChange: OnChange = (pagination, filters, sorter, extra) => {
+    const next = new URLSearchParams(params)
+    const sort = Array.isArray(sorter) ? sorter[0] : sorter
+    const values = {
+      name: String(filters.name?.[0] ?? ''),
+      value: String(filters.value?.[0] ?? ''),
+      sort: sort.order ? String(sort.columnKey) : '',
+      order: sort.order ?? '',
+      page:
+        extra.action === 'paginate' && pagination.current !== 1
+          ? String(pagination.current)
+          : ''
+    }
+    for (const [key, value] of Object.entries(values)) {
+      if (value) next.set(key, value)
+      else next.delete(key)
+    }
+    setParams(next, { replace: extra.action !== 'paginate' })
   }
 
   return (
-    <section className="variables-table">
-      <Button
-        data-testid="variables-table__clear-all-btn"
-        className="variables-table__clear-all-btn"
-        disabled={isClearDisabled}
-        onClick={clearAll}
-      >
-        Очистить все фильтры и сортировки
-      </Button>
-      <Table
-        size="small"
-        rowKey={(record) => record.name}
+    <section className="variables-table" aria-label="Список переменных">
+      <div className="variables-table__toolbar">
+        <p className="page-layout__summary" role="status">
+          {loading
+            ? 'Загрузка переменных…'
+            : unavailable
+              ? 'Список переменных недоступен'
+              : `Найдено ${filteredCount} из ${dataTable.length} переменных`}
+        </p>
+        <Button
+          data-testid="variables-table__clear-all-btn"
+          disabled={!hasFilters && !state.sort}
+          onClick={clearAll}
+        >
+          Сбросить фильтры и сортировку
+        </Button>
+      </div>
+      <Table<VariableType>
+        className="page-layout__table"
+        rowKey="name"
+        loading={loading}
         dataSource={dataTable}
-        columns={getColumns(sortedInfo, filteredInfo, onRemoveVariable)}
-        scroll={{ y: 'calc(100vh - 270px)', x: 1500 }}
+        columns={columns}
+        tableLayout="fixed"
+        scroll={{ x: 1450 }}
         onChange={handleChange}
         pagination={{
-          current: currentPage,
-          onChange: setCurrentPage,
-          pageSize: 50,
-          showSizeChanger: false
+          current: page,
+          pageSize,
+          showSizeChanger: false,
+          hideOnSinglePage: true
+        }}
+        locale={{
+          emptyText: unavailable ? (
+            'Список недоступен. Повторите загрузку.'
+          ) : (
+            <Empty
+              image={Empty.PRESENTED_IMAGE_SIMPLE}
+              description={
+                hasFilters
+                  ? 'По заданным условиям переменные не найдены'
+                  : 'Переменных пока нет'
+              }
+            >
+              {hasFilters && (
+                <Button onClick={clearAll}>Сбросить фильтры</Button>
+              )}
+            </Empty>
+          )
         }}
       />
     </section>

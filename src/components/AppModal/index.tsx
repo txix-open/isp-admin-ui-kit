@@ -1,116 +1,133 @@
 import { SyncOutlined } from '@ant-design/icons'
-import { Button, message, Tooltip } from 'antd'
-import { FormInput, FormTextArea, FormInputNumber } from 'isp-ui-kit'
-import { FC, useEffect } from 'react'
+import { Button, Modal } from 'antd'
+import { FormInput, FormInputNumber, FormTextArea } from 'isp-ui-kit'
 import { useForm } from 'react-hook-form'
 
 import { ValidationRules } from '@constants/form/validationRules'
 
-import Modal from '@widgets/Modal'
-
-import { AppModalType } from '@components/AppModal/app-group-modal.type'
-
 import { ApplicationAppType } from '@pages/ApplicationsPage/applications.type'
+
+import { notifyApiError } from '@utils/apiErrorNotifications'
 
 import applicationsApi from '@services/applicationsService'
 
+import { AppModalType } from './app-group-modal.type'
 import './app-modal.scss'
 
-const AppModal: FC<AppModalType> = ({
+const AppModal = ({
   title,
-  onOk,
-  onClose,
   open,
+  onClose,
+  onOk,
   app,
-  isNew = false,
-  isExistsId
-}) => {
-  const [getNextAppId, { isLoading }] =
-    applicationsApi.useGetNextAppIdMutation()
-  const { handleSubmit, control, reset, setValue, setError, clearErrors } =
-    useForm<ApplicationAppType>({
-      mode: 'onChange',
-      defaultValues: app
-    })
-
-  useEffect(() => {
-    if (open) {
-      reset(app)
+  groupName
+}: AppModalType) => {
+  const [getNextId, generation] = applicationsApi.useGetNextAppIdMutation()
+  const {
+    control,
+    handleSubmit,
+    setValue,
+    setError,
+    clearErrors,
+    formState: { isDirty, isSubmitting }
+  } = useForm<ApplicationAppType>({
+    defaultValues: {
+      name: app?.name ?? '',
+      description: app?.description ?? '',
+      id: app?.id
     }
-
-    if (isNew) {
-      reset()
-    }
-  }, [open, isNew])
-
-  useEffect(() => {
-    if (isExistsId?.field && isExistsId?.message) {
-      setError(isExistsId.field as keyof ApplicationAppType, {
-        type: 'manual',
-        message: isExistsId.message
-      })
-    }
-  }, [isExistsId])
-
-  const handleGetNextAppId = () => {
-    getNextAppId()
-      .then((res) => {
-        setValue('id', Number(res.data) as number)
-        message.success('Идентификатор сгеренирован')
-        clearErrors()
-      })
-      .catch(() => {
-        message.error('Ошибка генерации идентификатора')
-        clearErrors()
-      })
+  })
+  const busy = isSubmitting || generation.isLoading
+  const close = () => {
+    if (!busy) onClose()
   }
+  const generateId = () => {
+    if (busy) return
+    return getNextId()
+      .unwrap()
+      .then((value) => {
+        const id = Number(value)
+        if (!Number.isSafeInteger(id) || id < 0)
+          throw new Error('Invalid application ID')
+        setValue('id', id, { shouldDirty: true, shouldValidate: true })
+        clearErrors('id')
+      })
+      .catch((error) =>
+        notifyApiError(error, 'Не удалось получить идентификатор приложения')
+      )
+  }
+  const submit = handleSubmit((values) => {
+    if (!isDirty || busy) return
+    return onOk(values, setError)
+  })
 
   return (
     <Modal
-      onOk={handleSubmit(onOk)}
       title={title}
       open={open}
-      loading={isLoading}
-      footer={{ onCanselText: 'Отмена', onOkText: 'Сохранить' }}
-      onClose={() => {
-        if (onClose) {
-          onClose()
-        }
-        reset()
-      }}
+      onCancel={close}
+      destroyOnHidden
+      width={640}
+      mask={{ closable: false }}
+      keyboard={!busy}
+      closable={!busy}
+      footer={null}
     >
-      <form>
-        <div className="generate_id">
+      <form onSubmit={submit}>
+        <p>
+          Группа: <strong>{groupName}</strong>.{' '}
+          {app
+            ? 'Изменения применятся после сохранения.'
+            : 'Приложение появится в группе после нажатия «Создать приложение».'}
+        </p>
+        <div className="application-form-id">
           <FormInputNumber
             control={control}
             name="id"
             label="Идентификатор"
+            min={0}
+            precision={0}
             rules={{ required: ValidationRules.required }}
-            addonAfter={
-              isNew && (
-                <Tooltip title="Сгенерировать">
-                  <Button
-                    icon={<SyncOutlined />}
-                    onClick={handleGetNextAppId}
-                    loading={isLoading}
-                  />
-                </Tooltip>
-              )
-            }
+            disabled={busy}
           />
+          {!app && (
+            <Button
+              icon={<SyncOutlined />}
+              onClick={generateId}
+              loading={generation.isLoading}
+              disabled={isSubmitting}
+            >
+              Получить ID
+            </Button>
+          )}
         </div>
         <FormInput
           control={control}
           name="name"
-          label="Наименование"
+          label="Название приложения"
           rules={{ required: ValidationRules.required }}
+          disabled={busy}
         />
         <FormTextArea
-          autoSize={{ minRows: 2, maxRows: 6 }}
           control={control}
-          label="Описание"
           name="description"
+          label="Описание"
+          autoSize={{ minRows: 2, maxRows: 6 }}
+          disabled={busy}
         />
+        <div className="application-form-actions">
+          <Button onClick={close} disabled={busy}>
+            Отмена
+          </Button>
+          <Button
+            type="primary"
+            htmlType="submit"
+            loading={isSubmitting}
+            disabled={!isDirty || busy}
+          >
+            {app ? 'Сохранить изменения' : 'Создать приложение'}
+          </Button>
+        </div>
       </form>
     </Modal>
   )

@@ -4,7 +4,16 @@ import {
   ReloadOutlined,
   SwapOutlined
 } from '@ant-design/icons'
-import { Button, message, Popconfirm, Spin, Table, Tag, Tooltip } from 'antd'
+import {
+  Button,
+  message,
+  Popconfirm,
+  Space,
+  Spin,
+  Table,
+  Tag,
+  Tooltip
+} from 'antd'
 import { ColumnsType } from 'antd/es/table'
 import dayjs from 'dayjs'
 import { useEffect, useState } from 'react'
@@ -14,8 +23,11 @@ import { dateFormats } from '@constants/date'
 
 import CompareVersionModal from '@components/CompareVersionModal'
 import ConfigurationPreviewModal from '@components/ConfigurationPreviewModal'
+import PageLayout from '@components/PageLayout'
 
 import { ConfigType } from '@pages/ModulesPage/module.type'
+
+import { notifyApiError } from '@utils/apiErrorNotifications'
 
 import { useAppSelector } from '@hooks/redux'
 import useRole from '@hooks/useRole'
@@ -81,7 +93,11 @@ const AllVersionsPage = () => {
   }, [role])
 
   if (isLoading) {
-    return <Spin />
+    return (
+      <PageLayout title="История версий" level={2}>
+        <Spin />
+      </PageLayout>
+    )
   }
   if (isError) {
     return <Navigate to={routePaths.error} />
@@ -93,8 +109,8 @@ const AllVersionsPage = () => {
       .then(() => {
         message.success('Элемент успешно удален')
       })
-      .catch(() => {
-        message.error('Не удалось удалить элемент')
+      .catch((error) => {
+        notifyApiError(error, 'Не удалось удалить элемент')
       })
   }
   const handleRevertVersion = (newData: Record<string, unknown>) => {
@@ -104,8 +120,8 @@ const AllVersionsPage = () => {
       .then(() => {
         message.success('Версия успешно восстановлена')
       })
-      .catch(() => {
-        message.error('Не удалось восстановить версию')
+      .catch((error) => {
+        notifyApiError(error, 'Не удалось восстановить версию')
       })
   }
   const renderActionsField = (
@@ -115,7 +131,7 @@ const AllVersionsPage = () => {
   ) => {
     return (
       <div className="all-version-page__actions-field">
-        <Button.Group className="button_group">
+        <Space.Compact>
           {canSetVersion && index !== 0 && (
             <Tooltip title="Установить выбранную версию">
               <Popconfirm
@@ -152,7 +168,7 @@ const AllVersionsPage = () => {
               <Button danger icon={<DeleteOutlined />} />
             </Popconfirm>
           )}
-        </Button.Group>
+        </Space.Compact>
       </div>
     )
   }
@@ -203,7 +219,19 @@ const AllVersionsPage = () => {
     }
   ]
   return (
-    <section className="all-version-page">
+    <PageLayout
+      className="all-version-page"
+      title="История версий"
+      level={2}
+      context={currentConfig?.name}
+      back={
+        <Button
+          onClick={() => navigate(`${routePaths.modules}/${id}/configurations`)}
+        >
+          К конфигурациям
+        </Button>
+      }
+    >
       {showPreviewModal && (
         <ConfigurationPreviewModal
           versionCompare={true}
@@ -220,21 +248,16 @@ const AllVersionsPage = () => {
           onClose={() => setShowCompareModal(false)}
         />
       )}
-      <Button
-        className="all-version-page__back-btn"
-        onClick={() => navigate(`${routePaths.modules}/${id}/configurations`)}
-      >
-        Назад
-      </Button>
       <div className="all-version-page__table">
         <Table
           columns={columns}
           dataSource={versions}
           pagination={{ pageSize: 30 }}
           rowKey={(record) => record.id}
+          scroll={{ x: 700 }}
         />
       </div>
-    </section>
+    </PageLayout>
   )
 }
 

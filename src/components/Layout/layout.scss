@@ -1,47 +1,71 @@
-@use "src/constants/style/styleConst" as *;
+.admin-shell {
+  height: 100vh;
+  height: 100dvh;
+  min-width: 0;
+  overflow: hidden;
+}
 
-.layout {
-  min-height: 100vh !important;
+.admin-shell > .layout {
+  height: 100%;
+  min-height: 0;
+  min-width: 0;
+  overflow: hidden;
   position: relative;
 
-  .hide-item {
-    display: none !important;
+  &::before {
+    /* Верхняя акцентная линия каркаса. Оверлей, а не inset-тень родителя:
+       тени и фоны родителя рисуются под непрозрачными подложками
+       сайдера и контента и не были бы видны */
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: var(--ant-color-primary);
+    pointer-events: none;
+    z-index: 10;
   }
+}
 
-  //.ant-menu {
-  //  border-inline-end: none !important;
-  //}
-  //
-  //.ant-menu-title-content {
-  //  padding-left: 10px
-  //}
+.admin-shell .site-layout {
+  height: 100%;
+  min-height: 0;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.admin-shell .layout-sider {
+  /* Мягкая тень на границе сайдера и холста — намёк на глубину */
+  box-shadow: 3px 0 12px rgba(15, 23, 42, 0.08);
+}
+
+.admin-shell .site-layout__content {
+  height: 100%;
+  min-height: 0;
+  min-width: 0;
+  overflow: auto;
+  /* Холст вокруг рабочей панели: цвет — colorBgLayout.
+     Отступ виден как рамка между сайдером/краями и панелью;
+     100%-высота страницы влезает в content-box, документ не скроллится */
+  padding: 12px;
+}
+
+.layout .hide-item {
+  display: none !important;
 }
 
 .user-item {
   padding-left: 21px !important;
-
-  //& .ant-menu-submenu-arrow {
-  //  display: none !important;
-  //}
-
   border-bottom: 1px solid var(--ant-color-border);
   border-radius: 0 !important;
-
-  //& .ant-menu-title-content {
-  //  margin: 0 !important;
-  //  padding-left: 17px !important;
-  //}
 }
 
-  .ant-menu-inline-collapsed {
-    & .user-item {
-      padding-left: 24px !important;
-      padding-top: 5px !important;
-    }
-  }
+.ant-menu-inline-collapsed .user-item {
+  padding-left: 24px !important;
+  padding-top: 5px !important;
+}
 
-  .ant-menu-submenu {
-    .hide-item {
-      display: none !important;
-    }
-  }
+.ant-menu-submenu .hide-item {
+  display: none !important;
+}

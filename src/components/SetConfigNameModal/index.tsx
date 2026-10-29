@@ -41,9 +41,12 @@ const SetConfigNameModal: FC<SetConfigNameModalProps> = ({
       open={open}
       onClose={handleCloseModal}
       onOk={handleSubmit(onSubmit)}
-      footer={{ onOkText: 'Сохранить', onCanselText: 'Отмена' }}
+      footer={{ onOkText: 'Продолжить', onCanselText: 'Отмена' }}
     >
       <form key="set-name-config-modal">
+        <p>
+          Укажите название. На следующем шаге откроется редактор конфигурации.
+        </p>
         <FormInput
           control={control}
           name="name"

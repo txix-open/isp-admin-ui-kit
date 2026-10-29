@@ -1,44 +1,35 @@
-@use "src/constants/style/styleConst" as *;
-
 .token-content {
-  overflow-x: auto;
-  width: 100%;
-  &__table {
-    overflow-x: auto;
-    height: calc(100vh - 100px);
-  }
-
-  &__wrap {
-    padding: $basic-padding*1.25 $basic-padding*3;
-  }
-
+  flex: 1;
+  min-height: 0;
+  min-width: 0;
+  padding: 16px;
+  overflow: auto;
   &__header {
     display: flex;
-    position: relative;
-    margin-bottom: $basic-margin * 4;
-
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
     h3 {
       margin: 0;
-      padding: 0;
-      font-size: 19px;
-      text-overflow: ellipsis;
-      overflow: hidden;
-      white-space: nowrap;
-      font-family: PT Sans, sans-serif;
-      font-weight: 500;
+      font-size: 16px;
+    }
+    .search-app-by-token {
+      min-width: 0;
+      flex: 1 1 240px;
+      margin: 0;
     }
   }
-
-  .copy-btn {
-    cursor: pointer;
+  .ant-alert {
+    margin-bottom: 16px;
   }
-}
-
-.empty-data__wrap {
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  .search-app-by-token {
-    margin: 10px 24px 8px auto;
+  &__form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    margin-top: 24px;
+  }
+  @media (max-width: 767px) {
+    padding: 16px;
   }
 }

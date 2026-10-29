@@ -1,13 +1,21 @@
 import { CopyOutlined, DeleteOutlined } from '@ant-design/icons'
-import { Button, message, Popconfirm, Spin, Table, Tooltip } from 'antd'
-import { ColumnsType } from 'antd/es/table'
+import {
+  Alert,
+  Button,
+  Empty,
+  message,
+  Modal,
+  Popconfirm,
+  Result,
+  Space,
+  Table,
+  Tooltip
+} from 'antd'
+import type { ColumnsType } from 'antd/es/table'
 import ClipboardJS from 'clipboard'
 import dayjs from 'dayjs'
-import 'dayjs/locale/ru'
-import duration from 'dayjs/plugin/duration'
-import relativeTime from 'dayjs/plugin/relativeTime'
-import { FormSelect, EmptyData } from 'isp-ui-kit'
-import { useEffect, useMemo, useState } from 'react'
+import { FormSelect } from 'isp-ui-kit'
+import { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
 
 import { dateFormats } from '@constants/date'
@@ -15,12 +23,9 @@ import { ValidationRules } from '@constants/form/validationRules'
 
 import SearchAppByToken from '@ui/SearchAppByToken'
 
-import Modal from '@widgets/Modal'
+import { ApplicationTokenType } from '@pages/ApplicationsPage/applications.type'
 
-import {
-  ApplicationTokenType,
-  NewApplicationTokenType
-} from '@pages/ApplicationsPage/applications.type'
+import { notifyApiError } from '@utils/apiErrorNotifications'
 
 import useRole from '@hooks/useRole'
 
@@ -30,248 +35,223 @@ import { PermissionKeysType } from '@type/roles.type'
 
 import './tokens.scss'
 
-interface TokenPropTypes {
-  id: number
-}
+const lifetimeOptions = [
+  { value: 3600000, label: 'Один час' },
+  { value: 86400000, label: 'Один день' },
+  { value: 2592000000, label: '30 дней' },
+  { value: 31536000000, label: 'Один год' },
+  { value: -1, label: 'Бессрочно' }
+]
 
-// eslint-disable-next-line import/no-named-as-default-member
-dayjs.locale('ru')
-dayjs.extend(duration)
-dayjs.extend(relativeTime)
-
-const TokenContent = ({ id }: TokenPropTypes) => {
+const TokenContent = ({ id }: { id: number }) => {
   const { hasPermission } = useRole()
-  const [showApplicationsModal, setShowApplicationsModal] = useState(false)
-  const {
-    handleSubmit: handleSubmitTokens,
-    control: controlTokens,
-    reset
-  } = useForm<ApplicationTokenType>({
-    mode: 'onChange'
-  })
-
-  const { data, isLoading } = tokensApi.useGetTokensByAppIdQuery({ id })
-
-  const [createToken] = tokensApi.useCreateTokenMutation()
-  const [revokeToken] = tokensApi.useRevokeTokensMutation()
-
-  const canAddToken = hasPermission(
-    PermissionKeysType.application_group_token_add
-  )
-  const canRemoveToken = hasPermission(
+  const canView = hasPermission(PermissionKeysType.application_group_token_view)
+  const canAdd = hasPermission(PermissionKeysType.application_group_token_add)
+  const canRemove = hasPermission(
     PermissionKeysType.application_group_token_delete
   )
-  const canViewToken = hasPermission(
-    PermissionKeysType.application_group_token_view
-  )
+  const query = tokensApi.useGetTokensByAppIdQuery({ id }, { skip: !canView })
+  const [createToken, createState] = tokensApi.useCreateTokenMutation()
+  const [revokeToken, revokeState] = tokensApi.useRevokeTokensMutation()
+  const [open, setOpen] = useState(false)
+  const {
+    control,
+    handleSubmit,
+    reset,
+    formState: { isSubmitting }
+  } = useForm<{ expireTime: number }>({
+    defaultValues: { expireTime: 86400000 }
+  })
+  const busy = isSubmitting || createState.isLoading || revokeState.isLoading
 
   useEffect(() => {
     const clipboard = new ClipboardJS('.copy-btn')
     clipboard.on('success', () => {
-      message.success('Токен скопирован в буфер обмена')
+      message.success('Токен скопирован')
     })
     clipboard.on('error', () => {
-      message.error('Ошибка копирования')
+      message.error('Не удалось скопировать токен')
     })
-
-    return () => {
-      clipboard.destroy()
-    }
+    return () => clipboard.destroy()
   }, [])
 
-  const handleCreateToken = (data: any) => {
-    if (id) {
-      const newToken: NewApplicationTokenType = {
-        expireTimeMs: data.expireTime,
-        appId: Number(id)
-      }
-
-      createToken(newToken)
-        .then(() => {
-          setShowApplicationsModal(false)
-          reset()
-          message.success('Элемент добавлен')
-        })
-        .catch(() => {
-          message.error('Ошибка добавления элемента')
-        })
+  const close = () => {
+    if (!busy) {
+      setOpen(false)
+      reset()
     }
   }
-
-  function shortenString(longString: string) {
-    if (longString.length <= 6) {
-      return <span>{longString}</span>
-    } else {
-      return (
-        <span>
-          {longString.slice(0, 3)}...{longString.slice(-3)}
-        </span>
-      )
-    }
-  }
-
-  const handleRevokeToken = (elem: ApplicationTokenType) => {
-    const currentRemoveToken = {
-      appId: id,
-      tokens: [elem.token]
-    }
-
-    revokeToken(currentRemoveToken)
+  const issueToken = handleSubmit((values) => {
+    if (!canAdd || busy) return
+    return createToken({ appId: id, expireTimeMs: values.expireTime })
       .unwrap()
-      .then(() => message.success('Элемент удален'))
-      .catch(() => message.error('Ошибка удаления элемента'))
+      .then(() => {
+        setOpen(false)
+        reset()
+        message.success('Токен выпущен')
+      })
+      .catch((error) => notifyApiError(error, 'Не удалось выпустить токен'))
+  })
+  const revoke = (token: string) => {
+    if (!canRemove || busy) return
+    return revokeToken({ appId: id, tokens: [token] })
+      .unwrap()
+      .then(() => {
+        message.success('Токен отозван')
+      })
+      .catch((error) => notifyApiError(error, 'Не удалось отозвать токен'))
   }
-
   const columns: ColumnsType<ApplicationTokenType> = [
     {
       title: 'Токен',
       dataIndex: 'token',
-      key: 'token',
-      render: (value) => <div>{shortenString(value)}</div>
+      width: 130,
+      render: (value: string) =>
+        value.length > 6 ? `${value.slice(0, 3)}…${value.slice(-3)}` : value
     },
     {
-      title: 'Дата/Время выпуска',
+      title: 'Выпущен',
       dataIndex: 'createdAt',
-      key: 'createdAt',
-      render: (value) => {
-        const formatTime = dayjs(value).format(dateFormats.fullFormat)
-        return <div>{formatTime}</div>
-      }
+      width: 190,
+      render: (value: string) => dayjs(value).format(dateFormats.fullFormat)
     },
     {
-      title: 'Истекает',
+      title: 'Срок действия',
       dataIndex: 'expireTime',
-      key: 'expireTime',
-      render: (value, record) => {
-        if (value === -1) {
-          return <span>Никогда</span>
-        }
-
-        const dateNow = dayjs()
-        const expireTime = dayjs(record.createdAt).add(value)
-        if (expireTime.isBefore(dateNow)) {
-          return <span>Просрочен</span>
-        }
-
-        const formatTime = expireTime.format(dateFormats.fullFormat)
-        return <span>{formatTime}</span>
+      width: 190,
+      render: (value: number, record) => {
+        if (value === -1) return 'Бессрочно'
+        const expiry = dayjs(record.createdAt).add(value, 'millisecond')
+        return expiry.isBefore(dayjs())
+          ? 'Истёк'
+          : expiry.format(dateFormats.fullFormat)
       }
     },
     {
       title: 'Действия',
-      dataIndex: 'token',
       key: 'actions',
-      render: (value, record) => {
-        return (
-          <Button.Group>
-            <Tooltip title="Скопировать">
+      width: 100,
+      render: (_, record) => (
+        <Space.Compact>
+          <Tooltip title="Скопировать токен">
+            <Button
+              className="copy-btn"
+              aria-label="Скопировать токен"
+              icon={<CopyOutlined />}
+              data-clipboard-text={record.token}
+            />
+          </Tooltip>
+          {canRemove && (
+            <Popconfirm
+              title="Отозвать токен?"
+              description="Приложение больше не сможет использовать этот токен."
+              okText="Отозвать"
+              cancelText="Отмена"
+              onConfirm={() => revoke(record.token)}
+            >
               <Button
-                className="copy-btn"
-                icon={<CopyOutlined />}
-                data-clipboard-text={value}
+                danger
+                aria-label="Отозвать токен"
+                icon={<DeleteOutlined />}
+                disabled={busy}
+                loading={
+                  revokeState.isLoading &&
+                  revokeState.originalArgs?.tokens.includes(record.token)
+                }
               />
-            </Tooltip>
-            {canRemoveToken && (
-              <Tooltip title="Удалить">
-                <Popconfirm
-                  title="Закончить эту сессию?"
-                  onConfirm={() => handleRevokeToken(record)}
-                >
-                  <Button icon={<DeleteOutlined />} />
-                </Popconfirm>
-              </Tooltip>
-            )}
-          </Button.Group>
-        )
-      }
+            </Popconfirm>
+          )}
+        </Space.Compact>
+      )
     }
   ]
 
-  const tokensOptions = useMemo(
-    () => [
-      {
-        value: -1,
-        label: 'Бессрочно'
-      },
-      {
-        value: 3600000,
-        label: 'Один час'
-      },
-      {
-        value: 86400000,
-        label: 'Один день'
-      },
-      {
-        value: 2592000000,
-        label: '30 дней'
-      },
-      {
-        value: 31536000000,
-        label: 'Один год'
-      }
-    ],
-    []
-  )
-  if (!id) {
-    return (
-      <div className="empty-data__wrap">
-        {canViewToken && <SearchAppByToken />}
-        <EmptyData />
-      </div>
-    )
-  }
-
-  if (isLoading) {
-    return <Spin className="spin" />
-  }
-
-  const handleShowAddModalToken = () => {
-    setShowApplicationsModal(true)
-  }
-
+  if (!canView) return <Result status="403" title="Нет доступа к токенам" />
   return (
     <section className="token-content">
-      <div className="token-content__wrap">
-        <header className="token-content__header">
-          <h3>Токены</h3>
-          <SearchAppByToken />
-        </header>
-        <div className="token-content__table">
-          <Table
-            className="appliactions-tokent__table"
-            rowKey={(record) => record.createdAt}
-            pagination={false}
-            columns={columns}
-            dataSource={data}
+      <header className="token-content__header">
+        <h3>Токены приложения</h3>
+        <SearchAppByToken />
+        <Button loading={query.isFetching} onClick={() => query.refetch()}>
+          Обновить токены
+        </Button>
+        {canAdd && (
+          <Button type="primary" disabled={busy} onClick={() => setOpen(true)}>
+            Выпустить токен
+          </Button>
+        )}
+      </header>
+      {query.isError && (
+        <Alert
+          type="error"
+          showIcon
+          title={
+            query.data
+              ? 'Не удалось обновить токены. Показаны ранее загруженные данные.'
+              : 'Не удалось загрузить токены'
+          }
+          action={
+            <Button loading={query.isFetching} onClick={() => query.refetch()}>
+              Повторить
+            </Button>
+          }
+        />
+      )}
+      <Table<ApplicationTokenType>
+        rowKey="token"
+        tableLayout="fixed"
+        loading={query.isFetching}
+        columns={columns}
+        dataSource={query.data ?? []}
+        pagination={false}
+        scroll={{ x: 610 }}
+        locale={{
+          emptyText:
+            query.isError && !query.data ? (
+              'Токены недоступны. Повторите загрузку.'
+            ) : (
+              <Empty
+                image={Empty.PRESENTED_IMAGE_SIMPLE}
+                description="Токенов пока нет"
+              />
+            )
+        }}
+      />
+      <Modal
+        title="Выпуск токена"
+        open={open}
+        onCancel={close}
+        destroyOnHidden
+        mask={{ closable: false }}
+        keyboard={!busy}
+        closable={!busy}
+        footer={null}
+      >
+        <form onSubmit={issueToken}>
+          <p>Выберите срок действия нового токена приложения.</p>
+          <FormSelect
+            control={control}
+            name="expireTime"
+            label="Срок действия"
+            options={lifetimeOptions}
+            rules={{ required: ValidationRules.required }}
+            disabled={busy}
           />
-          {canAddToken && (
+          <div className="token-content__form-actions">
+            <Button onClick={close} disabled={busy}>
+              Отмена
+            </Button>
             <Button
-              className="applications-content__add-btn"
+              htmlType="submit"
               type="primary"
-              onClick={handleShowAddModalToken}
+              loading={isSubmitting}
+              disabled={busy}
             >
               Выпустить токен
             </Button>
-          )}
-        </div>
-        <Modal
-          onOk={handleSubmitTokens(handleCreateToken)}
-          title="Добавить"
-          open={showApplicationsModal}
-          footer={{ onCanselText: 'Отмена', onOkText: 'Сохранить' }}
-          onClose={() => setShowApplicationsModal(false)}
-        >
-          <form>
-            <FormSelect
-              options={tokensOptions}
-              name="expireTime"
-              control={controlTokens}
-              label="Время действия"
-              rules={{ required: ValidationRules.required }}
-            />
-          </form>
-        </Modal>
-      </div>
+          </div>
+        </form>
+      </Modal>
     </section>
   )
 }

@@ -1,46 +1,47 @@
-@use "src/constants/style/styleConst" as *;
-
 .users-page {
-  height: 100%;
-  border: 1px solid $border-color;
-  .ant-btn-group >.ant-btn:first-child {
-    z-index: 2;
+  &__content__wrap-table {
+    min-width: 0;
   }
-  &__header {
-    border-bottom: 1px solid $border-color;
-    padding: 0 3 * $basic-padding;
+  &__content__table__actions {
     display: flex;
-    justify-content: space-between;
-    align-items: center;
+    justify-content: flex-end;
+    white-space: nowrap;
+  }
 
-    &__title {
-      padding: 3 * $basic-padding 0;
-      display: inline-block;
-      font-weight: 500;
-      font-size: 20px;
-      line-height: 28px;
+  &__filters {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: 12px;
+
+    &__search,
+    &__select {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      min-width: 0;
+      font-size: 13px;
+    }
+
+    &__search {
+      flex: 1 1 280px;
+    }
+
+    &__select {
+      flex: 0 1 220px;
     }
   }
 
-  &__content {
-    padding: 2 * $basic-padding 3 * $basic-padding;
-    overflow-x: auto;
+  &__summary {
+    margin: 0;
+    color: var(--ant-color-text-secondary);
+    font-size: 13px;
+  }
 
-    &__wrap-table {
-      overflow-x: auto;
-      height: calc(100vh - 110px);
-    }
-
-    &__table {
-      &__actions {
-        justify-content: flex-end;
-        display: flex;
-        gap: $basic-margin;
-      }
-    }
-
-    &__pagination {
-      margin-top: 20px;
+  @media (max-width: 767px) {
+    &__filters__search,
+    &__filters__select {
+      flex-basis: 100%;
     }
   }
 }

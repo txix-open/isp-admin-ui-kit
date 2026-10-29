@@ -13,9 +13,11 @@ import {
 import { MODULES_TAB_KEYS, ModulesTabKeysType } from '@constants/modules'
 
 import ModuleTabs from '@components/ModuleTabs'
+import PageLayout from '@components/PageLayout'
 
 import { ModuleType } from '@pages/ModulesPage/module.type'
 
+import { notifyApiError } from '@utils/apiErrorNotifications'
 import { setUrlValue } from '@utils/columnLayoutUtils'
 import { filterFirstColumnItems } from '@utils/firstColumnUtils'
 
@@ -102,7 +104,7 @@ const ModulesPage = () => {
         message.success('Модуль успешно удален').then()
         setSelectedItemId('')
       })
-      .catch(() => message.error('Не удалось удалить модуль'))
+      .catch((error) => notifyApiError(error, 'Не удалось удалить модуль'))
   }
 
   const handleOpenModuleRelations = (): void => {
@@ -126,7 +128,11 @@ const ModulesPage = () => {
   }
 
   if (isLoading) {
-    return <Spin />
+    return (
+      <PageLayout title="Модули">
+        <Spin />
+      </PageLayout>
+    )
   }
 
   const currentModule = ModulesList.find(
@@ -162,7 +168,7 @@ const ModulesPage = () => {
               <div className="module-item__name">
                 <span>{item.name}</span>
                 <Tooltip
-                  overlayInnerStyle={{ width: '300px' }}
+                  styles={{ container: { width: '300px' } }}
                   title={textTooltip}
                 >
                   {renderVersion()}
@@ -188,49 +194,61 @@ const ModulesPage = () => {
     )
   }
   return (
-    <section className="modules-page">
-      <Column
-        extraTitle={
+    <PageLayout
+      split
+      title="Модули"
+      actions={
+        <Button onClick={handleOpenModuleRelations}>Карта связей</Button>
+      }
+    >
+      <div className="modules-page" data-selected={Boolean(selectedItemId)}>
+        <Column
+          sortableFields={[
+            { value: 'name', label: 'Наименование' },
+            { value: 'active', label: 'Активные экземпляры' }
+          ]}
+          sortValue={sortValue as keyof ModuleType}
+          onChangeSortValue={(value) =>
+            setUrlValue(value, setSearchParams, 'sort')
+          }
+          directionValue={directionValue}
+          onChangeDirectionValue={(value) =>
+            setUrlValue(value, setSearchParams, 'direction')
+          }
+          title="Модули"
+          searchPlaceholder="Введите имя или id"
+          items={filterFirstColumnItems(ModulesList, searchValue)}
+          showAddBtn={false}
+          showUpdateBtn={false}
+          showRemoveBtn={canRemoveModule}
+          onRemoveItem={handleRemoveModule}
+          onChangeSearchValue={handleOnChangeSearchValue}
+          renderItems={renderItems}
+          searchValue={searchValue}
+          selectedItemId={selectedItemId}
+          setSelectedItemId={setSelectedItemId}
+        />
+        <div className="modules-page__detail-panel">
           <Button
-            type="primary"
-            size="middle"
-            onClick={handleOpenModuleRelations}
+            className="modules-page__back-to-list"
+            onClick={() =>
+              navigate({
+                pathname: routePaths.modules,
+                search: searchParams.toString()
+              })
+            }
           >
-            Открыть карту связей
+            К списку модулей
           </Button>
-        }
-        sortableFields={[
-          { value: 'name', label: 'Наименование' },
-          { value: 'active', label: 'Активные экземпляры' }
-        ]}
-        sortValue={sortValue as keyof ModuleType}
-        onChangeSortValue={(value) =>
-          setUrlValue(value, setSearchParams, 'sort')
-        }
-        directionValue={directionValue}
-        onChangeDirectionValue={(value) =>
-          setUrlValue(value, setSearchParams, 'direction')
-        }
-        title="Модули"
-        searchPlaceholder="Введите имя или id"
-        items={filterFirstColumnItems(ModulesList, searchValue)}
-        showAddBtn={false}
-        showUpdateBtn={false}
-        showRemoveBtn={canRemoveModule}
-        onRemoveItem={handleRemoveModule}
-        onChangeSearchValue={handleOnChangeSearchValue}
-        renderItems={renderItems}
-        searchValue={searchValue}
-        selectedItemId={selectedItemId}
-        setSelectedItemId={setSelectedItemId}
-      />
-      <ModuleTabs
-        searchParams={searchParams}
-        currentModule={currentModule}
-        activeTab={activeTab}
-        setActiveTab={setActiveTab}
-      />
-    </section>
+          <ModuleTabs
+            searchParams={searchParams}
+            currentModule={currentModule}
+            activeTab={activeTab}
+            setActiveTab={setActiveTab}
+          />
+        </div>
+      </div>
+    </PageLayout>
   )
 }
 

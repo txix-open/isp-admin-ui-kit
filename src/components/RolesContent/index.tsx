@@ -1,16 +1,16 @@
-import { Divider, message, Table, TableColumnType, TableProps } from 'antd'
+import { Button, message, Table, TableColumnType, TableProps } from 'antd'
 import { FormInput } from 'isp-ui-kit'
-import { useEffect, useState } from 'react'
-import { Controller, useForm } from 'react-hook-form'
-import { useParams } from 'react-router-dom'
+import { useState } from 'react'
+import { Controller, useForm, useWatch } from 'react-hook-form'
 
 import { ValidationRules } from '@constants/form/validationRules'
 
-import SaveButton from '@ui/SaveButton'
-
 import AgreementModal from '@widgets/AgreementModal'
 
+import { PageHeader } from '@components/PageLayout'
 import { RolesContentPropsType } from '@components/RolesContent/roles-content.type'
+
+import { hasRoleChanges } from '@utils/formChanges'
 
 import { useColumnSearch } from '@hooks/useColumnsSearch'
 import useRole from '@hooks/useRole'
@@ -34,48 +34,56 @@ const RolesContent = ({
   role,
   permissions,
   saveRole,
-  title = 'Редактировать',
-  immutable = false
+  title = 'Роль пользователя',
+  immutable = false,
+  onCancel
 }: RolesContentPropsType) => {
   const {
     control,
-    formState: { isDirty },
+    formState: { defaultValues, isSubmitting },
     setError,
-    getValues,
+    handleSubmit,
     reset
   } = useForm<RoleType>({
-    defaultValues: role,
+    defaultValues: role ?? newRole,
     mode: 'onChange'
   })
+  const values = useWatch({ control })
+  const hasChanges = hasRoleChanges(values, defaultValues ?? {})
   const { hasPermission } = useRole()
   const { getColumnSearchProps } = useColumnSearch<PermissionType>()
-  const { id: selectedItemId } = useParams()
 
   const [openModal, setOpenModal] = useState<boolean>(false)
   const [filteredInfo, setFilteredInfo] = useState<PermissionTableFilters>({})
   const isUpdateRole = hasPermission(PermissionKeysType.role_update)
   const isCreateRole = hasPermission(PermissionKeysType.role_add)
 
-  const isSaveBtnAvailable =
-    selectedItemId === 'new' ? isCreateRole : isUpdateRole
+  const isSaveBtnAvailable = role ? isUpdateRole : isCreateRole
 
-  useEffect(() => {
-    if (!role) {
-      reset(newRole)
-    } else {
-      reset(role)
-    }
-  }, [role])
+  const requestSave = handleSubmit(() => {
+    if (!hasChanges || !isSaveBtnAvailable || isSubmitting) return
+    setOpenModal(true)
+  })
 
-  const handleSubmitForm = (changeMessage: string) => {
-    if (!changeMessage) {
-      message.error('Поле не может быть пустым')
+  const confirmSave = (changeMessage: string) => {
+    if (!hasChanges || !isSaveBtnAvailable || isSubmitting) return
+
+    const reason = changeMessage.trim()
+    if (!reason) {
+      message.error('Укажите причину изменений')
       return
     }
-    const formValue = getValues()
-    formValue.changeMessage = changeMessage
-    saveRole(formValue, setError)
-    setOpenModal(false)
+
+    return handleSubmit((values) => {
+      return saveRole({ ...values, changeMessage: reason }, setError).then(
+        (saved) => {
+          if (saved) {
+            reset(values)
+            setOpenModal(false)
+          }
+        }
+      )
+    })()
   }
 
   const columns: TableColumnType<PermissionType>[] = [
@@ -106,9 +114,8 @@ const RolesContent = ({
           onChange={handleTableChange}
           pagination={false}
           rowKey="key"
-          scroll={{
-            y: 'calc(100vh - 270px)'
-          }}
+          sticky
+          scroll={{ x: 'max-content' }}
           rowSelection={{
             selectedRowKeys: value,
             type: 'checkbox',
@@ -116,7 +123,7 @@ const RolesContent = ({
               onChange(selectedRowKeys)
             },
             getCheckboxProps: () => ({
-              disabled: immutable
+              disabled: immutable || !isSaveBtnAvailable || isSubmitting
             })
           }}
         />
@@ -129,31 +136,68 @@ const RolesContent = ({
       {openModal && (
         <AgreementModal
           open
-          destroyOnClose
-          onCancel={() => setOpenModal(false)}
-          okText="Сохранить"
-          title="Для подтверждения изменений укажите причину"
-          description="Основание для измений"
-          onConfirm={handleSubmitForm}
+          destroyOnHidden
+          onCancel={() => {
+            if (!isSubmitting) setOpenModal(false)
+          }}
+          confirmLoading={isSubmitting}
+          cancelButtonProps={{ disabled: isSubmitting }}
+          closable={!isSubmitting}
+          mask={{ closable: !isSubmitting }}
+          keyboard={!isSubmitting}
+          okText={role ? 'Сохранить изменения' : 'Создать роль'}
+          cancelText="Отмена"
+          title={
+            role ? 'Подтвердите изменение роли' : 'Подтвердите создание роли'
+          }
+          description={role ? 'Причина изменений' : 'Причина создания роли'}
+          onConfirm={confirmSave}
         />
       )}
-      <form className="roles-content">
-        <div className="roles-content__header">
-          <h2
-            data-cy="roles-content__header__title"
-            className="roles-content__header__title"
-          >
-            {title}
-          </h2>
-          <SaveButton
-            disabled={!isDirty || !isSaveBtnAvailable}
-            type="primary"
-            data-cy="roles-content__header__save-button"
-            onClick={() => setOpenModal(true)}
-            className="roles-content__header__save-button"
-          />
-        </div>
-        <Divider />
+      <form className="roles-content" onSubmit={requestSave}>
+        <PageHeader
+          className="roles-content__header"
+          level={2}
+          focusOnMount
+          title={role?.name || title}
+          context={
+            role
+              ? isSaveBtnAvailable
+                ? 'Редактирование роли'
+                : 'Просмотр роли'
+              : 'Создание роли'
+          }
+          description={
+            !role
+              ? 'Роль ещё не создана. Заполните название и выберите права. Она появится в списке после подтверждения создания.'
+              : undefined
+          }
+          actions={
+            <>
+              {!role && onCancel && (
+                <Button
+                  data-cy="roles-content__cancel-create"
+                  onClick={onCancel}
+                  disabled={isSubmitting}
+                >
+                  Отменить создание
+                </Button>
+              )}
+              {isSaveBtnAvailable && (
+                <Button
+                  disabled={!hasChanges || !isSaveBtnAvailable || isSubmitting}
+                  loading={isSubmitting}
+                  type="primary"
+                  data-cy="roles-content__header__save-button"
+                  htmlType="submit"
+                  className="roles-content__header__save-button"
+                >
+                  {role ? 'Сохранить изменения' : 'Создать роль'}
+                </Button>
+              )}
+            </>
+          }
+        />
         <div className="roles-content__wrap-input">
           <FormInput
             data-cy="roles-content__input__name"
@@ -161,15 +205,25 @@ const RolesContent = ({
             label="Наименование&nbsp;роли"
             name="name"
             control={control}
+            disabled={!isSaveBtnAvailable || isSubmitting}
           />
           <FormInput
             data-cy="roles-content__input__external-group"
             label="Группы ФРИИПа"
             name="externalGroup"
             control={control}
+            disabled={!isSaveBtnAvailable || isSubmitting}
           />
         </div>
-        {renderFormTable()}
+        <div className="roles-content__permissions">
+          <div className="roles-content__permissions__header">
+            <h3>Права доступа</h3>
+            <span role="status">
+              Выбрано: {values.permissions?.length ?? 0}
+            </span>
+          </div>
+          {renderFormTable()}
+        </div>
       </form>
     </>
   )

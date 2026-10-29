@@ -2,22 +2,10 @@
 
 .git-configuration-page {
   width: 100%;
-  height: 100vh;
+  height: 100%;
   display: flex;
   flex-direction: column;
   overflow: hidden;
-
-  &__header {
-    flex: none;
-    padding: 16px 16px 0;
-
-    &-title {
-      margin: 0;
-      font-size: $text-size-header2;
-      font-weight: 500;
-      line-height: 28px;
-    }
-  }
 
   &__wrap {
     flex: 1;
@@ -25,7 +13,7 @@
     display: flex;
     flex-direction: column;
     gap: 16px;
-    padding: 16px;
+    padding: 24px;
     overflow-y: auto;
   }
 
@@ -251,14 +239,10 @@
     color: var(--ant-color-text-tertiary);
   }
 
-  @media (max-width: 576px) {
-    &__header {
-      padding: 12px 12px 0;
-    }
-
+  @media (max-width: 767px) {
     &__wrap {
       gap: 12px;
-      padding: 12px;
+      padding: 16px;
     }
 
     &__select-field {

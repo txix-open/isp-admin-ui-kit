@@ -14,6 +14,8 @@ import {
 
 import { ChangeProfilePassword } from '@pages/ProfilePage/profile-page.type'
 
+import { ignoreApiError, notifyApiError } from '@utils/apiErrorNotifications'
+
 import useLogout from '@hooks/useLogout'
 
 import { apiService } from '@services/apiService'
@@ -36,26 +38,32 @@ const ChangePasswordModal: FC<ChangePasswordModalProps> = ({
   const [loading, setLoading] = useState(false)
   const { logoutUser } = useLogout()
 
-  const onSubmit = async (formValue: ChangePasswordModalType) => {
+  const onSubmit = (formValue: ChangePasswordModalType) => {
     setLoading(true)
-    try {
-      await apiService.post<ChangeProfilePassword>(apiPaths.changePassword, {
+    return apiService
+      .post<ChangeProfilePassword>(apiPaths.changePassword, {
         oldPassword: formValue.oldPassword,
         newPassword: formValue.newPassword
       })
-      await logoutUser()
-      message.success('Пароль успешно изменен')
-      clearErrors('oldPassword')
-      onClose()
-    } catch (error: any) {
-      if (error.response.data.errorCode === 1001) {
-        setError('oldPassword', {
-          message: 'Не верный текущий пароль'
-        })
-      }
-    } finally {
-      setLoading(false)
-    }
+      .then(() => logoutUser())
+      .then(() => {
+        message.success('Пароль успешно изменен')
+        clearErrors('oldPassword')
+        onClose()
+      })
+      .catch((error) => {
+        if (Number(error.response?.data?.errorCode) === 1001) {
+          ignoreApiError(error)
+          setError('oldPassword', {
+            message: 'Не верный текущий пароль'
+          })
+        } else {
+          notifyApiError(error, 'Не удалось изменить пароль')
+        }
+      })
+      .finally(() => {
+        setLoading(false)
+      })
   }
 
   const handleCloseModal = () => {

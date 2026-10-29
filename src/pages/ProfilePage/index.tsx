@@ -18,6 +18,7 @@ import {
 import { useNavigate } from 'react-router-dom'
 
 import ChangePasswordModal from '@components/ChangePasswordModal'
+import { PageHeader } from '@components/PageLayout'
 
 import { useAppSelector } from '@hooks/redux'
 import useLogout from '@hooks/useLogout'
@@ -128,14 +129,11 @@ const ProfilePage = () => {
         onClose={() => setIsModalOpen(false)}
         open={isModalOpen}
       />
+      <PageHeader
+        title="Профиль"
+        description="Учётная запись, настройки интерфейса и доступы"
+      />
       <div className="profile-page__content">
-        <header className="profile-page__header">
-          <h1 className="profile-page__title">Профиль</h1>
-          <p className="profile-page__subtitle">
-            Учётная запись, настройки интерфейса и доступы
-          </p>
-        </header>
-
         <div className="profile-page__grid">
           <section
             className="profile-page__card profile-page__identity"

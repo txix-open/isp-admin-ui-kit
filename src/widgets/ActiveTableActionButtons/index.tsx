@@ -13,6 +13,8 @@ import { useNavigate } from 'react-router-dom'
 
 import { ConfigType } from '@pages/ModulesPage/module.type'
 
+import { notifyApiError } from '@utils/apiErrorNotifications'
+
 import useRole from '@hooks/useRole'
 
 import configServiceApi from '@services/configService'
@@ -56,7 +58,7 @@ const ActiveTableActionButtons: FC<ActiveTableActionButtonsPropsType> = ({
     createUpdateConfig(newConfig)
       .unwrap()
       .then(() => message.success('Конфиг успешно скопирован'))
-      .catch(() => message.error('Не удалось скопировать конфиг'))
+      .catch((error) => notifyApiError(error, 'Не удалось скопировать конфиг'))
   }
 
   const renderDropDownNoActive = (record: any) => {

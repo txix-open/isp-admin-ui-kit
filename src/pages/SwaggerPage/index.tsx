@@ -1,9 +1,13 @@
-import { Spin } from 'antd'
+import { Button, Spin } from 'antd'
 import { memo, useContext, useRef } from 'react'
-import { useParams } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 import { RedocStandalone } from 'redoc'
 
+import PageLayout from '@components/PageLayout'
+
 import { Context } from '@stores/index'
+
+import { routePaths } from '@routes/routePaths'
 
 import { useRedocEnhancements } from './useRedocEnhancements'
 
@@ -24,32 +28,42 @@ const SwaggerPage = () => {
   const { changeTheme: isDark } = useContext(Context)
 
   const { id } = useParams<{ id: string }>()
+  const navigate = useNavigate()
   const pageRef = useRef<HTMLDivElement>(null)
   const { parsedSpec, isLoading } = useSwaggerSpec(id)
 
   useRedocEnhancements(pageRef, parsedSpec, isDark)
 
-  if (isLoading) {
-    return (
-      <div className="swagger-page__loader">
-        <Spin size="large" />
-      </div>
-    )
-  }
-
   return (
-    <div
-      className={`swagger-page ${isDark ? 'swagger-page--dark' : ''}`}
-      ref={pageRef}
+    <PageLayout
+      title="API модуля"
+      className="swagger-screen"
+      split
+      back={
+        <Button
+          onClick={() => navigate(`${routePaths.modules}/${id}/configurations`)}
+        >
+          К модулю
+        </Button>
+      }
     >
-      {parsedSpec ? (
-        <div className="swagger-page__content">
-          <RedocView spec={parsedSpec} isDark={isDark} />
-        </div>
-      ) : (
-        <div className="swagger-page__no-data">Нет данных Swagger</div>
-      )}
-    </div>
+      <div
+        className={`swagger-page ${isDark ? 'swagger-page--dark' : ''}`}
+        ref={pageRef}
+      >
+        {isLoading ? (
+          <div className="swagger-page__loader">
+            <Spin size="large" />
+          </div>
+        ) : parsedSpec ? (
+          <div className="swagger-page__content">
+            <RedocView spec={parsedSpec} isDark={isDark} />
+          </div>
+        ) : (
+          <div className="swagger-page__no-data">Нет данных Swagger</div>
+        )}
+      </div>
+    </PageLayout>
   )
 }
 

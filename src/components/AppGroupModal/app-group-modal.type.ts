@@ -1,8 +1,12 @@
-import { ModalPropsType } from '@widgets/Modal/modal.type'
+import {
+  ApplicationsGroupType,
+  NewApplicationsGroupType
+} from '@pages/ApplicationsPage/applications.type'
 
-import { ApplicationsGroupType } from '@pages/ApplicationsPage/applications.type'
-
-export type AppGroupModalType = Omit<ModalPropsType, 'onOk' | 'children'> & {
+export interface AppGroupModalType {
+  title: string
+  open: boolean
+  onClose: () => void
   appGroup?: ApplicationsGroupType
-  onOk: (data: ApplicationsGroupType) => void
+  onOk: (values: NewApplicationsGroupType) => Promise<void>
 }

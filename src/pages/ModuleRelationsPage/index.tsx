@@ -1,7 +1,6 @@
 import {
   ArrowLeftOutlined,
   ReloadOutlined,
-  ApartmentOutlined,
   CloudServerOutlined,
   LinkOutlined
 } from '@ant-design/icons'
@@ -10,7 +9,10 @@ import { useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 
 import { FlowDiagram } from '@components/FlowDiagram/FlowDiagram'
+import { PageHeader } from '@components/PageLayout'
 import { StatsCard } from '@components/StatsCard/StatsCard'
+
+import { notifyApiError } from '@utils/apiErrorNotifications'
 
 import { useModuleRelations } from '@hooks/useModuleRelations'
 
@@ -27,7 +29,7 @@ const Loader = () => {
       className="modules-relations-diagram__loading"
       style={{ background: token.colorBgContainer }}
     >
-      <Spin size="large" tip="Загрузка диаграммы связей..." />
+      <Spin size="large" description="Загрузка диаграммы связей..." />
     </div>
   )
 }
@@ -42,21 +44,23 @@ const Header = ({
   isRefreshing: boolean
 }) => {
   return (
-    <div className="modules-relations-diagram__header">
-      <Button icon={<ArrowLeftOutlined />} onClick={onBack}>
-        Назад к модулям
-      </Button>
-      <h2 className="modules-relations-diagram__title">
-        <ApartmentOutlined /> Карта связей модулей
-      </h2>
-      <Button
-        icon={<ReloadOutlined />}
-        onClick={onRefresh}
-        loading={isRefreshing}
-      >
-        Обновить
-      </Button>
-    </div>
+    <PageHeader
+      title="Карта связей модулей"
+      back={
+        <Button icon={<ArrowLeftOutlined />} onClick={onBack}>
+          К модулям
+        </Button>
+      }
+      actions={
+        <Button
+          icon={<ReloadOutlined />}
+          onClick={onRefresh}
+          loading={isRefreshing}
+        >
+          Обновить
+        </Button>
+      }
+    />
   )
 }
 
@@ -88,19 +92,30 @@ const ModuleRelationsPage = () => {
   } = modulesServiceApi.useGetRequiredModulesQuery('requiredModules')
   const relations = useModuleRelations(modules)
 
-  const handleRefresh = useCallback(async () => {
-    try {
-      await refetch().unwrap()
-      message.success('Данные успешно обновлены')
-    } catch {
-      message.error('Ошибка при обновлении данных')
-    }
-  }, [refetch])
+  const handleRefresh = useCallback(
+    () =>
+      refetch()
+        .unwrap()
+        .then(() => {
+          message.success('Данные успешно обновлены')
+        })
+        .catch((error) => {
+          notifyApiError(error, 'Ошибка при обновлении данных')
+        }),
+    [refetch]
+  )
 
   const handleBack = () => navigate(routePaths.modules)
 
   if (isLoading) {
-    return <Loader />
+    return (
+      <div className="modules-relations-diagram">
+        <Header onBack={handleBack} onRefresh={handleRefresh} isRefreshing />
+        <div className="modules-relations-diagram__body">
+          <Loader />
+        </div>
+      </div>
+    )
   }
 
   if (isError) {
@@ -114,12 +129,16 @@ const ModuleRelationsPage = () => {
           onRefresh={handleRefresh}
           isRefreshing={isFetching}
         />
-        <div className="modules-relations-diagram__error">
-          <h3>Ошибка загрузки данных</h3>
-          <p>Не удалось загрузить список модулей. Попробуйте обновить позже.</p>
-          <Button type="primary" onClick={handleRefresh} loading={isFetching}>
-            Повторить
-          </Button>
+        <div className="modules-relations-diagram__body">
+          <div className="modules-relations-diagram__error">
+            <h3>Ошибка загрузки данных</h3>
+            <p>
+              Не удалось загрузить список модулей. Попробуйте обновить позже.
+            </p>
+            <Button type="primary" onClick={handleRefresh} loading={isFetching}>
+              Повторить
+            </Button>
+          </div>
         </div>
       </div>
     )
@@ -136,34 +155,36 @@ const ModuleRelationsPage = () => {
         isRefreshing={isFetching}
       />
 
-      <Row gutter={16} className="modules-relations-diagram__stats">
-        <Col span={12}>
-          <StatsCard
-            icon={
-              <CloudServerOutlined className="modules-relations-diagram__stat-card-icon" />
-            }
-            label="Всего модулей"
-            value={modules.length}
-          />
-        </Col>
-        <Col span={12}>
-          <StatsCard
-            icon={
-              <LinkOutlined className="modules-relations-diagram__stat-card-icon" />
-            }
-            label="Всего связей"
-            value={relations.length}
-          />
-        </Col>
-      </Row>
+      <div className="modules-relations-diagram__body">
+        <Row gutter={16} className="modules-relations-diagram__stats">
+          <Col span={12}>
+            <StatsCard
+              icon={
+                <CloudServerOutlined className="modules-relations-diagram__stat-card-icon" />
+              }
+              label="Всего модулей"
+              value={modules.length}
+            />
+          </Col>
+          <Col span={12}>
+            <StatsCard
+              icon={
+                <LinkOutlined className="modules-relations-diagram__stat-card-icon" />
+              }
+              label="Всего связей"
+              value={relations.length}
+            />
+          </Col>
+        </Row>
 
-      <Legend />
+        <Legend />
 
-      <FlowDiagram
-        modules={modules}
-        relations={relations}
-        isLoading={isFetching}
-      />
+        <FlowDiagram
+          modules={modules}
+          relations={relations}
+          isLoading={isFetching}
+        />
+      </div>
     </div>
   )
 }

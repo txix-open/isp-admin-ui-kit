@@ -1,13 +1,6 @@
-import { Spin, message } from 'antd'
+import { Alert, Button, Result, Spin } from 'antd'
 import { AxiosError } from 'axios'
-import { useEffect } from 'react'
-import { useForm } from 'react-hook-form'
-import { Navigate, useNavigate, useParams } from 'react-router-dom'
-
-import VariableEditorForm from '@components/VariablesComponents/VariableEditorForm'
-import VariableEditorHeader from '@components/VariablesComponents/VariableEditorHeader'
-
-import { handleVariableApiError } from '@utils/variableUtils'
+import { useLocation, useNavigate, useParams } from 'react-router-dom'
 
 import useRole from '@hooks/useRole'
 
@@ -18,136 +11,81 @@ import { routePaths } from '@routes/routePaths'
 import { MSPError } from '@type/index'
 import { PermissionKeysType } from '@type/roles.type'
 
-import './variable-editor.scss'
+import VariableEditorContent from './VariableEditorContent'
 
 const VariableEditor = () => {
-  const navigate = useNavigate()
   const { id = '' } = useParams()
-  const isNewVariable = id === 'new'
-
-  const {
-    data: variable,
-    isLoading,
-    isError,
-    error
-  } = variablesApi.useGetVariableByNameQuery(id, { skip: isNewVariable })
-  const {
-    control,
-    watch,
-    reset,
-    handleSubmit,
-    setError,
-    formState: { isDirty }
-  } = useForm<VariableType>({
-    defaultValues: { type: 'TEXT' }
+  const { search } = useLocation()
+  const navigate = useNavigate()
+  const { hasPermission } = useRole()
+  const isNew = id === 'new'
+  const canAccess = hasPermission(
+    isNew ? PermissionKeysType.variable_add : PermissionKeysType.variable_view
+  )
+  const query = variablesApi.useGetVariableByNameQuery(id, {
+    skip: isNew || !canAccess
   })
-  const typeWatch = watch('type')
+  const variable = !isNew && query.data?.name === id ? query.data : undefined
+  const goToList = () => navigate({ pathname: routePaths.variables, search })
 
-  const [createVariable, { isLoading: isCreateMethodLoading }] =
-    variablesApi.useCreateVariableMutation()
-  const [updateVariable, { isLoading: isUpdateMethodLoading }] =
-    variablesApi.useUpdateVariableMutation()
-
-  const isSomeMethodLoading = isUpdateMethodLoading || isCreateMethodLoading
-
-  const { role, hasPermission } = useRole()
-  const canEditPermission = hasPermission(PermissionKeysType.variable_edit)
-
-  useEffect(() => {
-    if (!canEditPermission) {
-      navigate(routePaths.variables)
-    }
-  }, [canEditPermission])
-
-  useEffect(() => {
-    if (!role) {
-      navigate(routePaths.error)
-    }
-  }, [role])
-
-  useEffect(() => {
-    if (variable) reset(variable)
-  }, [reset, variable])
-
-  if (isLoading) {
-    return <Spin fullscreen />
+  if (!canAccess) {
+    return <Result status="403" title="Нет доступа к этой переменной" />
   }
-  if (isError) {
-    handleVariableApiError(
-      error as AxiosError<MSPError>,
-      'Произошла ошибка получения переменной',
-      { message }
+  if (query.isLoading || (!isNew && query.isFetching && !variable)) {
+    return (
+      <Spin description="Загрузка переменной">
+        <div style={{ minHeight: 160 }} />
+      </Spin>
     )
-    return <Navigate to={routePaths.error} />
   }
-
-  const goToVariablePage = () => navigate(routePaths.variables)
-
-  const handleCreateVariable = async (formData: VariableType) => {
-    const sendData: NewVariableType = {
-      description: formData.description,
-      name: formData.name,
-      value: formData.value,
-      type: formData.type
-    }
-    createVariable(sendData)
-      .unwrap()
-      .then(() => {
-        message.success('Переменная успешно создана')
-        goToVariablePage()
-      })
-      .catch((error: AxiosError<MSPError>) => {
-        handleVariableApiError(error, 'Ошибка при создании переменной', {
-          setError,
-          message
-        })
-      })
-  }
-
-  const handleUpdateVariable = async (formData: VariableType) => {
-    const sendData: UpdateVariableType = {
-      description: formData.description,
-      name: formData.name,
-      value: formData.value
-    }
-    updateVariable(sendData)
-      .unwrap()
-      .then(() => {
-        message.success('Переменная успешно обновлена')
-        goToVariablePage()
-      })
-      .catch((error: AxiosError<MSPError>) => {
-        handleVariableApiError(error, 'Ошибка при обновлении переменной', {
-          setError,
-          message
-        })
-      })
-  }
-
-  const handleSubmitForm = (formData: VariableType) => {
-    if (isNewVariable) {
-      handleCreateVariable(formData)
-    } else {
-      handleUpdateVariable(formData)
-    }
+  if (!isNew && !variable) {
+    const error = query.error as AxiosError<MSPError>
+    const notFound =
+      !query.isError ||
+      error?.status === 404 ||
+      error?.response?.status === 404 ||
+      String(error?.response?.data.errorCode) === '2006'
+    return (
+      <Result
+        status={notFound ? '404' : 'error'}
+        title={
+          notFound ? 'Переменная не найдена' : 'Не удалось загрузить переменную'
+        }
+        extra={[
+          <Button key="back" onClick={goToList}>
+            К переменным
+          </Button>,
+          !notFound && (
+            <Button
+              key="retry"
+              type="primary"
+              loading={query.isFetching}
+              onClick={() => query.refetch()}
+            >
+              Повторить
+            </Button>
+          )
+        ]}
+      />
+    )
   }
 
   return (
-    <form className="variable-editor">
-      <VariableEditorHeader
-        isEditPermission={canEditPermission}
-        isDirty={isDirty}
-        isLoading={isSomeMethodLoading}
-        title={isNewVariable ? 'Новая переменная' : variable!.name}
-        onSubmit={handleSubmit(handleSubmitForm)}
-      />
-      <VariableEditorForm
-        control={control}
-        isNewVariable={isNewVariable}
-        isEditPermission={canEditPermission}
-        typeWatch={typeWatch}
-      />
-    </form>
+    <div className="variable-editor-page">
+      {query.isError && variable && (
+        <Alert
+          type="warning"
+          showIcon
+          title="Не удалось обновить данные. Изменения в форме сохранены."
+          action={
+            <Button loading={query.isFetching} onClick={() => query.refetch()}>
+              Повторить
+            </Button>
+          }
+        />
+      )}
+      <VariableEditorContent key={id} variable={variable} />
+    </div>
   )
 }
 

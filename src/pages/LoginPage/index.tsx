@@ -1,5 +1,5 @@
 import { LockOutlined, UserOutlined } from '@ant-design/icons'
-import { Button, Divider, Layout, message } from 'antd'
+import { Button, Divider, Layout } from 'antd'
 import { AxiosError } from 'axios'
 import { FormInput, useAuth } from 'isp-ui-kit'
 import { ReactNode } from 'react'
@@ -16,6 +16,7 @@ import { messages } from '@constants/messages'
 
 import ClearStateOnLogin from '@pages/LoginPage/ClearStateOnLogin'
 
+import { notifyApiError } from '@utils/apiErrorNotifications'
 import { getConfigProperty } from '@utils/configUtils'
 import { LocalStorage } from '@utils/localStorageUtils'
 
@@ -29,7 +30,6 @@ import './login-page.scss'
 const passwordLoginEnabled = getConfigProperty('ENABLE_PASSWORD_LOGIN', true)
 
 const LoginPage = () => {
-  const [messageApi, contextHolder] = message.useMessage()
   const oAuthLoginEnabled = getConfigProperty(
     'ENABLE_OAUTH_LOGIN',
     import.meta.env.VITE_ENABLE_OAUTH_LOGIN
@@ -106,7 +106,7 @@ const LoginPage = () => {
         LocalStorage.set(localStorageKeys.OAUTH_LOGIN, true)
         window.location.href = response.loginUrl
       })
-      .catch(() => messageApi.error(messages.serverError))
+      .catch((error) => notifyApiError(error, messages.serverError))
   }
 
   const renderInternalAuthForm = () => {
@@ -173,7 +173,6 @@ const LoginPage = () => {
   return (
     <Layout>
       <section className="login-page">
-        {contextHolder}
         <form className="login-page__content">
           <h1 data-cy="login-title" className="login-page__content__title">
             Вход в систему

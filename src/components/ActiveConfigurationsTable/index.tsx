@@ -12,6 +12,8 @@ import { ActiveConfigurationsTablePropsType } from '@components/ActiveConfigurat
 
 import { ConfigType } from '@pages/ModulesPage/module.type'
 
+import { notifyApiError } from '@utils/apiErrorNotifications'
+
 import useRole from '@hooks/useRole'
 
 import configApi from '@services/configService'
@@ -71,8 +73,8 @@ const ActiveConfigurationsTable: FC<ActiveConfigurationsTablePropsType> = ({
         message.success('Элемент успешно сохранен')
         setEditKeyConfig('')
       })
-      .catch(() => {
-        message.error('Не удалось сохранить элемент')
+      .catch((error) => {
+        notifyApiError(error, 'Не удалось сохранить элемент')
       })
   }
   const handleDeleteConfig = (record: ConfigType) => {
@@ -82,8 +84,8 @@ const ActiveConfigurationsTable: FC<ActiveConfigurationsTablePropsType> = ({
         message.success('Элемент успешно удален')
         setEditKeyConfig('')
       })
-      .catch(() => {
-        message.error('Не удалось удалить элемент')
+      .catch((error) => {
+        notifyApiError(error, 'Не удалось удалить элемент')
       })
   }
 
@@ -94,8 +96,8 @@ const ActiveConfigurationsTable: FC<ActiveConfigurationsTablePropsType> = ({
         message.success('Элемент успешно обновлен')
         setEditKeyConfig('')
       })
-      .catch(() => {
-        message.error('Не удалось обновить элемент')
+      .catch((error) => {
+        notifyApiError(error, 'Не удалось обновить элемент')
       })
   }
 

@@ -27,6 +27,7 @@ export const useColumnSearch = <T,>() => {
         <Input
           ref={searchInput}
           placeholder="Введите значение"
+          aria-label="Значение фильтра"
           value={selectedKeys[0]}
           onChange={(e) =>
             setSelectedKeys(e.target.value ? [e.target.value] : [])
@@ -63,7 +64,7 @@ export const useColumnSearch = <T,>() => {
     filterIcon: (filtered) => (
       <SearchOutlined
         style={{
-          color: filtered ? 'variable-column-search__filtered-icon' : undefined
+          color: filtered ? 'var(--ant-color-primary)' : undefined
         }}
       />
     ),

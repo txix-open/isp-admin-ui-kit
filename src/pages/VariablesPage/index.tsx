@@ -1,9 +1,8 @@
-import { PlusSquareOutlined } from '@ant-design/icons'
-import { Button, message, Spin } from 'antd'
-import { AxiosError } from 'axios'
-import { useEffect } from 'react'
-import { Navigate, useNavigate } from 'react-router-dom'
+import { PlusOutlined } from '@ant-design/icons'
+import { Alert, Button, message, Result } from 'antd'
+import { useLocation, useNavigate } from 'react-router-dom'
 
+import PageLayout from '@components/PageLayout'
 import VariablesTable from '@components/VariablesComponents/VariablesTable/VariablesTable'
 
 import { handleVariableApiError } from '@utils/variableUtils'
@@ -14,100 +13,86 @@ import variablesApi from '@services/variablesService'
 
 import { routePaths } from '@routes/routePaths'
 
-import { MSPError } from '@type/index'
 import { PermissionKeysType } from '@type/roles.type'
 
-import './variables-page.scss'
-
 const VariablesPage = () => {
-  const [messageApi, contextHolder] = message.useMessage()
-  const messageKey = 'removeVariableKey'
-  const {
-    data: variables = [],
-    isLoading,
-    isError
-  } = variablesApi.useGetAllVariablesQuery()
-
-  const [removeVariable] = variablesApi.useDeleteVariableMutation()
-
+  const { hasPermission } = useRole()
+  const canView = hasPermission(PermissionKeysType.variable_view)
+  const canAdd = hasPermission(PermissionKeysType.variable_add)
+  const canRemove = hasPermission(PermissionKeysType.variable_delete)
+  const query = variablesApi.useGetAllVariablesQuery(undefined, {
+    skip: !canView
+  })
+  const [removeVariable, removeState] = variablesApi.useDeleteVariableMutation()
   const navigate = useNavigate()
+  const { search } = useLocation()
 
-  const { role, hasPermission } = useRole()
-  const isPageAvailable = hasPermission(PermissionKeysType.variable_view)
-  const canAddVariable = hasPermission(PermissionKeysType.variable_add)
-
-  useEffect(() => {
-    if (!isPageAvailable) {
-      navigate(routePaths.home)
-    }
-  }, [isPageAvailable])
-
-  useEffect(() => {
-    if (!role) {
-      navigate(routePaths.error)
-    }
-  }, [role])
-
-  if (isLoading) {
-    return <Spin />
-  }
-
-  if (isError) {
-    return <Navigate to={routePaths.error} />
-  }
-
-  const handleRemoveVariable = (variableName: string) => {
-    messageApi.open({
-      key: messageKey,
-      type: 'loading',
-      content: `Удаление переменной "${variableName}"`
-    })
-    removeVariable(variableName)
+  const handleRemove = (name: string) => {
+    if (!canRemove || removeState.isLoading) return
+    return removeVariable(name)
       .unwrap()
       .then(() => {
-        messageApi.open({
-          key: messageKey,
-          type: 'success',
-          content: `Переменная "${variableName}" успешно удалена`
-        })
+        message.success(`Переменная «${name}» удалена`)
       })
-      .catch((err: AxiosError<MSPError>) => {
-        handleVariableApiError(
-          err,
-          `Произошла ошибка удаления переменной "${variableName}"`,
-          { message }
-        )
+      .catch((error) => {
+        handleVariableApiError(error, `Не удалось удалить переменную «${name}»`)
       })
   }
 
+  if (!canView) return <Result status="403" title="Нет доступа к переменным" />
+
   return (
-    <section className="variables-page">
-      {contextHolder}
-      <header className="variables-page__header">
-        <span
-          data-testid="variables-page__header__title"
-          className="variables-page__header__title"
-        >
-          Переменные
-        </span>
-        {canAddVariable && (
-          <Button
-            data-testid="variables-page__header__addButton"
-            type="primary"
-            icon={<PlusSquareOutlined />}
-            onClick={() => navigate(`${routePaths.variables}/new`)}
-          >
-            Добавить
+    <PageLayout
+      title="Переменные"
+      className="variables-page"
+      description="Общие значения для конфигураций. Значения секретов скрыты и недоступны для поиска."
+      actions={
+        <>
+          <Button loading={query.isFetching} onClick={() => query.refetch()}>
+            Обновить
           </Button>
-        )}
-      </header>
-      <div className="variables-page__content">
-        <VariablesTable
-          dataTable={variables}
-          onRemoveVariable={handleRemoveVariable}
+          {canAdd && (
+            <Button
+              data-testid="variables-page__header__addButton"
+              type="primary"
+              icon={<PlusOutlined />}
+              disabled={removeState.isLoading}
+              onClick={() =>
+                navigate({ pathname: `${routePaths.variables}/new`, search })
+              }
+            >
+              Новая переменная
+            </Button>
+          )}
+        </>
+      }
+    >
+      {query.isError && (
+        <Alert
+          type="error"
+          showIcon
+          title={
+            query.data
+              ? 'Не удалось обновить переменные. Показаны ранее загруженные данные.'
+              : 'Не удалось загрузить переменные'
+          }
+          action={
+            <Button loading={query.isFetching} onClick={() => query.refetch()}>
+              Повторить
+            </Button>
+          }
         />
-      </div>
-    </section>
+      )}
+      <VariablesTable
+        dataTable={query.data ?? []}
+        loading={query.isFetching}
+        unavailable={query.isError && !query.data}
+        removingName={
+          removeState.isLoading ? removeState.originalArgs : undefined
+        }
+        onRemoveVariable={handleRemove}
+      />
+    </PageLayout>
   )
 }
 

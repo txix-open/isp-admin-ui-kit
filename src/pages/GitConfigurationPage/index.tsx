@@ -36,6 +36,7 @@ import { Navigate, useNavigate } from 'react-router-dom'
 import { ValidationRules } from '@constants/form/validationRules'
 
 import GitConfigurationModal from '@components/GitConfigurationModal'
+import { PageHeader } from '@components/PageLayout'
 
 import {
   GitFileFormType,
@@ -374,15 +375,10 @@ const GitConfigurationPage = () => {
 
   return (
     <section className="git-configuration-page">
-      <div className="git-configuration-page__header">
-        <h1 className="git-configuration-page__header-title">
-          Git конфигурация
-        </h1>
-        <p className="git-configuration-page__description">
-          Выберите источник конфигурации, откройте файл и проверьте его перед
-          применением к модулю.
-        </p>
-      </div>
+      <PageHeader
+        title="Git конфигурация"
+        description="Выберите источник конфигурации, откройте файл и проверьте его перед применением к модулю."
+      />
       <div className="git-configuration-page__wrap">
         <Card
           className="git-configuration-page__card"

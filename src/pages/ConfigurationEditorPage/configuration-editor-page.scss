@@ -1,4 +1,4 @@
-@use "../../constants/style/styleConst" as *;
+@use '../../constants/style/styleConst' as *;
 
 .configuration-editor-page {
   display: flex;
@@ -6,37 +6,27 @@
   -ms-overflow-style: none; /* IE и Edge */
   scrollbar-width: none;
   border-left: 1px solid $border-color;
-  height: 100vh;
-  overflow: auto;
-  padding-bottom: 80px;
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
 
   &::-webkit-scrollbar {
     display: none;
   }
 
   .react-json-view {
-    margin: $basic-margin *3 0 $basic-margin *2 0;
-  }
-
-  &__header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: $basic-padding *2 $basic-padding;
-    border-bottom: 1px solid $border-color;
-  }
-
-  &__controll {
-    display: flex;
-  }
-
-  &__save-btn {
-    width: auto;
-    margin-left: $basic-margin;
+    margin: $basic-margin * 3 0 $basic-margin * 2 0;
   }
 
   &__content {
-    padding: $basic-padding * 3 $basic-padding;
+    flex: 1;
+    min-height: 0;
+    overflow: auto;
+    padding: 24px;
+
+    @media (max-width: 767px) {
+      padding: 16px;
+    }
   }
 
   .rjsf {
@@ -103,7 +93,7 @@
     .collapseArray_item_content {
       width: 100%;
       min-width: 0;
-      
+
       .ant-btn {
         position: relative;
         top: 10px;
@@ -223,23 +213,5 @@
   .error-data {
     color: red;
     font-size: 16px;
-  }
-}
-
-.change-status {
-  font-size: 12px;
-  &-circle {
-    display: inline-block;
-    border-radius: 50%;
-    height: 4px;
-    width: 4px;
-    margin-left: 2px;
-    margin-bottom: 6px;
-  }
-  &_green {
-    background-color: green;
-  }
-  &_red {
-    background-color: red;
   }
 }

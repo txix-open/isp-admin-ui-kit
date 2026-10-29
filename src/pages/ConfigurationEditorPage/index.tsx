@@ -1,4 +1,4 @@
-import { RollbackOutlined } from '@ant-design/icons'
+import { DownOutlined, RollbackOutlined } from '@ant-design/icons'
 import {
   Button,
   Dropdown,
@@ -9,7 +9,7 @@ import {
   Space,
   Spin
 } from 'antd'
-import { AxiosError, AxiosResponse } from 'axios'
+import { AxiosError } from 'axios'
 import { FC, useEffect, useRef, useState } from 'react'
 import { useLocation, useNavigate, useParams } from 'react-router-dom'
 
@@ -19,9 +19,11 @@ import ConfigurationEditorForm from '@components/ConfigurationEditorForm'
 import ConfigurationEditorJson from '@components/ConfigurationEditorJson'
 import ConfirmConfigModal from '@components/ConfirmConfigModal/ConfirmConfigModal'
 import ErrorConfigModal from '@components/ErrorConfigModal/ErrorConfigModal'
+import { PageHeader } from '@components/PageLayout'
 
 import { ConfigType } from '@pages/ModulesPage/module.type'
 
+import { ignoreApiError, notifyApiError } from '@utils/apiErrorNotifications'
 import {
   cleanEmptyParamsObject,
   sortObject,
@@ -175,22 +177,26 @@ const ConfigurationEditorPage: FC = () => {
         message.success('Конфигурация успешно сохранена')
       })
       .catch((e: AxiosError<MSPError>) => {
-        const { response } = e
-        const { data } = response as AxiosResponse<MSPError>
-        const errorCode = parseInt(data.errorCode)
+        const data = e.response?.data
+        const errorCode = Number(data?.errorCode)
         if (errorCode === 2004) {
+          ignoreApiError(e)
           setShowConfirmModal(true)
+          return
         }
         if (errorCode === 2003) {
+          ignoreApiError(e)
           setDetailsError({
-            details: data.details,
+            details: data?.details ?? [],
             isOpenDetailsErrorModal: true
           })
+          return
         }
         if (errorCode === 400) {
-          message.error('Невалидный JSON объект')
+          notifyApiError(e, 'Невалидный JSON объект')
+          return
         }
-        message.error('Ошибка обновления элемента')
+        notifyApiError(e, 'Ошибка обновления элемента')
       })
   }
 
@@ -236,40 +242,53 @@ const ConfigurationEditorPage: FC = () => {
 
   return (
     <main className="configuration-editor-page">
-      <section className="configuration-editor-page__header">
-        <Button onClick={goToConfigurationPage}>
-          <RollbackOutlined />
-          Назад
-        </Button>
-        <Space>
-          <h1>{isNew ? state?.name : bufConfig?.name}</h1>
-          <p className="change-status">
-            ({disableSendBtn ? 'нет изменений' : 'есть измнения'})
-            <span
-              className={`change-status-circle ${disableSendBtn ? 'change-status_red' : 'change-status_green'}`}
-            />
-          </p>
-        </Space>
-
-        <div className="configuration-editor-page__controll">
-          <Button
-            disabled={!jsonSchema}
-            className="configurations____buttons__show-schema-btn"
-            onClick={() => setShowSchemeModal(true)}
-          >
-            Текущая схема конфигурации
+      <PageHeader
+        title={(isNew ? state?.name : bufConfig?.name) || 'Конфигурация'}
+        context={
+          isNew ? 'Создание конфигурации' : 'Редактирование конфигурации'
+        }
+        description={
+          <span role="status">
+            {disableSendBtn ? 'Нет изменений' : 'Есть изменения'}
+          </span>
+        }
+        back={
+          <Button onClick={goToConfigurationPage} icon={<RollbackOutlined />}>
+            Назад
           </Button>
-          <Dropdown.Button
-            onClick={() => handleSaveClick(undefined, undefined, true)}
-            disabled={disableBtn || disableSendBtn}
-            type="primary"
-            className="configuration-editor-page__save-btn"
-            menu={{ items: filteredItemsSaveBtn, onClick: onSaveBtn }}
-          >
-            Сохранить и выйти
-          </Dropdown.Button>
-        </div>
-      </section>
+        }
+        actions={
+          <>
+            <Button
+              disabled={!jsonSchema}
+              className="configurations____buttons__show-schema-btn"
+              onClick={() => setShowSchemeModal(true)}
+            >
+              Текущая схема конфигурации
+            </Button>
+            <Space.Compact>
+              <Button
+                onClick={() => handleSaveClick(undefined, undefined, true)}
+                disabled={disableBtn || disableSendBtn}
+                type="primary"
+              >
+                Сохранить и выйти
+              </Button>
+              <Dropdown
+                disabled={disableBtn || disableSendBtn}
+                menu={{ items: filteredItemsSaveBtn, onClick: onSaveBtn }}
+              >
+                <Button
+                  type="primary"
+                  disabled={disableBtn || disableSendBtn}
+                  aria-label="Другие действия сохранения"
+                  icon={<DownOutlined />}
+                />
+              </Dropdown>
+            </Space.Compact>
+          </>
+        }
+      />
       <div className="configuration-editor-page__content">
         <Radio.Group
           defaultValue={jsonRadio}

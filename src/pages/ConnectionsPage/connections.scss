@@ -1,4 +1,4 @@
-@use "../../constants/style/styleConst" as *;
+@use '../../constants/style/styleConst' as *;
 
 .connection-page {
   &__content {
@@ -6,7 +6,7 @@
 
     &__wrap-table {
       overflow-x: auto;
-      height: calc(100vh - 70px);
+      min-width: 0;
     }
   }
 
@@ -21,7 +21,7 @@
       border: 1px solid var(--ant-color-border);
       border-radius: 12px;
       padding: 0 4px;
-      margin: 4px
+      margin: 4px;
     }
   }
 
@@ -35,14 +35,16 @@
     height: 100%;
     font-size: 1.5em;
     overflow: hidden;
-    font-family: PT Sans, sans-serif;
+    font-family:
+      PT Sans,
+      sans-serif;
     font-weight: 500;
     padding: 8px;
     text-overflow: ellipsis;
     white-space: nowrap;
     color: rgba(0, 0, 0, 0.45);
   }
-  &__inner-tag{
+  &__inner-tag {
     margin-left: $basic-margin !important;
   }
 

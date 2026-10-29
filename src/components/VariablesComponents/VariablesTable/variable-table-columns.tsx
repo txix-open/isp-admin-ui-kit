@@ -1,7 +1,7 @@
-import { DeleteOutlined, EditOutlined } from '@ant-design/icons'
-import { Button, Popconfirm, TableColumnType, Tag, Tooltip } from 'antd'
+import { DeleteOutlined, EditOutlined, ExportOutlined } from '@ant-design/icons'
+import { Button, Popconfirm, Space, TableColumnType, Tag, Tooltip } from 'antd'
 import dayjs from 'dayjs'
-import { useNavigate } from 'react-router-dom'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 
 import {
   Filters,
@@ -15,13 +15,32 @@ import { routePaths } from '@routes/routePaths'
 
 import { PermissionKeysType } from '@type/roles.type'
 
-export const getColumns = (
+import { matchesVariableSearch } from './variableTableState'
+
+const renderText = (value?: string) =>
+  value ? (
+    <Tooltip
+      title={value}
+      trigger={['hover', 'focus']}
+      classNames={{ container: 'variables-table__tooltip' }}
+    >
+      <span className="variables-table__text" tabIndex={0}>
+        {value}
+      </span>
+    </Tooltip>
+  ) : (
+    '—'
+  )
+
+export const useVariableColumns = (
   sortedInfo: Sorts,
   filteredInfo: Filters,
-  onRemoveVariable: (name: string) => void
+  onRemoveVariable: (name: string) => void | Promise<void>,
+  removingName?: string
 ): TableColumnType<VariableType>[] => {
   const navigate = useNavigate()
-  const { role: _, hasPermission } = useRole()
+  const { search } = useLocation()
+  const { hasPermission } = useRole()
   const { getColumnSearchProps } = useColumnSearch<VariableType>()
   const canEditPermission = hasPermission(PermissionKeysType.variable_edit)
   const canRemovePermission = hasPermission(PermissionKeysType.variable_delete)
@@ -34,17 +53,32 @@ export const getColumns = (
       dataIndex: 'name',
       key: 'name',
       width: 200,
-      align: 'center',
+      align: 'left',
       sorter: (a, b) => a.name.localeCompare(b.name),
       sortOrder: sortedInfo.columnKey === 'name' ? sortedInfo.order : null,
-      ...getColumnSearchProps('name', filteredInfo)
+      ...getColumnSearchProps('name', filteredInfo),
+      render: (name: string) => (
+        <Tooltip
+          title={name}
+          trigger={['hover', 'focus']}
+          classNames={{ container: 'variables-table__tooltip' }}
+        >
+          <Link
+            className="variables-table__name"
+            to={{ pathname: `${routePaths.variables}/${name}`, search }}
+          >
+            {name}
+          </Link>
+        </Tooltip>
+      )
     },
     {
       title: 'Описание',
       dataIndex: 'description',
       key: 'description',
-      align: 'center',
-      width: 200
+      align: 'left',
+      width: 200,
+      render: renderText
     },
     {
       title: 'Тип',
@@ -56,37 +90,34 @@ export const getColumns = (
       sortOrder: sortedInfo.columnKey === 'type' ? sortedInfo.order : null,
       render: (value) => {
         const label = value === 'TEXT' ? 'ТЕКСТ' : 'СЕКРЕТ'
-        return (
-          <Tag
-            data-testid="variables-table__clear-all-btn"
-            color={value === 'TEXT' ? 'green' : 'orange'}
-          >
-            {label}
-          </Tag>
-        )
+        return <Tag color={value === 'TEXT' ? 'green' : 'orange'}>{label}</Tag>
       }
     },
     {
       title: 'Значение',
       dataIndex: 'value',
       key: 'value',
-      align: 'center',
+      align: 'left',
       width: 200,
       ...getColumnSearchProps('value', filteredInfo),
-      render: (_, record) => (record.type === 'SECRET' ? '****' : record.value)
+      onFilter: (value, record) =>
+        record.type === 'TEXT' &&
+        matchesVariableSearch(record.value, String(value)),
+      render: (_, record) =>
+        record.type === 'SECRET' ? 'Скрыто' : renderText(record.value)
     },
     {
       title: 'Используется в конфигурациях',
       dataIndex: 'containsInConfigs',
       key: 'containsInConfigs',
-      align: 'center',
+      align: 'left',
       width: 200,
       render: (configs) => {
         if (!configs || configs.length === 0) {
           return 'Не используется'
         }
         return (
-          <ul>
+          <ul className="variables-table__configurations">
             {configs.map(
               (config: VariableType['containsInConfigs'][number]) => (
                 <li
@@ -95,15 +126,26 @@ export const getColumns = (
                   key={config.id}
                 >
                   {isModulesPageAvailable ? (
-                    <a
-                      href={`${config.moduleId}/configEditor/${config.id}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
+                    <Tooltip
+                      title={`${config.name} — откроется в новой вкладке`}
+                      trigger={['hover', 'focus']}
+                      classNames={{ container: 'variables-table__tooltip' }}
                     >
-                      {config.name}
-                    </a>
+                      <a
+                        className="variables-table__configuration-link"
+                        href={`/${config.moduleId}/configEditor/${config.id}`}
+                        aria-label={`${config.name} — откроется в новой вкладке`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        <span className="variables-table__text">
+                          {config.name}
+                        </span>{' '}
+                        <ExportOutlined aria-hidden />
+                      </a>
+                    </Tooltip>
                   ) : (
-                    config.name
+                    renderText(config.name)
                   )}
                 </li>
               )
@@ -117,48 +159,56 @@ export const getColumns = (
       dataIndex: 'createdAt',
       key: 'createdAt',
       width: 200,
-      align: 'center',
+      align: 'left',
       sorter: (a, b) =>
         dayjs(a.createdAt).valueOf() - dayjs(b.createdAt).valueOf(),
       sortOrder: sortedInfo.columnKey === 'createdAt' ? sortedInfo.order : null,
-      render: (value) => (value ? dayjs(value).format('DD.MM.YYYY HH:mm') : '')
+      render: (value) => (value ? dayjs(value).format('DD.MM.YYYY HH:mm') : '—')
     },
     {
       title: 'Дата обновления',
       dataIndex: 'updatedAt',
       key: 'updatedAt',
       width: 200,
-      align: 'center',
+      align: 'left',
       sorter: (a, b) =>
         dayjs(a.updatedAt).valueOf() - dayjs(b.updatedAt).valueOf(),
       sortOrder: sortedInfo.columnKey === 'updatedAt' ? sortedInfo.order : null,
-      render: (value) => (value ? dayjs(value).format('DD.MM.YYYY HH:mm') : '')
+      render: (value) => (value ? dayjs(value).format('DD.MM.YYYY HH:mm') : '—')
     },
     {
       title: 'Действия',
       dataIndex: 'actions',
       key: 'actions',
       width: 150,
-      align: 'center',
+      align: 'right',
       render: (_, record) => {
-        if (!canEditPermission) {
-          return null
-        }
-        const isUsedInConfigs = record.containsInConfigs.length > 0
+        const isUsedInConfigs = Boolean(record.containsInConfigs?.length)
         return (
-          <Button.Group>
-            <Tooltip title="Редактировать переменную">
-              <Button
-                data-testid="variables-table__edit-config-btn"
-                icon={<EditOutlined />}
-                onClick={() =>
-                  navigate(`${routePaths.variables}/${record.name}`)
-                }
-              />
-            </Tooltip>
+          <Space.Compact>
+            {canEditPermission && (
+              <Tooltip title="Редактировать переменную">
+                <Button
+                  data-testid="variables-table__edit-config-btn"
+                  icon={<EditOutlined />}
+                  aria-label={`Редактировать переменную ${record.name}`}
+                  disabled={Boolean(removingName)}
+                  onClick={() =>
+                    navigate({
+                      pathname: `${routePaths.variables}/${record.name}`,
+                      search
+                    })
+                  }
+                />
+              </Tooltip>
+            )}
             {canRemovePermission && (
               <Popconfirm
-                title="Вы уверены, что хотите удалить эту переменную?"
+                disabled={isUsedInConfigs || Boolean(removingName)}
+                title={`Удалить переменную ${record.name}?`}
+                description="Это действие нельзя отменить."
+                okText="Удалить"
+                cancelText="Отмена"
                 onConfirm={() => onRemoveVariable(record.name)}
               >
                 <Tooltip
@@ -171,12 +221,15 @@ export const getColumns = (
                   <Button
                     data-testid="variables-table__delete-config-btn"
                     icon={<DeleteOutlined />}
-                    disabled={isUsedInConfigs}
+                    aria-label={`Удалить переменную ${record.name}`}
+                    danger
+                    loading={removingName === record.name}
+                    disabled={isUsedInConfigs || Boolean(removingName)}
                   />
                 </Tooltip>
               </Popconfirm>
             )}
-          </Button.Group>
+          </Space.Compact>
         )
       }
     }

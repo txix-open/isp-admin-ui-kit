@@ -1,4 +1,3 @@
-import { message } from 'antd'
 import axios, { AxiosError } from 'axios'
 
 import {
@@ -6,6 +5,11 @@ import {
   sessionStorageKeys
 } from '@constants/localStorageKeys'
 
+import {
+  ignoreApiError,
+  notifyApiError,
+  scheduleApiError
+} from '@utils/apiErrorNotifications'
 import { getConfigProperty } from '@utils/configUtils'
 import { LocalStorage } from '@utils/localStorageUtils'
 import { getCleanPath } from '@utils/routeUtils'
@@ -25,7 +29,7 @@ apiService.defaults.headers.common['X-APPLICATION-TOKEN'] = getConfigProperty(
 )
 
 apiService.interceptors.request.use(
-  async (config: any) => {
+  (config) => {
     const headerName = LocalStorage.get(localStorageKeys.HEADER_NAME)
     config.headers[headerName] = LocalStorage.get(localStorageKeys.USER_TOKEN)
 
@@ -39,33 +43,44 @@ const localClear = () => {
   LocalStorage.remove(localStorageKeys.HEADER_NAME)
 }
 
+let redirectingToLogin = false
+
+const getErrorMessage = (error: AxiosError<MSPError>) => {
+  if (error.response?.status === 403)
+    return 'Недостаточно прав для выполнения запроса'
+  if (error.response && error.response.status >= 500)
+    return 'Внутренняя ошибка сервиса, попробуйте повторить запрос'
+  if (error.code === 'ECONNABORTED')
+    return 'Сервис не ответил вовремя. Попробуйте повторить запрос'
+  if (!error.response) return 'Не удалось подключиться к сервису'
+  return 'Не удалось выполнить запрос'
+}
+
 apiService.interceptors.response.use(
-  async (response: any) => response,
+  (response) => response,
   (error: AxiosError<MSPError>) => {
     if (error.response && error.response.status === 401) {
       localClear()
       const prevRoute =
         sessionStorage.getItem(sessionStorageKeys.PREV_ROUTE) || ''
-      message.error('Ваша сессия истекла"').then()
+      if (!redirectingToLogin) {
+        redirectingToLogin = true
+        notifyApiError(error, 'Ваша сессия истекла')
+      } else {
+        ignoreApiError(error)
+      }
       sessionStorage.setItem(
         sessionStorageKeys.PREV_ROUTE,
         getCleanPath(prevRoute)
       )
       window.location.href = routePaths.login
+      return Promise.reject(error)
     }
 
-    if (error.response && error.response.status === 403) {
-      message
-        .warning(
-          'К сожалению, некоторые данные недоступны — у вас нет прав для их просмотра'
-        )
-        .then()
-    }
-
-    if (error.response && error.response.status >= 500) {
-      message
-        .error('Внутренняя ошибка сервиса, попробуйте повторить запрос')
-        .then()
+    if (axios.isCancel(error)) {
+      ignoreApiError(error)
+    } else {
+      scheduleApiError(error, getErrorMessage(error))
     }
 
     return Promise.reject(error)

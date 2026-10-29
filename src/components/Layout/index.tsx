@@ -34,6 +34,7 @@ import { routePaths } from '@routes/routePaths'
 import './layout.scss'
 
 const { Content } = Layout
+const smallScreenQuery = '(max-width: 991px)'
 
 const getCustomMenuItems = (
   routers: CustomMenuItemType[]
@@ -60,9 +61,10 @@ const getCustomMenuItems = (
 }
 
 const LayoutComponent = ({ customRouters }: LayoutComponentPropsType) => {
-  const [collapsed, setCollapsed] = useState<boolean>(
-    LocalStorage.get('menu') === null ? true : LocalStorage.get('menu')
-  )
+  const [collapsed, setCollapsed] = useState<boolean>(() => {
+    if (window.matchMedia(smallScreenQuery).matches) return true
+    return LocalStorage.get('menu') ?? true
+  })
   const [loading, setLoading] = useState(true)
   const dispatch = useAppDispatch()
   const {
@@ -157,6 +159,17 @@ const LayoutComponent = ({ customRouters }: LayoutComponentPropsType) => {
     }
   }, [status])
 
+  useEffect(() => {
+    const smallScreen = window.matchMedia(smallScreenQuery)
+    const collapseOnSmallScreen = () => {
+      if (smallScreen.matches) setCollapsed(true)
+    }
+    collapseOnSmallScreen()
+    smallScreen.addEventListener('change', collapseOnSmallScreen)
+    return () =>
+      smallScreen.removeEventListener('change', collapseOnSmallScreen)
+  }, [])
+
   const handleItemChange = ({ key }: { key: string }) => {
     const routeWithParents = findRouteWithParents(key, resultMenuConfig)
     const routePath = routeWithParents?.route.route
@@ -184,11 +197,16 @@ const LayoutComponent = ({ customRouters }: LayoutComponentPropsType) => {
   }
 
   return (
-    <section>
+    <section className="admin-shell">
       <Layout className="layout" data-cy="homePage">
-        <LayoutSider collapsed={collapsed} onCollapse={handleCollapsedChange}>
+        <LayoutSider
+          collapsed={collapsed}
+          onCollapse={handleCollapsedChange}
+          style={{ height: '100%' }}
+        >
           <Header collapsed={collapsed} />
           <LayoutMenu
+            inlineCollapsed={collapsed}
             onHideMenuItem={() => false}
             currentPath={location.pathname}
             menuConfig={visibleMenuConfig}

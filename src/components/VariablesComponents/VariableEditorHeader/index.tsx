@@ -1,43 +1,56 @@
 import { Button } from 'antd'
-import { useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
+
+import { PageHeader } from '@components/PageLayout'
 
 import { routePaths } from '@routes/routePaths'
 
-import './variable-editor-header.scss'
 import { VariableEditorHeaderPropsType } from './variable-editor-header.type'
 
 const VariableEditorHeader = ({
   title,
-  onSubmit,
+  isNewVariable,
   isLoading,
   isDirty,
   isEditPermission
 }: VariableEditorHeaderPropsType) => {
   const navigate = useNavigate()
+  const { search } = useLocation()
+  const operation = isNewVariable
+    ? 'Создание переменной'
+    : isEditPermission
+      ? 'Редактирование переменной'
+      : 'Просмотр переменной'
 
   return (
-    <header className="variable-editor-header">
-      <div className="variable-editor-header__title-wrapper">
+    <PageHeader
+      className="variable-editor-header"
+      title={title}
+      context={operation}
+      focusOnMount
+      back={
         <Button
           data-testid="variable-editor-header__back-btn"
-          onClick={() => navigate(routePaths.variables)}
+          disabled={isLoading}
+          onClick={() => navigate({ pathname: routePaths.variables, search })}
         >
-          Назад
+          К переменным
         </Button>
-        <h2>{title}</h2>
-      </div>
-      {isEditPermission && (
-        <Button
-          data-testid="variable-editor-header__save-btn"
-          type="primary"
-          loading={isLoading}
-          onClick={onSubmit}
-          disabled={!isDirty}
-        >
-          Сохранить
-        </Button>
-      )}
-    </header>
+      }
+      actions={
+        isEditPermission && (
+          <Button
+            data-testid="variable-editor-header__save-btn"
+            type="primary"
+            loading={isLoading}
+            htmlType="submit"
+            disabled={!isDirty || isLoading}
+          >
+            Сохранить
+          </Button>
+        )
+      }
+    />
   )
 }
 

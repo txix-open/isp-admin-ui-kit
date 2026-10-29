@@ -1,8 +1,23 @@
-@use "../../constants/style/styleConst" as *;
+@use '../../constants/style/styleConst' as *;
+
+.ant-drawer .ant-drawer-body.role-create-drawer__body {
+  display: flex;
+  min-height: 0;
+  padding: 0;
+  overflow: hidden;
+}
 
 .roles-page {
+  flex: 1;
   height: 100%;
+  min-height: 0;
+  min-width: 0;
   display: flex;
+  overflow: hidden;
+
+  &__back-to-list {
+    display: none;
+  }
 
   .role-item {
     &__id {
@@ -11,7 +26,38 @@
   }
 
   &__content {
-    overflow-x: auto;
-    width: 100%
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-width: 0;
+    min-height: 0;
+    overflow: hidden;
+  }
+}
+
+@media (min-width: 768px) {
+  /* Разделитель между списком ролей и формой в сплит-панели */
+  .roles-page > .column {
+    border-inline-end: 1px solid var(--ant-color-border-secondary);
+  }
+}
+
+@media (max-width: 767px) {
+  .roles-page {
+    > .column {
+      max-width: 100%;
+    }
+
+    &[data-selected='false'] .roles-page__content,
+    &[data-selected='true'] > .column {
+      display: none;
+    }
+
+    &__back-to-list {
+      display: inline-flex;
+      flex: none;
+      align-self: flex-start;
+      margin: 12px 16px;
+    }
   }
 }

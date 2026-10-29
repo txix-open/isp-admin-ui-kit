@@ -16,7 +16,9 @@ const Header = ({ collapsed }: HeaderPropsType) => {
   const { useToken } = theme
   const { token } = useToken()
 
-  const safePrimaryColor = primaryColor || token.colorBgLayout
+  // По умолчанию без собственного цвета потребителя: тон primary темы
+  // (светлая #e6f4ff / тёмная #20375b), контраст текста считается утилитой
+  const safePrimaryColor = primaryColor || token.colorPrimaryBg
 
   const textColor = useMemo(
     () => getContrastTextColor(safePrimaryColor),

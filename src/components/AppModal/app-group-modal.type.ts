@@ -1,13 +1,15 @@
-import { ModalPropsType } from '@widgets/Modal/modal.type'
+import { UseFormSetError } from 'react-hook-form'
 
 import { ApplicationAppType } from '@pages/ApplicationsPage/applications.type'
 
-export type AppModalType = Omit<ModalPropsType, 'onOk' | 'children'> & {
+export interface AppModalType {
+  title: string
+  open: boolean
+  onClose: () => void
   app?: ApplicationAppType
-  onOk: (data: ApplicationAppType) => void
-  isNew?: boolean
-  isExistsId?: {
-    field: keyof ApplicationAppType
-    message: string
-  } | null
+  groupName: string
+  onOk: (
+    values: ApplicationAppType,
+    setError: UseFormSetError<ApplicationAppType>
+  ) => Promise<void>
 }

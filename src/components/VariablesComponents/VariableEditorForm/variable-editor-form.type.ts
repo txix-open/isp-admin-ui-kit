@@ -5,4 +5,5 @@ export interface VariableEditorFormPropsType {
   isNewVariable: boolean
   isEditPermission: boolean
   typeWatch: string
+  isSaving?: boolean
 }

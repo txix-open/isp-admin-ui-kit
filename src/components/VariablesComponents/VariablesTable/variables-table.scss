@@ -1,15 +1,52 @@
-@use "src/constants/style/styleConst" as *;
-
 .variables-table {
   display: flex;
   flex-direction: column;
-  gap: $basic-margin;
+  gap: 16px;
+  min-width: 0;
 
-  &__clear-all-btn {
-    align-self: flex-end;
+  &__name,
+  &__text {
+    display: block;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+
+  &__configuration-link {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+
+    .variables-table__text {
+      min-width: 0;
+    }
+  }
+
+  .ant-table-cell {
+    overflow-wrap: anywhere;
+  }
+
+  &__toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+  }
+
+  &__configurations {
+    margin: 0;
+    padding: 0;
   }
 
   .variable-table-columns__list-element {
     list-style: none;
   }
+}
+
+.variables-table__tooltip {
+  max-height: min(320px, 50vh);
+  overflow: auto;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
 }

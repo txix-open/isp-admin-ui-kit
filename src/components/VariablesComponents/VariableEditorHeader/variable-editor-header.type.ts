@@ -1,6 +1,6 @@
 export interface VariableEditorHeaderPropsType {
   title: string
-  onSubmit: () => void
+  isNewVariable: boolean
   isLoading: boolean
   isDirty: boolean
   isEditPermission: boolean

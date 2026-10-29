@@ -21,6 +21,7 @@ import SelectedAccessMethod from '@widgets/SelectedAccessMethod'
 import { AppAccessContentPropsType } from '@components/AppAccessContent/app-access-content.type'
 import SaveModal from '@components/SaveModal/SaveModal'
 
+import { notifyApiError } from '@utils/apiErrorNotifications'
 import { setUrlValue } from '@utils/columnLayoutUtils'
 
 import useRole from '@hooks/useRole'
@@ -92,10 +93,6 @@ const AppAccessContent: FC<AppAccessContentPropsType> = ({
 
   const openSuccessMessage = (body: string) => {
     messageApi.success(body)
-  }
-
-  const openErrorMessage = (body: string) => {
-    messageApi.error(body)
   }
 
   const createAllMethodList = (status: boolean) => {
@@ -193,8 +190,8 @@ const AppAccessContent: FC<AppAccessContentPropsType> = ({
       .then(() => {
         openSuccessMessage('Методы успешно удалены')
       })
-      .catch(() => {
-        openErrorMessage('Не удалось удалить методы')
+      .catch((error) => {
+        notifyApiError(error, 'Не удалось удалить методы')
       })
   }
 
@@ -212,8 +209,8 @@ const AppAccessContent: FC<AppAccessContentPropsType> = ({
         setShowSaveModal(false)
         setSelectedMethod([])
       })
-      .catch(() => {
-        openErrorMessage('Не удалось изменить статус методов')
+      .catch((error) => {
+        notifyApiError(error, 'Не удалось изменить статус методов')
         setShowSaveModal(false)
       })
   }

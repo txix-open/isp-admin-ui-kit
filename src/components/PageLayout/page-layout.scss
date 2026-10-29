@@ -1,0 +1,125 @@
+.page-layout {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+  color: var(--ant-color-text);
+  background: var(--ant-color-bg-container);
+  /* Рабочая панель: отделена от холста отступом контейнера контента
+     (layout.scss) и мягкой тенью; значение тени — токен темы
+     (pagePanelShadow в theme.ts), в обеих темах свой */
+  border-radius: 12px;
+  box-shadow: var(--ant-page-panel-shadow);
+
+  &__body {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    gap: 16px;
+    min-width: 0;
+    min-height: 0;
+    padding: 24px;
+    overflow: auto;
+  }
+
+  &__summary {
+    margin: 0;
+    color: var(--ant-color-text-secondary);
+    font-size: 13px;
+  }
+
+  &--split > &__body {
+    padding: 0;
+    gap: 0;
+    overflow: hidden;
+  }
+
+  /* Колонки kit'а внутри сплит-панели без собственной рамки: их карточка
+     (border, радиус 16px, тень) конфликтовала с краями панели.
+     Рамка у экрана одна — панель; разделители секций — в scss страниц */
+  &--split .column {
+    background: transparent;
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+  }
+
+  &__table {
+    min-width: 0;
+    .ant-table-cell {
+      overflow-wrap: anywhere;
+    }
+  }
+}
+
+.page-header {
+  flex: none;
+  padding: 12px 16px;
+  color: var(--ant-color-text);
+  font-family: var(--ant-font-family);
+  border-bottom: 1px solid var(--ant-color-border-secondary);
+  background: var(--ant-color-bg-container);
+
+  &__inner {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    align-items: center;
+  }
+
+  &__heading {
+    flex: 1;
+    min-width: 180px;
+  }
+  &__title {
+    margin: 0;
+    font-size: 22px;
+    font-weight: 600;
+    line-height: 30px;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+  &__title[tabindex='-1']:focus {
+    outline: none;
+  }
+  &__context,
+  &__description {
+    color: var(--ant-color-text-secondary);
+    font-size: 13px;
+    line-height: 20px;
+  }
+  &__context {
+    margin: 0 0 4px;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+  &__description {
+    margin-top: 8px;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    overflow: hidden;
+    overflow-wrap: anywhere;
+  }
+  &__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+}
+
+@media (max-width: 767px) {
+  .page-layout__body {
+    padding: 16px;
+  }
+  .page-header__back {
+    flex-basis: 100%;
+  }
+  .page-header__inner {
+    gap: 12px;
+  }
+}
