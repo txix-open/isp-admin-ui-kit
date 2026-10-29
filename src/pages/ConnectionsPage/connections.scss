@@ -1,19 +1,30 @@
-@use "../../constants/style/styleConst" as *;
+@use '../../constants/style/styleConst' as *;
 
 .connection-page {
+  min-width: 0;
+  max-width: 100%;
+
   &__content {
     width: 100%;
+    min-width: 0;
 
     &__wrap-table {
-      overflow-x: auto;
-      height: calc(100vh - 70px);
+      min-width: 0;
+      max-width: 100%;
     }
   }
 
   &__endpoint-list {
     &__item {
-      height: 25px;
+      min-height: 25px;
       display: flex;
+      flex-wrap: wrap;
+      align-items: flex-start;
+      gap: 6px;
+      margin-bottom: 8px;
+      code {
+        overflow-wrap: anywhere;
+      }
     }
 
     &__inner-marker {
@@ -21,7 +32,7 @@
       border: 1px solid var(--ant-color-border);
       border-radius: 12px;
       padding: 0 4px;
-      margin: 4px
+      margin: 4px;
     }
   }
 
@@ -35,14 +46,25 @@
     height: 100%;
     font-size: 1.5em;
     overflow: hidden;
-    font-family: PT Sans, sans-serif;
+    font-family:
+      PT Sans,
+      sans-serif;
     font-weight: 500;
     padding: 8px;
     text-overflow: ellipsis;
     white-space: nowrap;
-    color: rgba(0, 0, 0, 0.45);
+    color: var(--ant-color-text-secondary);
   }
-  &__inner-tag{
+  &__date {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    > span:last-child {
+      color: var(--ant-color-text-secondary);
+      font-size: 12px;
+    }
+  }
+  &__inner-tag {
     margin-left: $basic-margin !important;
   }
 

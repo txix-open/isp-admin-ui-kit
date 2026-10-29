@@ -1,140 +1,170 @@
-export const LIGHT_OPTIONS = {
+import type { RedocRawOptions } from 'redoc'
+
+const common: RedocRawOptions = {
+  nativeScrollbars: true,
+  hideDownloadButtons: true,
+  hideSingleRequestSampleTab: true,
+  pathInMiddlePanel: true,
+  requiredPropsFirst: true,
+  jsonSampleExpandLevel: 2,
+  schemaExpansionLevel: 1,
+  labels: {
+    responses: 'Ответы',
+    requestSamples: 'Примеры запроса',
+    responseSamples: 'Примеры ответа',
+    noResultsFound: 'Ничего не найдено'
+  },
   theme: {
-    colors: {
-      primary: { main: '#1677ff' },
-      text: {
-        primary: 'rgba(0, 0, 0, 0.88)',
-        secondary: 'rgba(0, 0, 0, 0.65)'
-      }
-    },
-    sidebar: {
-      backgroundColor: '#ffffff',
-      textColor: 'rgba(0, 0, 0, 0.88)',
-      activeTextColor: '#1677ff'
-    },
-    rightPanel: {
-      width: '40%',
-      backgroundColor: '#1f2933',
-      textColor: '#e8eaed'
-    },
+    spacing: { sectionHorizontal: 28, sectionVertical: 28 },
+    sidebar: { width: '260px' },
+    rightPanel: { width: '36%' },
     typography: {
-      fontFamily: 'sans-serif',
-      headings: { fontFamily: 'sans-serif' }
+      fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+      fontSize: '14px',
+      lineHeight: '1.6',
+      headings: {
+        fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+        fontWeight: '600'
+      },
+      code: {
+        fontFamily: 'SFMono-Regular, Consolas, monospace',
+        fontSize: '13px',
+        wrap: true
+      }
     }
   }
 }
 
-export const DARK_OPTIONS = {
+export const LIGHT_OPTIONS: RedocRawOptions = {
+  ...common,
   theme: {
-    codeBlock: {
-      backgroundColor: '#18181b'
-    },
+    ...common.theme,
     colors: {
-      error: {
-        main: '#ef4444'
-      },
-      border: {
-        light: '#27272a',
-        dark: '#a1a1aa'
-      },
-      http: {
-        basic: '#71717a',
-        delete: '#ef4444',
-        get: '#22c55e',
-        head: '#d946ef',
-        link: '#06b6d4',
-        options: '#eab308',
-        patch: '#f97316',
-        post: '#3b82f6',
-        put: '#ec4899'
-      },
-      primary: {
-        main: '#71717a'
-      },
-      responses: {
-        error: {
-          backgroundColor: 'rgba(239,68,68,0.1)',
-          borderColor: '#fca5a5',
-          color: '#ef4444',
-          tabTextColor: '#ef4444'
-        },
-        info: {
-          backgroundColor: 'rgba(59,131,246,0.1)',
-          borderColor: '#93c5fd',
-          color: '#3b82f6',
-          tabTextColor: '#3b82f6'
-        },
-        redirect: {
-          backgroundColor: 'rgba(234,179,8,0.1)',
-          borderColor: '#fde047',
-          color: '#eab308',
-          tabTextColor: '#eab308'
-        },
-        success: {
-          backgroundColor: 'rgba(34,197,94,0.1)',
-          borderColor: '#86efac',
-          color: '#22c55e',
-          tabTextColor: '#22c55e'
-        },
-        warning: {
-          main: '#eab308'
-        }
-      },
-      secondary: {
-        main: '#3f3f46',
-        light: '#27272a'
-      },
-      success: {
-        main: '#22c55e'
-      },
-      text: {
-        primary: '#fafafa',
-        secondary: '#a1a1aa',
-        light: '#3f3f46'
-      }
-    },
-    fab: {
-      backgroundColor: '#52525b',
-      color: '#67e8f9'
-    },
-    rightPanel: {
-      width: '40%',
-      backgroundColor: '#27272a',
-      servers: {
-        overlay: {
-          backgroundColor: '#2a2727'
-        },
-        url: {
-          backgroundColor: '#18181b'
-        }
-      }
-    },
-    schema: {
-      linesColor: '#d8b4fe',
-      nestedBackground: '#18181b',
-      typeNameColor: '#93c5fd',
-      typeTitleColor: '#1d4ed8',
-      requireLabelColor: '#ef4444'
+      primary: { main: '#1677ff' },
+      text: { primary: '#1f1f1f', secondary: '#595959' },
+      border: { light: '#e8ecf2', dark: '#d9d9d9' }
     },
     sidebar: {
-      activeTextColor: '#ffffff',
-      backgroundColor: '#18181b',
-      textColor: '#a1a1aa'
+      ...common.theme?.sidebar,
+      backgroundColor: '#ffffff',
+      textColor: '#595959',
+      activeTextColor: '#0958d9',
+      level1Items: {
+        activeBackgroundColor: '#e6f4ff',
+        activeTextColor: '#0958d9'
+      }
+    },
+    rightPanel: {
+      ...common.theme?.rightPanel,
+      backgroundColor: '#243142',
+      textColor: '#e8eaed'
+    },
+    codeBlock: { backgroundColor: '#1b2635' },
+    schema: {
+      nestedBackground: '#f8fafc',
+      linesColor: '#d9e0e8',
+      typeNameColor: '#0958d9',
+      requireLabelColor: '#cf1322'
+    }
+  }
+}
+
+export const DARK_OPTIONS: RedocRawOptions = {
+  ...common,
+  theme: {
+    ...common.theme,
+    // ReDoc keeps several secondary elements in fixed light-theme colors.
+    extensionsHook: (name: string) => {
+      if (name === 'UnderlinedHeader')
+        return `color: #a6a6a6; border-color: #434343;
+          > span { color: #a6a6a6; }`
+      if (name === 'Markdown')
+        return `table tr { background-color: transparent; }
+          table tr:nth-child(2n) { background-color: #262626; }
+          blockquote { color: #a6a6a6; border-color: #434343; }`
+      if (name === 'Prism')
+        return `.token.number, .token.constant { color: #91caff; }
+          .token.boolean, .token.deleted { color: #ff9c9a; }
+          .token.comment, .token.prolog, .token.doctype, .token.cdata {
+            color: #a6a6a6;
+          }`
+      return ''
+    },
+    colors: {
+      primary: { main: '#69b1ff' },
+      text: { primary: '#f0f0f0', secondary: '#a6a6a6' },
+      border: { light: '#333333', dark: '#525252' },
+      http: {
+        get: '#73d13d',
+        post: '#69b1ff',
+        put: '#ffc069',
+        delete: '#ff7875',
+        patch: '#b37feb',
+        options: '#5cdbd3',
+        head: '#95de64',
+        basic: '#bfbfbf',
+        link: '#5cdbd3'
+      },
+      responses: {
+        success: {
+          color: '#95de64',
+          backgroundColor: '#162312',
+          tabTextColor: '#95de64'
+        },
+        error: {
+          color: '#ff7875',
+          backgroundColor: '#2c1618',
+          tabTextColor: '#ff7875'
+        },
+        info: {
+          color: '#91caff',
+          backgroundColor: '#20375b',
+          tabTextColor: '#91caff'
+        },
+        redirect: {
+          color: '#ffd666',
+          backgroundColor: '#2b2111',
+          tabTextColor: '#ffd666'
+        }
+      }
+    },
+    sidebar: {
+      ...common.theme?.sidebar,
+      backgroundColor: '#1f1f1f',
+      textColor: '#a6a6a6',
+      activeTextColor: '#91caff',
+      level1Items: {
+        activeBackgroundColor: '#20375b',
+        activeTextColor: '#91caff'
+      },
+      groupItems: {
+        activeBackgroundColor: '#262626',
+        activeTextColor: '#f0f0f0'
+      }
+    },
+    rightPanel: {
+      ...common.theme?.rightPanel,
+      backgroundColor: '#191919',
+      textColor: '#e8e8e8'
+    },
+    codeBlock: { backgroundColor: '#191919' },
+    fab: { backgroundColor: '#262626', color: '#91caff' },
+    schema: {
+      nestedBackground: '#262626',
+      linesColor: '#434343',
+      typeNameColor: '#91caff',
+      typeTitleColor: '#91caff',
+      requireLabelColor: '#ff7875',
+      arrow: { color: '#a6a6a6' }
     },
     typography: {
-      fontFamily: 'sans-serif',
-      headings: { fontFamily: 'sans-serif' },
+      ...common.theme?.typography,
       code: {
-        backgroundColor: '#18181b',
-        color: '#fde047'
+        ...common.theme?.typography?.code,
+        color: '#d9e3f0',
+        backgroundColor: '#191919'
       },
-      links: {
-        color: '#0ea5e9',
-        hover: '#0ea5e9',
-        textDecoration: 'none',
-        hoverTextDecoration: 'underline',
-        visited: '#0ea5e9'
-      }
+      links: { color: '#91caff', hover: '#bae0ff', visited: '#91caff' }
     }
   }
 }

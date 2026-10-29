@@ -1,11 +1,5 @@
 import { ButtonProps } from 'antd'
-import {
-  ComponentType,
-  Dispatch,
-  MutableRefObject,
-  ReactNode,
-  SetStateAction
-} from 'react'
+import { ComponentType, Dispatch, ReactNode, SetStateAction } from 'react'
 
 import { ConfigType, ResponseSchemaType } from '@pages/ModulesPage/module.type'
 
@@ -15,9 +9,7 @@ export interface ConfigurationEditorPropsType {
   setBufConfig: Dispatch<SetStateAction<ConfigType | undefined>>
   isCurrentConfigLoading: boolean
   setDisableBtn?: Dispatch<SetStateAction<boolean>>
-  setDisableSendBtn?: Dispatch<SetStateAction<boolean>>
-  submitRef?: MutableRefObject<null>
-  currentConfig?: ConfigType
+  disabled?: boolean
 }
 
 export interface DescriptionPropsType {
@@ -46,6 +38,8 @@ export interface ArrayFieldTemplatePropsType {
   items: ReactNode[]
   onAddClick: (event: MouseEvent) => void
   canAdd: boolean
+  disabled?: boolean
+  readonly?: boolean
   title: string
   titleField?: ComponentType<any>
   fieldPathId?: { $id: string }
@@ -60,6 +54,8 @@ export interface ArrayFieldItemTemplatePropsType {
   hasToolbar?: boolean
   buttonsProps?: {
     hasRemove?: boolean
+    disabled?: boolean
+    readonly?: boolean
     onRemoveItem?: (event?: any) => void
   }
 }
@@ -85,12 +81,15 @@ export interface ObjectFieldTemplatePropsType {
     $id: string
   }
   schema: {
+    description?: string
     properties?: SchemaPropertiesType
     additionalProperties?: boolean | { type: string }
   }
   onAddClick?: (schema: any) => () => void
   onAddProperty?: () => void
   title: string
+  disabled?: boolean
+  readonly?: boolean
   activeTabKey?: string
   handleTabsChange?: (key: string) => void
 }

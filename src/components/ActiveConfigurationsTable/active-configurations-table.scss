@@ -1,15 +1,56 @@
-@use "src/constants/style/styleConst" as *;
-
+@use 'src/constants/style/styleConst' as *;
 
 .active-configurations-table {
   &__title {
-    margin-bottom: $basic-margin*2;
-    font-size: 20px;
+    margin: 0;
+    font-size: 16px;
+    font-weight: 600;
+    line-height: 24px;
+  }
+  &--active &__title::before {
+    content: '';
+    display: inline-block;
+    width: 7px;
+    height: 7px;
+    margin-right: 8px;
+    border-radius: 50%;
+    background: var(--ant-color-success-text);
+    vertical-align: middle;
+  }
+  &__count {
+    margin-left: 8px;
+    font-size: 13px;
+    font-weight: 400;
+  }
+
+  .ant-btn.active-configurations-table__name-button {
+    flex: 1;
+    display: block;
+    min-width: 0;
+    height: auto;
+    min-height: 32px;
+    padding: 4px 0;
+    color: var(--ant-color-text);
+    text-align: left;
+    white-space: normal;
+    overflow-wrap: anywhere;
+    > span {
+      display: block;
+      white-space: normal;
+      overflow-wrap: anywhere;
+    }
+    &:hover {
+      color: var(--ant-color-link);
+    }
   }
 
   &__table {
     &__name-field {
       input {
+        font: inherit;
+        min-height: 32px;
+        min-width: 0;
+        text-overflow: ellipsis;
         color: var(--ant-color-text);
         border: none;
         background-color: transparent;
@@ -17,31 +58,90 @@
 
         &:focus-visible {
           color: var(--ant-color-text);
-          padding: $basic-padding;
-          border-radius: 4px;
-          outline: 1px solid $blue-color;
+          outline: 2px solid var(--ant-color-primary);
+          outline-offset: 2px;
         }
       }
 
       display: flex;
+      min-width: 0;
+      align-items: center;
       justify-content: space-between;
       gap: $basic-margin;
 
       &__actions {
+        flex: none;
         display: flex;
-        gap: $basic-margin
+        gap: $basic-margin;
       }
     }
   }
 
-  .active-config {
-    tr {
-      background: var(--ant-color-info-bg);
-    }
+  &__version {
+    font-family: var(
+      --ant-font-family-code,
+      ui-monospace,
+      SFMono-Regular,
+      Menlo,
+      monospace
+    );
+    font-variant-numeric: tabular-nums;
+    color: var(--ant-color-text-secondary);
   }
-
   &__buttons {
     display: flex;
+    align-items: center;
     justify-content: space-between;
+    gap: 12px;
+    min-height: 32px;
+    margin-bottom: 12px;
+  }
+  .ant-table-tbody > .configuration-row--active > td {
+    background: color-mix(
+      in srgb,
+      var(--ant-color-success-bg) 70%,
+      var(--ant-color-bg-container)
+    );
+  }
+  .ant-table-tbody > .configuration-row--active:hover > td {
+    background: var(--ant-color-success-bg);
+  }
+
+  .ant-table-cell {
+    overflow-wrap: anywhere;
+  }
+  .ant-table-cell.active-configurations-table__actions-cell {
+    padding-inline: 6px;
+    white-space: nowrap;
+  }
+  &__mobile-meta {
+    display: none;
+  }
+  @media (max-width: 767px) {
+    --configuration-actions-width: 80px;
+
+    .admin-table .ant-table-cell.active-configurations-table__actions-cell {
+      padding-inline: 8px;
+    }
+    .active-configurations-table-actions-field .admin-table-actions {
+      flex-direction: column;
+    }
+    &__table__name-field--editing {
+      flex-wrap: wrap;
+      > input {
+        flex-basis: 100%;
+      }
+    }
+    .ant-table-cell:not(.active-configurations-table__actions-cell) {
+      padding-inline: 8px;
+    }
+    &__mobile-meta {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      margin-top: 4px;
+      color: var(--ant-color-text-secondary);
+      font-size: 12px;
+    }
   }
 }

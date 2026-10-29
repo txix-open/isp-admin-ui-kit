@@ -16,7 +16,6 @@ import {
   message,
   Popconfirm,
   Select,
-  Spin,
   Tag,
   Tooltip
 } from 'antd'
@@ -36,12 +35,17 @@ import { Navigate, useNavigate } from 'react-router-dom'
 import { ValidationRules } from '@constants/form/validationRules'
 
 import GitConfigurationModal from '@components/GitConfigurationModal'
+import { PageHeader, PageLoading } from '@components/PageLayout'
 
 import {
   GitFileFormType,
   OptionType
 } from '@pages/GitConfigurationPage/git-configuration-page.type'
 
+import {
+  deleteConfirmation,
+  irreversibleDelete
+} from '@utils/deleteConfirmation'
 import { handleApiError } from '@utils/errorUtils'
 
 import { useAppDispatch } from '@hooks/redux'
@@ -317,21 +321,28 @@ const GitConfigurationPage = () => {
       .catch((e) => handleApiError(e, 'Не удалось применить конфигурацию'))
   }
 
-  const handleCreateCredentials = (data: CredentialsType) => {
+  const handleCreateCredentials = (
+    data: CredentialsType,
+    onSaved?: () => void
+  ) => {
     if (!canEditCredentials) {
       return
     }
 
-    createCredentials(data)
+    return createCredentials(data)
       .unwrap()
       .then(() => {
+        onSaved?.()
         setShowCredentialsModal({ ...showCredentialsModal, addModal: false })
         message.success('GIT успешно создан')
       })
       .catch((e) => handleApiError(e, 'Не удалось создать GIT'))
   }
 
-  const handleUpdateCredentials = (data: CredentialsType) => {
+  const handleUpdateCredentials = (
+    data: CredentialsType,
+    onSaved?: () => void
+  ) => {
     if (!canEditCredentials || !currentCredential) {
       return
     }
@@ -343,9 +354,10 @@ const GitConfigurationPage = () => {
       token: data.token
     }
 
-    updateCredentials(updateData)
+    return updateCredentials(updateData)
       .unwrap()
       .then(() => {
+        onSaved?.()
         setShowCredentialsModal({ ...showCredentialsModal, updateModal: false })
         handleSelectCredential(data.name)
         message.success('GIT успешно отредактирован')
@@ -354,18 +366,22 @@ const GitConfigurationPage = () => {
   }
 
   const handleDeleteCredentials = () => {
-    if (!canEditCredentials || !currentCredential) {
+    if (
+      !canEditCredentials ||
+      !currentCredential ||
+      isDeleteCredentialsLoading
+    ) {
       return
     }
 
-    deleteCredentials({ name: currentCredential.name })
+    return deleteCredentials({ name: currentCredential.name })
       .unwrap()
       .then(() => {
         setSelectedCredentialName(undefined)
         resetGitData()
-        message.success('GIT удален')
+        message.success('Подключение Git удалено')
       })
-      .catch((e) => handleApiError(e, 'Не удалось удалить GIT'))
+      .catch((e) => handleApiError(e, 'Не удалось удалить подключение Git'))
   }
 
   if (isError) {
@@ -374,15 +390,10 @@ const GitConfigurationPage = () => {
 
   return (
     <section className="git-configuration-page">
-      <div className="git-configuration-page__header">
-        <h1 className="git-configuration-page__header-title">
-          Git конфигурация
-        </h1>
-        <p className="git-configuration-page__description">
-          Выберите источник конфигурации, откройте файл и проверьте его перед
-          применением к модулю.
-        </p>
-      </div>
+      <PageHeader
+        title="Git конфигурация"
+        description="Выберите источник конфигурации, откройте файл и проверьте его перед применением к модулю."
+      />
       <div className="git-configuration-page__wrap">
         <Card
           className="git-configuration-page__card"
@@ -409,7 +420,7 @@ const GitConfigurationPage = () => {
                   })
                 }
               >
-                Добавить GIT
+                Новое соединение
               </Button>
             )
           }
@@ -452,8 +463,12 @@ const GitConfigurationPage = () => {
                   Редактировать GIT
                 </Button>
                 <Popconfirm
-                  okText="Удалить"
-                  title="Вы действительно хотите удалить этот GIT?"
+                  title={
+                    currentCredential &&
+                    `Удалить подключение Git «${currentCredential.name}»?`
+                  }
+                  description={irreversibleDelete}
+                  {...deleteConfirmation}
                   onConfirm={handleDeleteCredentials}
                 >
                   <Button
@@ -642,7 +657,9 @@ const GitConfigurationPage = () => {
           </p>
           {fileContent ? (
             <div ref={editorBoxRef} className="git-configuration-page__file">
-              <Suspense fallback={<Spin />}>
+              <Suspense
+                fallback={<PageLoading label="Загрузка просмотра файла…" />}
+              >
                 <MonacoEditor
                   value={fileContent}
                   language="json"
@@ -686,7 +703,7 @@ const GitConfigurationPage = () => {
         </Card>
 
         <GitConfigurationModal
-          title="Добавить GIT"
+          title="Новое соединение GIT"
           open={canEditCredentials && showCredentialsModal.addModal}
           onOk={handleCreateCredentials}
           loading={isCreateCredentialsLoading}

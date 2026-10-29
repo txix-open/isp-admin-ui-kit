@@ -1,155 +1,136 @@
-import { LogoutOutlined } from '@ant-design/icons'
-import {
-  Alert,
-  Button,
-  Popconfirm,
-  Spin,
-  Table,
-  message,
-  Pagination,
-  Tooltip
-} from 'antd'
+import { LogoutOutlined, ReloadOutlined } from '@ant-design/icons'
+import { Alert, Button, message, Popconfirm, Table, Tooltip } from 'antd'
 import { ColumnsType } from 'antd/es/table'
-import dayjs from 'dayjs'
-import { useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
 
-import { dateFormats } from '@constants/date'
 import { SessionStatusKeysType, sessionStatuses } from '@constants/statuses'
 
 import { getColumnSearchProps } from '@components/ColumnSearch'
 import { highlightSearchMatch } from '@components/ColumnSearch/highlightSearchMatch'
 import DownloadCsvButton from '@components/DownloadCsvButton'
+import PageLayout, { PageAccessDenied } from '@components/PageLayout'
+import {
+  TableActionButton,
+  TableActions,
+  TableDate,
+  TableEmpty,
+  TableStatus
+} from '@components/TableUI'
 
+import { notifyApiError } from '@utils/apiErrorNotifications'
 import { getUserFullName } from '@utils/userUtils/getFullNameUtil'
 
+import usePagePagination from '@hooks/usePagePagination'
 import useRole from '@hooks/useRole'
 import { useTableSearch } from '@hooks/useTableSearch'
 
 import sessionServiceApi from '@services/sessionService'
 import userServiceApi from '@services/userService'
 
-import { routePaths } from '@routes/routePaths'
-
 import { PermissionKeysType } from '@type/roles.type'
 import { SessionType } from '@type/session.type'
-
-import './sessions-page.scss'
 
 const limit = 10
 
 const SessionsPage = () => {
-  const {
-    query,
-    searchParams,
-    currentPage,
-    setCurrentPage,
-    handleTableChange
-  } = useTableSearch<SessionType>(
+  const tableSearch = useTableSearch<SessionType>(
     ['createdAt', 'expiredAt'],
     ['userId', 'status']
   )
-  const { currentData, data, isFetching, isError } =
-    sessionServiceApi.useGetAllSessionsQuery({
-      limit,
-      offset: (currentPage - 1) * limit,
-      ...searchParams
-    })
-  const [revokeSession] = sessionServiceApi.useRevokeSessionMutation()
-  const { data: allUsers = [], isLoading: isUsersLoading } =
-    userServiceApi.useGetAllUsersQuery()
-  const { role, hasPermission } = useRole()
-  const navigate = useNavigate()
+  const { hasPermission } = useRole()
+  const canView = hasPermission(PermissionKeysType.session_view)
+  const canViewUsers = hasPermission(PermissionKeysType.user_view)
+  const canRevoke = hasPermission(PermissionKeysType.session_revoke)
+  const { page, offset, changePage } = usePagePagination(limit)
+  const query = sessionServiceApi.useGetAllSessionsQuery(
+    { limit, offset, ...tableSearch.searchParams },
+    { skip: !canView }
+  )
+  const usersQuery = userServiceApi.useGetAllUsersQuery(undefined, {
+    skip: !canView || !canViewUsers
+  })
+  const [revokeSession, revokeState] =
+    sessionServiceApi.useRevokeSessionMutation()
+  // currentData prevents showing the previous page under a new page number.
+  const data = query.currentData
 
-  const isLoading = isUsersLoading
-
-  const isPageAvailable = hasPermission(PermissionKeysType.session_view)
-  const hasRevokePermission = hasPermission(PermissionKeysType.session_revoke)
-
-  useEffect(() => {
-    if (!isPageAvailable) {
-      navigate(routePaths.home)
-    }
-  }, [isPageAvailable])
-
-  useEffect(() => {
-    if (!role) {
-      navigate(routePaths.error)
-    }
-  }, [role])
-
-  const handleRevokeSessions = (id: number) => {
-    revokeSession(id)
+  const handleRevoke = (id: number) => {
+    if (!canRevoke || revokeState.isLoading) return
+    return revokeSession(id)
       .unwrap()
-      .then(() => message.success('Сессия успешно завершена'))
-      .catch(() => message.error('Не удалось завершить сессию'))
+      .then(() => {
+        message.success('Сессия успешно завершена')
+      })
+      .catch((error) => {
+        notifyApiError(error, 'Не удалось завершить сессию')
+      })
   }
 
-  if (isLoading) {
-    return <Spin />
-  }
+  const statusTones = {
+    [SessionStatusKeysType.allowed]: 'success',
+    [SessionStatusKeysType.revoked]: 'neutral',
+    [SessionStatusKeysType.expired]: 'warning'
+  } as const
 
   const columns: ColumnsType<SessionType> = [
     {
       title: 'Пользователь',
       dataIndex: 'userId',
-      key: 'userId',
-      sorter: true,
-      ...getColumnSearchProps({
+      ...getColumnSearchProps<SessionType>({
         title: 'Пользователь',
         type: 'select',
-        options: allUsers.map((user) => ({
+        options: (usersQuery.data ?? []).map((user) => ({
           value: user.id,
           label: getUserFullName(user)
         }))
       }),
-      render: (value) => {
-        const user = allUsers.find((el) => el.id === value)
-        return user && getUserFullName(user)
+      sorter: true,
+      key: 'userId',
+      className: 'admin-table-name',
+      render: (id) => {
+        const user = usersQuery.data?.find(
+          (item) => String(item.id) === String(id)
+        )
+        return user ? getUserFullName(user) : `Пользователь #${id}`
       }
     },
     {
-      title: 'Идентификатор',
+      title: 'ID сессии',
       dataIndex: 'id',
+      ...getColumnSearchProps<SessionType>({ title: 'ID', type: 'number' }),
+      sorter: true,
       key: 'id',
-      sorter: true,
-      ...getColumnSearchProps({ title: 'Идентификатор', type: 'number' }),
-      render: (value: number) => highlightSearchMatch(value, query?.id)
+      render: (value) => highlightSearchMatch(value, tableSearch.query?.id),
+      width: 110,
+      className: 'admin-table-meta admin-table-number'
     },
     {
-      title: 'Дата начала сессии',
+      title: 'Начало сессии',
       dataIndex: 'createdAt',
-      key: 'createdAt',
-      sorter: true,
-      ...getColumnSearchProps({
-        title: 'Дата начала сессии',
+      ...getColumnSearchProps<SessionType>({
+        title: 'Начало сессии',
         type: 'date',
         showTime: true
       }),
-      render: (value) => {
-        return dayjs(value).format(dateFormats.fullFormat)
-      }
+      sorter: true,
+      key: 'createdAt',
+      render: (value) => <TableDate value={value} />
     },
     {
-      title: 'Дата окончания сессии',
+      title: 'Окончание сессии',
       dataIndex: 'expiredAt',
-      key: 'expiredAt',
-      sorter: true,
-      ...getColumnSearchProps({
-        title: 'Дата окончания сессии',
+      ...getColumnSearchProps<SessionType>({
+        title: 'Окончание сессии',
         type: 'date',
         showTime: true
       }),
-      render: (value) => {
-        return dayjs(value).format(dateFormats.fullFormat)
-      }
+      sorter: true,
+      key: 'expiredAt',
+      render: (value) => <TableDate value={value} />
     },
     {
       title: 'Статус',
       dataIndex: 'status',
-      key: 'status',
-      sorter: true,
-      ...getColumnSearchProps({
+      ...getColumnSearchProps<SessionType>({
         title: 'Статус',
         type: 'select',
         options: Object.entries(sessionStatuses).map(([value, label]) => ({
@@ -157,88 +138,155 @@ const SessionsPage = () => {
           label
         }))
       }),
-      render: (value: SessionStatusKeysType) => sessionStatuses[value]
+      sorter: true,
+      key: 'status',
+      width: 140,
+      render: (status: SessionStatusKeysType) => (
+        <TableStatus tone={statusTones[status]}>
+          {sessionStatuses[status] ?? status}
+        </TableStatus>
+      )
     },
-    {
-      dataIndex: 'actions',
-      key: 'actions',
-      render: (_, record) => {
-        if (record.status !== SessionStatusKeysType.allowed) {
-          return null
-        }
-        return (
-          <>
-            {hasRevokePermission && (
-              <Popconfirm
-                title="Закончить эту сессию?"
-                onConfirm={() => handleRevokeSessions(record.id)}
-              >
-                <Tooltip key="LogoutOutlined" title="Закончить сессию">
-                  <Button
-                    data-cy="sessions-page__content__table__logout-btn"
-                    icon={<LogoutOutlined />}
-                  />
-                </Tooltip>
-              </Popconfirm>
-            )}
-          </>
-        )
-      }
-    }
+    ...(canRevoke
+      ? [
+          {
+            title: 'Действия',
+            key: 'actions',
+            width: 112,
+            align: 'right' as const,
+            render: (_: unknown, record: SessionType) =>
+              record.status === SessionStatusKeysType.allowed && (
+                <TableActions>
+                  <Popconfirm
+                    title={`Завершить сессию #${record.id}?`}
+                    description="Пользователю потребуется войти снова."
+                    okText="Завершить"
+                    okButtonProps={{ danger: true }}
+                    cancelText="Отмена"
+                    onConfirm={() => handleRevoke(record.id)}
+                  >
+                    <Tooltip title="Завершить сессию">
+                      <TableActionButton
+                        danger
+                        data-cy="sessions-page__content__table__logout-btn"
+                        aria-label={`Завершить сессию #${record.id}`}
+                        icon={<LogoutOutlined />}
+                        disabled={revokeState.isLoading}
+                        loading={
+                          revokeState.isLoading &&
+                          revokeState.originalArgs === record.id
+                        }
+                      />
+                    </Tooltip>
+                  </Popconfirm>
+                </TableActions>
+              )
+          }
+        ]
+      : [])
   ]
 
-  const totalCount = (currentData ?? data)?.totalCount ?? 0
+  if (!canView)
+    return (
+      <PageAccessDenied
+        title="Пользовательские сессии"
+        context="Пользователи и роли"
+      />
+    )
+
   return (
-    <section className="sessions-page">
-      <header className="sessions-page__header">
-        <span
-          data-cy="sessions-page__header__title"
-          className="sessions-page__header__title"
-        >
-          Пользовательские сессии
-        </span>
-        {isPageAvailable && (
+    <PageLayout
+      className="sessions-page"
+      title="Пользовательские сессии"
+      context="Пользователи и роли"
+      actions={
+        <>
+          <Button
+            icon={<ReloadOutlined />}
+            onClick={() => query.refetch()}
+            loading={query.isFetching}
+          >
+            Обновить
+          </Button>
           <DownloadCsvButton
             type="session"
-            params={{
-              limit,
-              offset: (currentPage - 1) * limit,
-              ...searchParams
-            }}
-            disabled={isFetching || isError || !currentData?.items.length}
+            params={{ limit, offset, ...tableSearch.searchParams }}
+            disabled={query.isFetching || query.isError || !data?.items.length}
           />
-        )}
-      </header>
-      <section className="sessions-page__content">
-        {isError && (
-          <Alert
-            type="error"
-            title="Не удалось загрузить пользовательские сессии"
-          />
-        )}
-        <div className="sessions-page__content__wrap-table">
-          <Table
-            className="sessions-page__content__table"
-            rowKey={(record) => record.id}
-            pagination={false}
-            dataSource={currentData?.items ?? []}
-            loading={isFetching}
-            onChange={handleTableChange}
-            columns={columns}
-          />
-        </div>
-        <div className="sessions-page__content__pagination">
-          <Pagination
-            showSizeChanger={false}
-            current={currentPage}
-            total={totalCount}
-            pageSize={limit}
-            onChange={setCurrentPage}
-            disabled={isFetching}
-          />
-        </div>
-      </section>
-    </section>
+        </>
+      }
+    >
+      {query.isError && (
+        <Alert
+          type="error"
+          showIcon
+          title={
+            data
+              ? 'Не удалось обновить сессии. Показаны ранее загруженные данные.'
+              : 'Не удалось загрузить сессии'
+          }
+          action={
+            <Button
+              icon={<ReloadOutlined />}
+              onClick={() => query.refetch()}
+              loading={query.isFetching}
+            >
+              Повторить
+            </Button>
+          }
+        />
+      )}
+      {usersQuery.isError && (
+        <Alert
+          type="warning"
+          showIcon
+          title="Имена пользователей недоступны. Показаны идентификаторы."
+          action={
+            <Button
+              onClick={() => usersQuery.refetch()}
+              loading={usersQuery.isFetching}
+            >
+              Повторить
+            </Button>
+          }
+        />
+      )}
+      <p className="page-layout__summary" role="status">
+        {query.isFetching
+          ? 'Загрузка сессий…'
+          : data
+            ? `Всего сессий: ${data.totalCount}`
+            : 'Список сессий недоступен'}
+      </p>
+      <Table<SessionType>
+        onChange={(pagination, filters, sorter, extra) => {
+          if (extra.action === 'paginate') return
+          tableSearch.handleTableChange(pagination, filters, sorter, extra)
+          changePage(1)
+        }}
+        className="page-layout__table admin-table"
+        size="middle"
+        rowKey="id"
+        loading={query.isFetching}
+        dataSource={data?.items ?? []}
+        columns={columns}
+        scroll={{ x: 1000 }}
+        pagination={{
+          current: page,
+          total: data?.totalCount ?? query.data?.totalCount ?? 0,
+          pageSize: limit,
+          showSizeChanger: false,
+          hideOnSinglePage: true,
+          onChange: changePage
+        }}
+        locale={{
+          emptyText:
+            query.isFetching || (query.isError && !data) ? null : (
+              <TableEmpty description="Сессий пока нет" />
+            )
+        }}
+      />
+    </PageLayout>
   )
 }
 

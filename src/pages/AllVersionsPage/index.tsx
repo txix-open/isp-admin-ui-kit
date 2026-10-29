@@ -1,23 +1,43 @@
 import {
+  ArrowLeftOutlined,
+  ClearOutlined,
   DeleteOutlined,
   EyeOutlined,
+  EllipsisOutlined,
   ReloadOutlined,
   SwapOutlined
 } from '@ant-design/icons'
-import { Button, message, Popconfirm, Spin, Table, Tag, Tooltip } from 'antd'
+import {
+  Alert,
+  Button,
+  Dropdown,
+  Modal,
+  message,
+  Popconfirm,
+  Table,
+  Tooltip
+} from 'antd'
 import { ColumnsType } from 'antd/es/table'
-import dayjs from 'dayjs'
-import { useEffect, useState } from 'react'
-import { Navigate, useNavigate, useParams } from 'react-router-dom'
-
-import { dateFormats } from '@constants/date'
+import { Key, useEffect, useState } from 'react'
+import { useLocation, useNavigate, useParams } from 'react-router-dom'
 
 import CompareVersionModal from '@components/CompareVersionModal'
 import ConfigurationPreviewModal from '@components/ConfigurationPreviewModal'
+import {
+  TableActionButton,
+  TableActions,
+  TableDate,
+  TableStatus
+} from '@components/TableUI'
 
 import { ConfigType } from '@pages/ModulesPage/module.type'
 
-import { useAppSelector } from '@hooks/redux'
+import { notifyApiError } from '@utils/apiErrorNotifications'
+import {
+  deleteConfirmation,
+  irreversibleDelete
+} from '@utils/deleteConfirmation'
+
 import useRole from '@hooks/useRole'
 
 import configServiceApi from '@services/configService'
@@ -31,38 +51,55 @@ import { VersionType } from '@type/version.type'
 import './all-versions-page.scss'
 
 const AllVersionsPage = () => {
-  const [showCompareModal, setShowCompareModal] = useState<boolean>(false)
+  const [comparison, setComparison] = useState<[VersionType, VersionType]>()
   const [showPreviewModal, setShowPreviewModal] = useState<boolean>(false)
 
   const [currentClickVersion, setCurrentClickVersion] = useState<VersionType>(
     {} as VersionType
   )
+  const [selectedVersionIds, setSelectedVersionIds] = useState<Key[]>([])
+  const [modal, contextHolder] = Modal.useModal()
   const navigate = useNavigate()
+  const { search, state } = useLocation()
   const { id = '', configId = '' } = useParams()
   const {
-    data: versions = [],
+    currentData: versions = [],
     isLoading: isVersionLoading,
-    isError: isVersionError
+    isError: isVersionError,
+    isFetching: isVersionsFetching,
+    refetch: refetchVersions
   } = configServiceApi.useGetAllVersionQuery(configId)
   const {
-    data: currentConfig,
+    currentData: currentConfig,
     isLoading: isCurrentConfigLoading,
-    isError: isCurrentConfigError
+    isError: isCurrentConfigError,
+    isFetching: isConfigFetching,
+    refetch: refetchConfig
   } = configServiceApi.useGetConfigByIdQuery(configId)
-  const [deleteVersion] = configServiceApi.useDeleteVersionMutation()
-  const [createUpdateConfig] = configServiceApi.useCreateUpdateConfigMutation()
+  const [deleteVersion, { isLoading: isDeleting }] =
+    configServiceApi.useDeleteVersionMutation()
+  const [createUpdateConfig, { isLoading: isRestoring }] =
+    configServiceApi.useCreateUpdateConfigMutation()
 
-  const {
-    data: allUsers = [],
-    isLoading: isUsersLoading,
-    isError: isUsersError
-  } = userServiceApi.useGetAllUsersQuery()
-  const { profile } = useAppSelector((state) => state.profileReducer)
+  const { data: allUsers = [], isError: isUsersError } =
+    userServiceApi.useGetAllUsersQuery()
 
   const { role, hasPermission } = useRole()
 
-  const isLoading = isVersionLoading || isCurrentConfigLoading || isUsersLoading
-  const isError = isVersionError || isCurrentConfigError || isUsersError
+  const isLoading = isVersionLoading || isCurrentConfigLoading
+  const isError = isVersionError || isCurrentConfigError
+  const isBusy = isDeleting || isRestoring
+  const selectedVersions = versions
+    .filter((version) => selectedVersionIds.includes(version.id))
+    .sort((a, b) => a.configVersion - b.configVersion)
+  const isCurrentVersion = (version: VersionType) =>
+    currentConfig?.version === version.configVersion
+
+  useEffect(() => {
+    setSelectedVersionIds([])
+    setComparison(undefined)
+    setShowPreviewModal(false)
+  }, [configId])
   const isPageAvailable = hasPermission(PermissionKeysType.module_view)
   const canSetVersion = hasPermission(PermissionKeysType.module_history_set)
   const canRemoveVersion = hasPermission(
@@ -80,130 +117,221 @@ const AllVersionsPage = () => {
     }
   }, [role])
 
-  if (isLoading) {
-    return <Spin />
-  }
-  if (isError) {
-    return <Navigate to={routePaths.error} />
-  }
+  const header = (
+    <header className="all-version-page__header">
+      <Button
+        type="text"
+        icon={<ArrowLeftOutlined />}
+        onClick={() =>
+          navigate(
+            {
+              pathname: `${routePaths.modules}/${id}/configurations`,
+              search
+            },
+            { state: { moduleScrollTop: state?.moduleScrollTop ?? 0 } }
+          )
+        }
+      >
+        К конфигурациям
+      </Button>
+      <div className="all-version-page__heading">
+        <h2 className="all-version-page__title">История версий</h2>
+        <span
+          className="all-version-page__config-name"
+          title={currentConfig?.name || `ID: ${configId}`}
+        >
+          {currentConfig?.name || `ID: ${configId}`}
+        </span>
+      </div>
+    </header>
+  )
 
-  const handeRemoveVersion = (versionId: string) => {
-    deleteVersion(versionId)
+  const handleRemoveVersion = (versionId: string) => {
+    return deleteVersion(versionId)
       .unwrap()
       .then(() => {
-        message.success('Элемент успешно удален')
+        setSelectedVersionIds((ids) => ids.filter((id) => id !== versionId))
+        message.success('Версия успешно удалена')
       })
-      .catch(() => {
-        message.error('Не удалось удалить элемент')
+      .catch((error) => {
+        notifyApiError(error, 'Не удалось удалить версию конфигурации')
       })
   }
   const handleRevertVersion = (newData: Record<string, unknown>) => {
     const sendData = { ...currentConfig, data: newData } as ConfigType
-    createUpdateConfig(sendData)
+    return createUpdateConfig(sendData)
       .unwrap()
       .then(() => {
         message.success('Версия успешно восстановлена')
       })
-      .catch(() => {
-        message.error('Не удалось восстановить версию')
+      .catch((error) => {
+        notifyApiError(error, 'Не удалось восстановить версию')
       })
   }
-  const renderActionsField = (
-    _: unknown,
-    record: VersionType,
-    index: number
-  ) => {
-    return (
-      <div className="all-version-page__actions-field">
-        <Button.Group className="button_group">
-          {canSetVersion && index !== 0 && (
-            <Tooltip title="Установить выбранную версию">
-              <Popconfirm
-                title="Вы действительно хотите установить выбранную версию ?"
-                onConfirm={() => handleRevertVersion(record.data)}
-              >
-                <Button icon={<ReloadOutlined />} />
-              </Popconfirm>
+  const renderActionsField = (_: unknown, record: VersionType) => (
+    <div className="all-version-page__actions-field">
+      <TableActions>
+        <Tooltip title="Просмотреть версию">
+          <TableActionButton
+            aria-label={`Просмотреть версию ${record.configVersion}`}
+            icon={<EyeOutlined />}
+            onClick={() => {
+              setCurrentClickVersion(record)
+              setShowPreviewModal(true)
+            }}
+          />
+        </Tooltip>
+        {canSetVersion && !isCurrentVersion(record) && (
+          <Popconfirm
+            title={`Восстановить версию ${record.configVersion}?`}
+            description="Конфигурация будет сохранена с данными выбранной версии."
+            onConfirm={() => handleRevertVersion(record.data)}
+            okText="Восстановить"
+            cancelText="Отмена"
+            okButtonProps={{ loading: isRestoring }}
+            disabled={isBusy || !currentConfig || isCurrentConfigError}
+          >
+            <Tooltip title="Восстановить версию">
+              <TableActionButton
+                aria-label={`Восстановить версию ${record.configVersion}`}
+                disabled={isBusy || !currentConfig || isCurrentConfigError}
+                icon={<ReloadOutlined />}
+              />
             </Tooltip>
-          )}
-          <Tooltip title="Просмотр версии">
-            <Button
-              onClick={() => {
-                setCurrentClickVersion(record)
-                setShowPreviewModal(true)
-              }}
-              icon={<EyeOutlined />}
+          </Popconfirm>
+        )}
+        {canRemoveVersion && (
+          <Dropdown
+            trigger={['click']}
+            menu={{
+              items: [
+                {
+                  key: 'delete',
+                  label: 'Удалить версию',
+                  icon: <DeleteOutlined />,
+                  danger: true,
+                  disabled: isBusy,
+                  onClick: () =>
+                    modal.confirm({
+                      title: `Удалить версию ${record.configVersion}?`,
+                      content: irreversibleDelete,
+                      ...deleteConfirmation,
+                      onOk: () => handleRemoveVersion(record.id)
+                    })
+                }
+              ]
+            }}
+          >
+            <TableActionButton
+              aria-label={`Другие действия версии ${record.configVersion}`}
+              icon={<EllipsisOutlined />}
             />
-          </Tooltip>
-          <Tooltip title="Сравнение версий">
-            <Button
-              onClick={() => {
-                setCurrentClickVersion(record)
-                setShowCompareModal(true)
-              }}
-              icon={<SwapOutlined />}
-            />
-          </Tooltip>
-          {canRemoveVersion && (
-            <Popconfirm
-              title="Вы действительно хотите удалить выбранную версию ?"
-              onConfirm={() => handeRemoveVersion(record.id)}
-            >
-              <Button danger icon={<DeleteOutlined />} />
-            </Popconfirm>
-          )}
-        </Button.Group>
-      </div>
-    )
-  }
+          </Dropdown>
+        )}
+      </TableActions>
+    </div>
+  )
   const columns: ColumnsType<VersionType> = [
     {
       key: 'configVersion',
       title: 'Версия',
       dataIndex: 'configVersion',
-      render: (value: string, record) => {
-        const isCurrentVersion = currentConfig?.version === record.configVersion
-
-        if (isCurrentVersion) {
-          return (
-            <div className="all-version-page__table__current-version-cell">
-              <span>{value}</span>
-              <Tag color="blue">Текущая версия</Tag>
-            </div>
-          )
-        }
-        return value
-      }
+      width: 230,
+      render: (value: number, record) => (
+        <div className="all-version-page__table__current-version-cell">
+          <span className="admin-table-name admin-table-number">{value}</span>
+          {isCurrentVersion(record) && (
+            <TableStatus tone="info">Текущая версия</TableStatus>
+          )}
+        </div>
+      )
     },
     {
       key: 'createdAt',
       title: 'Создано',
       dataIndex: 'createdAt',
-      render: (value: string) => {
-        return dayjs(value).format(dateFormats.fullFormat)
-      }
+      width: 150,
+      render: (value: string) => <TableDate value={value} />
     },
     {
       key: 'user',
       title: 'Автор',
       dataIndex: 'adminId',
       render: (value: number) => {
-        const user = allUsers.find((user) => user.id === value)
-        if (user) {
-          return `${user.lastName} ${user.firstName}`
-        }
-        return `${profile.lastName} ${profile.firstName}`
+        const user = allUsers.find((user) => String(user.id) === String(value))
+        const name =
+          user && [user.lastName, user.firstName].filter(Boolean).join(' ')
+        return (
+          name || (value != null ? `ID: ${value}` : 'Неизвестный пользователь')
+        )
       }
     },
     {
       key: 'actions',
       title: 'Действия',
       dataIndex: 'actions',
+      width: 152,
+      align: 'right',
       render: renderActionsField
     }
   ]
   return (
     <section className="all-version-page">
+      {contextHolder}
+      {header}
+      {isError && (
+        <Alert
+          type="error"
+          showIcon
+          title="Не удалось загрузить историю версий"
+          description="Повторите загрузку. Ранее полученные данные останутся видимыми."
+          action={
+            <Button
+              disabled={isVersionsFetching || isConfigFetching}
+              onClick={() => {
+                void refetchVersions()
+                void refetchConfig()
+              }}
+            >
+              Повторить
+            </Button>
+          }
+        />
+      )}
+      {isUsersError && (
+        <Alert
+          type="warning"
+          showIcon
+          title="Не удалось загрузить авторов. Показаны их идентификаторы."
+        />
+      )}
+      <div className="all-version-page__selection">
+        <span role="status" aria-live="polite">
+          {selectedVersions.length === 0
+            ? 'Выберите две версии'
+            : selectedVersions.length === 1
+              ? `Версия ${selectedVersions[0].configVersion} — выберите вторую`
+              : `Версии ${selectedVersions[0].configVersion} → ${selectedVersions[1].configVersion}`}
+        </span>
+        <Button
+          icon={<SwapOutlined />}
+          disabled={selectedVersions.length !== 2}
+          onClick={() => {
+            if (selectedVersions.length === 2) {
+              setComparison([selectedVersions[0], selectedVersions[1]])
+            }
+          }}
+        >
+          Сравнить выбранные
+        </Button>
+        <Button
+          icon={<ClearOutlined />}
+          disabled={selectedVersions.length === 0}
+          onClick={() => setSelectedVersionIds([])}
+        >
+          Сбросить
+        </Button>
+      </div>
       {showPreviewModal && (
         <ConfigurationPreviewModal
           versionCompare={true}
@@ -212,26 +340,40 @@ const AllVersionsPage = () => {
           onClose={() => setShowPreviewModal(false)}
         />
       )}
-      {showCompareModal && currentConfig && (
+      {comparison && (
         <CompareVersionModal
-          currentConfig={currentConfig}
-          config={currentClickVersion}
-          open={showCompareModal}
-          onClose={() => setShowCompareModal(false)}
+          versions={comparison}
+          configName={currentConfig?.name || `ID: ${configId}`}
+          open
+          onClose={() => setComparison(undefined)}
         />
       )}
-      <Button
-        className="all-version-page__back-btn"
-        onClick={() => navigate(`${routePaths.modules}/${id}/configurations`)}
-      >
-        Назад
-      </Button>
-      <div className="all-version-page__table">
+      <div className="all-version-page__table admin-table">
         <Table
           columns={columns}
+          loading={isLoading}
+          size="middle"
+          rowSelection={{
+            selectedRowKeys: selectedVersions.map((version) => version.id),
+            onChange: (keys) => setSelectedVersionIds(keys.slice(0, 2)),
+            hideSelectAll: true,
+            columnWidth: 40,
+            getCheckboxProps: (record) => ({
+              disabled:
+                selectedVersions.length >= 2 &&
+                !selectedVersionIds.includes(record.id),
+              'aria-label': `Выбрать версию ${record.configVersion} для сравнения`
+            })
+          }}
+          locale={{
+            emptyText: isError
+              ? 'История версий недоступна'
+              : 'История версий пока пуста'
+          }}
           dataSource={versions}
-          pagination={{ pageSize: 30 }}
+          pagination={{ pageSize: 30, hideOnSinglePage: true }}
           rowKey={(record) => record.id}
+          scroll={{ x: 700 }}
         />
       </div>
     </section>

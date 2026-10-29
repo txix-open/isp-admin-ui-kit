@@ -1,8 +1,6 @@
 import { Tabs } from 'antd'
-import { memo, useEffect, useMemo } from 'react'
-import { useHref, useNavigate, useParams } from 'react-router-dom'
-
-import { MODULES_TAB_KEYS } from '@constants/modules'
+import { memo, useLayoutEffect, useRef } from 'react'
+import { useLocation, useNavigate, useParams } from 'react-router-dom'
 
 import ModuleTabContent from '@widgets/ModuleTabContent'
 
@@ -12,87 +10,54 @@ import { routePaths } from '@routes/routePaths'
 
 const secondColumnItems = [
   { key: 'configurations', name: 'Конфигурации' },
-  { key: 'connections', name: 'Подключения' },
-  { key: 'swagger', name: 'Swagger' }
+  { key: 'connections', name: 'Подключения' }
 ] as const
 
 const ModuleTabs = ({
   activeTab,
-  setActiveTab,
   currentModule,
   searchParams
 }: ModuleTabsPropsType) => {
   const navigate = useNavigate()
+  const location = useLocation()
+  const contentRef = useRef<HTMLDivElement>(null)
   const { id: selectedItemId = '' } = useParams()
-  const swaggerHref = useHref(
-    `${routePaths.modules}/${selectedItemId}/${routePaths.swagger}`
-  )
-
-  const hasSwagger = useMemo(
-    () =>
-      currentModule?.status?.some((status) =>
-        status.endpoints?.some((e) => e.path.includes('swagger'))
-      ),
-    [currentModule]
-  )
-
-  const resolvedActiveTab = useMemo(() => {
-    return activeTab === MODULES_TAB_KEYS.swagger && !hasSwagger
-      ? 'configurations'
-      : activeTab
-  }, [activeTab, hasSwagger])
+  useLayoutEffect(() => {
+    if (contentRef.current) {
+      contentRef.current.scrollTop = location.state?.moduleScrollTop ?? 0
+    }
+  }, [location.key])
 
   const navigateToTab = (tabKey: string) => {
-    if (tabKey === MODULES_TAB_KEYS.swagger) {
-      window.open(swaggerHref, '_blank')
-      return
-    }
-
     const params = new URLSearchParams(searchParams)
-    navigate(
-      {
-        pathname: `${selectedItemId}/${tabKey}`,
-        search: params.toString()
-      },
-      { replace: true }
-    )
+    navigate({
+      pathname: `${routePaths.modules}/${selectedItemId}/${tabKey}`,
+      search: params.toString()
+    })
   }
-
-  useEffect(() => {
-    if (resolvedActiveTab !== activeTab) {
-      setActiveTab(resolvedActiveTab)
-      navigateToTab(resolvedActiveTab)
-    }
-  }, [resolvedActiveTab])
-
-  const items = useMemo(
-    () =>
-      secondColumnItems.filter(({ key }) => key !== 'swagger' || hasSwagger),
-    [hasSwagger]
-  )
 
   return (
     <Tabs
-      activeKey={resolvedActiveTab}
+      activeKey={activeTab}
       className="modules-page__tabs"
-      onChange={(key) => {
-        navigateToTab(key)
-        if (key !== MODULES_TAB_KEYS.swagger) {
-          setActiveTab(key)
-        }
-      }}
-      items={items.map(({ key, name }) => ({
+      onChange={navigateToTab}
+      items={secondColumnItems.map(({ key, name }) => ({
         key,
         label: name,
-        disabled: !selectedItemId,
-        children: (
-          <div className="modules-page__content">
-            <ModuleTabContent
-              selectedItemId={selectedItemId}
-              currentModule={currentModule}
-            />
-          </div>
-        )
+        disabled: !currentModule,
+        children:
+          key === activeTab ? (
+            <div
+              className="modules-page__content"
+              key={selectedItemId}
+              ref={contentRef}
+            >
+              <ModuleTabContent
+                selectedItemId={selectedItemId}
+                currentModule={currentModule}
+              />
+            </div>
+          ) : null
       }))}
     />
   )

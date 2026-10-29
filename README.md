@@ -1,30 +1,31 @@
 # isp-admin-ui-kit
 
-[![npm version](https://img.shields.io/npm/v/isp-admin-ui-kit.svg)](https://www.npmjs.com/package/isp-admin-ui-kit) [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![npm version](https://img.shields.io/npm/v/isp-admin-ui-kit.svg)](https://www.npmjs.com/package/isp-admin-ui-kit)
 
-**isp-admin-ui-kit** — это компонент базовой админ-панели для использования в других проектах. Библиотека предоставляет готовый каркас, навигацию, управление состоянием и типовые страницы, позволяя сосредоточиться на бизнес-логике.
+React-библиотека для проектов, которым нужна готовая админ-панель ISP. Подключите `AdminBase` и Redux-хранилище, чтобы получить общий лейаут, маршрутизацию, меню с учётом прав и встроенные страницы. Разделы приложения можно добавить через `customRouters`.
 
 ## 📑 Содержание
 
 - [Возможности](#-возможности)
 - [Установка и зависимости](#-установка-и-зависимости)
 - [Настройка Monaco Editor](#-настройка-monaco-editor)
+  - [Monaco Workers в Vite](#monaco-workers-в-vite)
 - [Быстрый старт](#-быстрый-старт)
 - [Настройка компонента AdminBase](#-настройка-компонента-adminbase)
 - [Работа с данными и Store](#-работа-с-данными-и-store)
 - [Встроенные страницы](#-встроенные-страницы)
 - [Разработка и обновление версии](#-разработка-и-обновление-версии)
+  - [Тестирование](#тестирование)
 
 ---
 
 ## 🚀 Возможности
 
-- **Готовый Layout**: Структура админ-панели с меню и навигацией.
-- **State Management**: Redux Toolkit из коробки.
-- **UI Kit**: Компоненты на базе Ant Design.
-- **Code Editor**: Интеграция Monaco Editor.
-- **Базовые страницы**: Пользователи, роли, логи, модули.
-- **Типизация**: Полная поддержка TypeScript.
+- **Общий интерфейс.** `PageLayout` и `PageHeader` для встроенных и пользовательских разделов, светлая и тёмная темы Ant Design.
+- **Маршрутизация и права.** Встроенный роутер, меню с учётом разрешений и подключение маршрутов приложения.
+- **Данные.** Redux Toolkit, RTK Query и готовые API-сервисы для встроенных разделов.
+- **Конфигурации модулей.** Форма по JSON Schema, JSON и редактор Monaco, история и сравнение версий, предупреждение при уходе с несохранёнными изменениями.
+- **Авторизация.** Вход и выход администратора, включая OAuth через СУДИР.
 
 ### OAuth / СУДИР
 
@@ -56,31 +57,29 @@
 npm install isp-admin-ui-kit
 ```
 
-### 2. Установка зависимостей (Peer Dependencies)
+### 2. Совместимые зависимости
 
-Для корректной работы необходимо установить следующие библиотеки:
-
-```bash
-npm install @monaco-editor/react antd axios dayjs monaco-editor react react-dom react-hook-form react-router-dom react-redux @reduxjs/toolkit swagger-ui-react isp-ui-kit
-```
-
-**Требуемые версии:**
+Приложение и кит используют общие экземпляры React и React DOM. При интеграции сверяйте версии с `peerDependencies` установленной версии пакета. Ниже указаны диапазоны из текущего `package.json`.
 
 ```json
 {
+  "@ant-design/icons": "^6.2.5",
+  "@dagrejs/dagre": "^3.0.0",
   "@monaco-editor/react": "^4.7.0",
-  "@reduxjs/toolkit": "^2.2.3",
-  "antd": ">=5.12.2",
-  "axios": "^1.7.7",
-  "dayjs": "^1.11.10",
-  "isp-ui-kit": ">=1.0.0",
+  "@reduxjs/toolkit": "^2.12.0",
+  "antd": ">=6.0.0",
+  "axios": "^1.17.0",
+  "dayjs": "^1.11.21",
+  "isp-ui-kit": "^2.3.4",
   "monaco-editor": "^0.55.1",
-  "react": ">=18.2.0 <19",
-  "react-dom": ">=18.2.0 <19",
-  "react-hook-form": "^7.54.0",
-  "react-redux": "^9.1.0",
-  "react-router-dom": "^6.22.3",
-  "swagger-ui-react": "^5.31.0"
+  "react": ">=18",
+  "react-dom": ">=18",
+  "react-hook-form": "^7.78.0",
+  "react-redux": "^9.3.0",
+  "react-router-dom": "^6.30.4",
+  "reactflow": "^11.11.4",
+  "redoc": "^2.5.3",
+  "yaml": "^2.9.0"
 }
 ```
 
@@ -93,7 +92,7 @@ npm install @monaco-editor/react antd axios dayjs monaco-editor react react-dom 
 Необходимо выполнить конфигурацию и инициализацию монико-редактора в точке входа вашего приложения (например, `main.tsx` или `index.tsx`) **до** рендеринга компонента `AdminBase`.
 
 ```tsx
-import loader from '@monaco-editor/react'
+import { loader } from '@monaco-editor/react'
 import * as monaco from 'monaco-editor'
 
 // Конфигурация loader
@@ -109,13 +108,12 @@ loader.init().then(() => {
 **Пример полной точки входа (`main.tsx`):**
 
 ```tsx
-import loader from '@monaco-editor/react'
+import { loader } from '@monaco-editor/react'
 import { baseSetupStore, AdminBase } from 'isp-admin-ui-kit'
 import * as monaco from 'monaco-editor'
 import React from 'react'
 import ReactDOM from 'react-dom/client'
 import { Provider } from 'react-redux'
-import { BrowserRouter } from 'react-router-dom'
 
 // 1. Настройка Monaco
 loader.config({ monaco })
@@ -127,24 +125,18 @@ loader.init().then(() => {
   ReactDOM.createRoot(document.getElementById('root')!).render(
     <React.StrictMode>
       <Provider store={store}>
-        <BrowserRouter>
-          <AdminBase />
-        </BrowserRouter>
+        <AdminBase />
       </Provider>
     </React.StrictMode>
   )
 })
 ```
 
-## Настройка Monaco Worker (Vite / Rollup)
+### Monaco Workers в Vite
 
-⚠️ Важно: Если ваше приложение или библиотека собирается через Vite или Rollup, необходимо явно подключить Monaco Workers. Без этого редактор может выдавать ошибки или не работать подсветка синтаксиса.
+Подключите workers в точке входа Vite до вызова `loader.init()`. Для другого сборщика настройте загрузку workers по его правилам.
 
-🔧 Пример настройки
-
-Добавьте конфигурацию до инициализации loader:
-
-```jsx
+```tsx
 import { loader } from '@monaco-editor/react';
 import * as monaco from 'monaco-editor';
 
@@ -177,21 +169,18 @@ loader.init();
 
 ## ⚡ Быстрый старт
 
-После настройки Monaco Editor, базовое подключение выглядит следующим образом:
+После настройки Monaco оберните `AdminBase` в Redux `Provider`. `AdminBase` сам создаёт роутер и устанавливает базовый путь из `BASE_URL`. Пользовательские маршруты передавайте через `customRouters`.
 
 ```tsx
 import { baseSetupStore, AdminBase } from 'isp-admin-ui-kit'
 import { Provider } from 'react-redux'
-import { BrowserRouter } from 'react-router-dom'
 
 const store = baseSetupStore()
 
 const App = () => {
   return (
     <Provider store={store}>
-      <BrowserRouter>
-        <AdminBase />
-      </BrowserRouter>
+      <AdminBase />
     </Provider>
   )
 }
@@ -233,7 +222,7 @@ const App = () => {
 const customRouters = [
   {
     route: '/dashboard',
-    key: 'dashboard', // Должно совпадать с route
+    key: '/dashboard',
     label: 'Dashboard',
     element: <Dashboard />,
     permissions: ['admin', 'user'],
@@ -314,29 +303,48 @@ const { data, isLoading, isError } =
 
 ## 📄 Встроенные страницы
 
-Библиотека предоставляет готовый набор страниц:
-
-- **Приложения**: Управление настройками приложений.
-- **Доступы приложений**: Настройка методов доступа.
-- **Модули**: Конфигурация системных модулей.
-- **Пользователи**: Список и управление пользователями.
-- **Роли**: Управление ролями и правами.
-- **Сессии**: Журнал пользовательских сессий.
-- **Журналы ИБ**: Просмотр событий безопасности.
+| Раздел | Что в нём есть |
+| --- | --- |
+| Приложения и группы | Списки групп и приложений, карточка приложения, выпуск и отзыв токенов |
+| Доступы приложений | Просмотр маршрутов и настройка разрешённых методов |
+| Модули | Подключения, конфигурации, история версий, OpenAPI и карта связей |
+| Пользователи и роли | Учётные записи, назначение ролей и настройка прав |
+| Сессии и журнал событий | Просмотр и завершение сессий, аудит событий |
+| Переменные | Настройка общих значений и секретов для конфигураций |
+| Git и профиль | Подключения Git, работа с файлами конфигурации, настройки учётной записи |
 
 ---
 
 ## 🛠 Разработка и обновление версии
 
-### Сборка пакета
+### Сборка и Storybook
 
-```bash
-# Установка зависимостей
-npm install
-
-# Сборка
+```sh
+npm ci
 npm run build
+npm run storybook
 ```
+
+Сборка создаёт ESM, CommonJS и декларации TypeScript в `dist/`. Storybook запускается на порту `6006`.
+
+### Тестирование
+
+```sh
+npx playwright install chromium
+npm test
+```
+
+`npm test` запускает проверки логики и браузерные сценарии через Playwright. Для запуска только браузерных сценариев используйте `npm run test:e2e`. Стенд собирается из компонентов кита, использует фиктивные данные и блокирует сетевые запросы. При сбое скриншоты и трассировки сохраняются в `test-results/`.
+
+Playwright подключён как зависимость для разработки. Конфигурация, тесты и отчёты исключены из npm-пакета. [Подробная инструкция по тестам](tests/README.md).
+
+Для интерактивного запуска и отладки браузерных сценариев используйте `npm run test:e2e:ui`. Команда соберёт стенд и откроет интерфейс Playwright.
+
+### Проверки перед push
+
+Husky запускает `npm run check:push` перед отправкой в Git. Команда последовательно выполняет тесты, сборку пакета и сборку Storybook. Ошибка или превышение таймаута останавливает push.
+
+Для ручной проверки запустите `npm run check:push`. Для разового пропуска хука используйте `HUSKY=0 git push`.
 
 ### Проверка на стенде без публикации в npm
 
@@ -347,7 +355,7 @@ production-версию и создаёт `isp-admin-ui-kit-<version>.tgz` бе�
 выполните (подставьте версию созданного архива):
 
 ```bash
-npm install ./vendor/isp-admin-ui-kit-1.11.0.tgz
+npm install ./vendor/isp-admin-ui-kit-1.14.1.tgz
 ```
 
 Закоммитьте в приложении архив, `package.json` и `package-lock.json` и запускайте

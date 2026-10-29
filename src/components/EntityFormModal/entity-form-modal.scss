@@ -1,0 +1,19 @@
+@use './entity-fields' as *;
+
+.entity-form-modal {
+  @include stable-entity-fields;
+  fieldset {
+    min-width: 0;
+    margin: 0;
+    padding: 0;
+    border: 0;
+  }
+  p:first-child {
+    margin-top: 0;
+    margin-bottom: 24px;
+    color: var(--ant-color-text-secondary);
+  }
+  .application-form-id > .ant-btn {
+    margin-bottom: 22px;
+  }
+}

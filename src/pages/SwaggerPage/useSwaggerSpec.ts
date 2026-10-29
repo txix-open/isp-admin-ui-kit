@@ -1,77 +1,71 @@
-import { useEffect, useMemo, useState } from 'react'
-
-import { ModuleType } from '@pages/ModulesPage/module.type'
+import { useMemo } from 'react'
 
 import modulesServiceApi from '@services/modulesService'
 import swaggerServiceApi from '@services/swaggerService'
 
-const getSwaggerPath = (modules: ModuleType[], moduleId?: string) => {
-  if (!moduleId || !modules.length) {
-    return null
-  }
-
-  const module = modules.find((item) => item.id === moduleId)
-
-  if (!module) {
-    return null
-  }
-
-  const swaggerEndpoint = module.status
-    ?.flatMap((status) => status.endpoints)
-    ?.find((endpoint) => endpoint?.path?.includes('swagger'))
-
-  return swaggerEndpoint ? `/${swaggerEndpoint.path}` : null
+export interface SwaggerSpec {
+  openapi?: string
+  swagger?: string
+  info?: { title?: string; version?: string }
+  paths?: Record<string, Record<string, unknown>>
+  [key: string]: unknown
 }
 
-const parseSwaggerSpec = (swaggerSpec?: string) => {
-  if (!swaggerSpec) {
-    return null
-  }
-
+const parseSwaggerSpec = (
+  value: unknown
+): { spec: SwaggerSpec | null; invalid: boolean } => {
+  if (value === undefined || value === null || value === '')
+    return { spec: null, invalid: false }
   try {
-    return typeof swaggerSpec === 'string'
-      ? JSON.parse(swaggerSpec)
-      : swaggerSpec
+    const spec = typeof value === 'string' ? JSON.parse(value) : value
+    if (!spec || typeof spec !== 'object' || Array.isArray(spec))
+      return { spec: null, invalid: true }
+    return { spec, invalid: false }
   } catch {
-    return null
+    return { spec: null, invalid: true }
   }
 }
 
 export const useSwaggerSpec = (moduleId?: string) => {
-  const {
-    data: modules = [],
-    isLoading: isModulesLoading,
-    isFetching: isModulesFetching
-  } = modulesServiceApi.useGetModulesQuery('modules')
-
-  const [swaggerPath, setSwaggerPath] = useState<string | null>()
-
-  useEffect(() => {
-    if (isModulesLoading || isModulesFetching) {
-      return
-    }
-
-    setSwaggerPath(getSwaggerPath(modules, moduleId))
-  }, [modules, moduleId, isModulesLoading, isModulesFetching])
-
-  const {
-    data: swaggerSpec,
-    isLoading: isSwaggerLoading,
-    isFetching: isSwaggerFetching
-  } = swaggerServiceApi.useGetSwaggerQuery(swaggerPath || '', {
-    skip: !swaggerPath
-  })
-
-  const parsedSpec = useMemo(
-    () => parseSwaggerSpec(swaggerSpec),
-    [swaggerSpec]
+  const modulesQuery = modulesServiceApi.useGetModulesQuery('modules')
+  const module = modulesQuery.data?.find((item) => String(item.id) === moduleId)
+  const endpoint = module?.status
+    ?.flatMap((status) => status.endpoints ?? [])
+    .find((item) => item.path?.includes('swagger'))
+  const path = endpoint ? `/${endpoint.path.replace(/^\/+/, '')}` : ''
+  const specQuery = swaggerServiceApi.useGetSwaggerQuery(path, { skip: !path })
+  const { spec, invalid } = useMemo(
+    () => parseSwaggerSpec(specQuery.currentData),
+    [specQuery.currentData]
   )
-  const isResolvingSwaggerPath =
-    Boolean(moduleId) &&
-    (isModulesLoading || isModulesFetching || swaggerPath === undefined)
-
+  const isError =
+    modulesQuery.isError || (Boolean(path) && specQuery.isError) || invalid
+  const refetch = () => {
+    if (path) void specQuery.refetch()
+    if (!path || modulesQuery.isError) void modulesQuery.refetch()
+  }
   return {
-    parsedSpec,
-    isLoading: isResolvingSwaggerPath || isSwaggerLoading || isSwaggerFetching
+    parsedSpec: spec,
+    module,
+    isLoading:
+      modulesQuery.isLoading ||
+      (Boolean(path) && !spec && specQuery.isFetching),
+    isFetching:
+      modulesQuery.isFetching || (Boolean(path) && specQuery.isFetching),
+    isError,
+    errorTitle: invalid
+      ? 'Не удалось прочитать спецификацию'
+      : 'Не удалось загрузить документацию API',
+    errorDescription: invalid
+      ? 'Сервис вернул некорректный JSON. Обновите документацию или проверьте спецификацию модуля.'
+      : spec
+        ? 'Показана ранее загруженная документация.'
+        : 'Повторите загрузку документации.',
+    emptyDescription: !module
+      ? 'Модуль не найден'
+      : !path
+        ? 'Модуль не предоставляет Swagger'
+        : 'Сервис не вернул спецификацию',
+    refetch
   }
 }

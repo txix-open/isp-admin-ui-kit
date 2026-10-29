@@ -1,13 +1,13 @@
-import { MessageInstance } from 'antd/es/message/interface'
 import { AxiosError } from 'axios'
 import { UseFormSetError, FieldValues, Path } from 'react-hook-form'
 
 import { MSPError } from '@type/index'
 
+import { ignoreApiError, notifyApiError } from './apiErrorNotifications'
+
 type ErrorHandlerOptions<T extends FieldValues> = {
   setError?: UseFormSetError<T>
   fieldName?: string
-  message?: MessageInstance
 }
 
 const handleVariableApiError = <T extends FieldValues>(
@@ -16,34 +16,35 @@ const handleVariableApiError = <T extends FieldValues>(
   options?: ErrorHandlerOptions<T>
 ) => {
   const { response, status } = error
-  const { setError, fieldName = 'name', message } = options || {}
+  const { setError, fieldName = 'name' } = options || {}
 
-  if (response && status === 400) {
-    switch (parseInt(response.data.errorCode)) {
+  if (response && (response.status ?? status) === 400) {
+    switch (parseInt(response.data?.errorCode ?? '', 10)) {
       case 2006: {
-        message?.error('Переменная c таким именем не найдена')
-        break
+        notifyApiError(error, 'Переменная c таким именем не найдена')
+        return
       }
       case 2007: {
         if (setError && fieldName) {
+          ignoreApiError(error)
           setError(fieldName as Path<T>, {
             message: 'Переменная с таким именем уже существует'
           })
         } else {
-          message?.error('Переменная с таким именем уже существует')
+          notifyApiError(error, 'Переменная с таким именем уже существует')
         }
-        break
+        return
       }
       case 2008: {
-        message?.error(
+        notifyApiError(
+          error,
           'Переменная используется в конфигурациях и не может быть удалена'
         )
-        break
+        return
       }
     }
-  } else {
-    message?.error(defaultMessage)
   }
+  notifyApiError(error, defaultMessage)
 }
 
 export { handleVariableApiError }

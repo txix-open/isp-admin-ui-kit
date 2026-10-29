@@ -1,11 +1,13 @@
-import { Spin, Table, Tag, Tooltip } from 'antd'
+import { Alert, Button, Empty, Table, Tag } from 'antd'
 import { ColumnsType } from 'antd/es/table'
 import dayjs from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime'
-import { memo, useEffect, useState } from 'react'
+import { memo, useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 
 import { dateFormats } from '@constants/date'
+
+import { PageLoading } from '@components/PageLayout'
 
 import {
   AddressType,
@@ -24,21 +26,23 @@ import { routePaths } from '@routes/routePaths'
 
 import './connections.scss'
 
+dayjs.extend(relativeTime)
+
 const Connections = () => {
-  const { data: connectionsList = [], isLoading: isModulesLoading } =
-    modulesServiceApi.useGetModulesQuery('modules')
+  const {
+    data: connectionsList = [],
+    isLoading: isModulesLoading,
+    isError,
+    refetch
+  } = modulesServiceApi.useGetModulesQuery('modules')
   const { role } = useRole()
   const navigate = useNavigate()
   const { id } = useParams()
-  const [obj, setObj] = useState<ModuleStatusType[] | []>([])
+  const instances =
+    connectionsList.find((item: ModuleType) => String(item.id) === id)
+      ?.status ?? []
 
   const isLoading = isModulesLoading
-
-  useEffect(() => {
-    const module = connectionsList.find((item: ModuleType) => item.id === id)
-
-    setObj(module?.status ?? [])
-  }, [connectionsList, id])
 
   useEffect(() => {
     if (!role) {
@@ -47,7 +51,7 @@ const Connections = () => {
   }, [role])
 
   if (isLoading) {
-    return <Spin />
+    return <PageLoading label="Загрузка подключений…" />
   }
 
   const formatFullDate = (obj: string) =>
@@ -57,8 +61,11 @@ const Connections = () => {
     if (endpoints && endpoints.length) {
       return (
         <ul className="connection-page__endpoint-list">
-          {endpoints.map(({ path, httpMethod, inner }) => (
-            <li className="connection-page__endpoint-list__item" key={path}>
+          {endpoints.map(({ path, httpMethod, inner }, index) => (
+            <li
+              className="connection-page__endpoint-list__item"
+              key={`${httpMethod}:${path}:${index}`}
+            >
               {httpMethod && (
                 <span className="connection-page__method-tag">
                   <Tag color={httpMethodColors[httpMethod]} variant="filled">
@@ -66,7 +73,7 @@ const Connections = () => {
                   </Tag>
                 </span>
               )}
-              {path}
+              <code>{path}</code>
               {inner && (
                 <Tag
                   className="connection-page__inner-tag"
@@ -115,10 +122,11 @@ const Connections = () => {
       dataIndex: 'establishedAt',
       key: 'establishedAt',
       render: (val: string) => {
-        dayjs.extend(relativeTime)
-
         return (
-          <Tooltip title={formatFullDate(val)}>{dayjs(val).fromNow()}</Tooltip>
+          <div className="connection-page__date">
+            <span>{dayjs(val).fromNow()}</span>
+            <span>{formatFullDate(val)}</span>
+          </div>
         )
       }
     },
@@ -132,19 +140,36 @@ const Connections = () => {
 
   return (
     <section className="connection-page">
-      <div className="connection-page__content">
-        <div className="connection-page__content__wrap-table">
-          <Table
-            rowKey={(record) => record.id}
-            pagination={false}
-            dataSource={obj}
-            columns={columns}
-            expandable={{
-              expandedRowRender: (i) => renderEndpoints(i)
-            }}
-          />
+      {isError && (
+        <Alert
+          type="error"
+          showIcon
+          title="Не удалось обновить подключения"
+          action={<Button onClick={() => refetch()}>Повторить</Button>}
+        />
+      )}
+      {(!isError || instances.length > 0) && (
+        <div className="connection-page__content">
+          <div className="connection-page__content__wrap-table">
+            <Table
+              rowKey={(record) => record.id}
+              pagination={false}
+              dataSource={instances}
+              columns={columns}
+              scroll={{ x: 820 }}
+              locale={{
+                emptyText: (
+                  <Empty description="У модуля нет подключённых экземпляров" />
+                )
+              }}
+              expandable={{
+                expandedRowRender: (i) => renderEndpoints(i),
+                rowExpandable: (instance) => Boolean(instance.endpoints?.length)
+              }}
+            />
+          </div>
         </div>
-      </div>
+      )}
     </section>
   )
 }

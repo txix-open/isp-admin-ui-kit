@@ -10,5 +10,5 @@ export type GitConfigurationModalType = Omit<
   'onOk' | 'children'
 > & {
   credentials?: CredentialsInfoType
-  onOk: (data: CredentialsType) => void
+  onOk: (data: CredentialsType, onSaved?: () => void) => void | Promise<void>
 }

@@ -1,7 +1,7 @@
-import { LockOutlined, UserOutlined } from '@ant-design/icons'
-import { Button, Divider, Layout, message } from 'antd'
+import { ControlOutlined } from '@ant-design/icons'
+import { Alert, Button, Divider, Layout } from 'antd'
 import { AxiosError } from 'axios'
-import { FormInput, useAuth } from 'isp-ui-kit'
+import { FormInput, FormInputPassword, useAuth } from 'isp-ui-kit'
 import { ReactNode } from 'react'
 import { useForm } from 'react-hook-form'
 import { useNavigate } from 'react-router-dom'
@@ -16,6 +16,7 @@ import { messages } from '@constants/messages'
 
 import ClearStateOnLogin from '@pages/LoginPage/ClearStateOnLogin'
 
+import { notifyApiError } from '@utils/apiErrorNotifications'
 import { getConfigProperty } from '@utils/configUtils'
 import { LocalStorage } from '@utils/localStorageUtils'
 
@@ -27,9 +28,7 @@ import { LoginRequest } from '@type/login.type'
 import './login-page.scss'
 
 const passwordLoginEnabled = getConfigProperty('ENABLE_PASSWORD_LOGIN', true)
-
 const LoginPage = () => {
-  const [messageApi, contextHolder] = message.useMessage()
   const oAuthLoginEnabled = getConfigProperty(
     'ENABLE_OAUTH_LOGIN',
     import.meta.env.VITE_ENABLE_OAUTH_LOGIN
@@ -106,7 +105,7 @@ const LoginPage = () => {
         LocalStorage.set(localStorageKeys.OAUTH_LOGIN, true)
         window.location.href = response.loginUrl
       })
-      .catch(() => messageApi.error(messages.serverError))
+      .catch((error) => notifyApiError(error, messages.serverError))
   }
 
   const renderInternalAuthForm = () => {
@@ -115,25 +114,27 @@ const LoginPage = () => {
     }
 
     return (
-      <>
+      <div className="login-page__fields">
         <ClearStateOnLogin />
         <FormInput
           data-cy="email-input"
           control={control}
           name="email"
-          className="login-page__content__email-field"
-          prefix={<UserOutlined className="color" />}
-          placeholder="Логин"
+          id="login-email"
+          label="Логин"
+          size="large"
+          disabled={isLoading}
           rules={{ required: ValidationRules.required }}
         />
-        <FormInput
+        <FormInputPassword
           data-cy="password-input"
           control={control}
           name="password"
-          className="login-page__content__password-field"
-          prefix={<LockOutlined className="color" />}
-          type="password"
-          placeholder="Пароль"
+          id="login-password"
+          label="Пароль"
+          size="large"
+          disabled={isLoading}
+          trimOnBlur={false}
           rules={{ required: ValidationRules.required }}
         />
         <Button
@@ -142,12 +143,13 @@ const LoginPage = () => {
           loading={isLoading}
           type="primary"
           className="login-page__content__submit-btn"
-          onClick={handleSubmit(handleSubmitForm)}
+          size="large"
+          block
           htmlType="submit"
         >
           Войти
         </Button>
-      </>
+      </div>
     )
   }
 
@@ -161,28 +163,60 @@ const LoginPage = () => {
         data-cy="submit-oAuth-btn"
         disabled={isLoading}
         loading={isLoading}
-        type="text"
+        type={passwordLoginEnabled ? 'default' : 'primary'}
+        htmlType="button"
+        size="large"
+        block
         className="login-page__content__submit-oAuth-btn"
         onClick={handleSubmitOAuthForm}
       >
-        {oAuthLoginButtonText}
+        {oAuthLoginButtonText || 'Корпоративный вход'}
       </Button>
     )
   }
 
   return (
-    <Layout>
-      <section className="login-page">
-        {contextHolder}
-        <form className="login-page__content">
-          <h1 data-cy="login-title" className="login-page__content__title">
-            Вход в систему
-          </h1>
-          <Divider />
+    <Layout className="login-page-shell">
+      <main className="login-page">
+        <form
+          className="login-page__panel"
+          aria-labelledby="login-title"
+          onSubmit={
+            passwordLoginEnabled
+              ? handleSubmit(handleSubmitForm)
+              : (event) => event.preventDefault()
+          }
+        >
+          <header className="login-page__heading">
+            <span className="login-page__brand-mark" aria-hidden="true">
+              <ControlOutlined />
+            </span>
+            <div>
+              <div className="login-page__brand">ISP</div>
+              <h1
+                id="login-title"
+                data-cy="login-title"
+                className="login-page__title"
+              >
+                Вход
+              </h1>
+            </div>
+          </header>
           {renderInternalAuthForm()}
+          {passwordLoginEnabled && oAuthLoginEnabled && (
+            <Divider plain>или</Divider>
+          )}
           {renderOAuthAuthBtn()}
+          {!passwordLoginEnabled && !oAuthLoginEnabled && (
+            <Alert
+              type="info"
+              showIcon
+              title="Вход пока недоступен"
+              description="Обратитесь к администратору для настройки способа входа."
+            />
+          )}
         </form>
-      </section>
+      </main>
     </Layout>
   )
 }

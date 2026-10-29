@@ -1,12 +1,10 @@
-@use "src/constants/style/styleConst" as *;
-
+@use 'src/constants/style/styleConst' as *;
 
 .active-configurations-table-actions-field {
   display: flex;
   gap: $basic-margin;
-}
-
-.dropdown {
-  display: flex;
-  gap: $basic-margin;
+  justify-content: flex-end;
+  .ant-btn.active-configurations-table-actions-field__activate {
+    color: var(--ant-color-success-text);
+  }
 }

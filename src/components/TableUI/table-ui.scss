@@ -1,0 +1,105 @@
+.admin-table {
+  min-width: 0;
+  .ant-table-thead > tr > th {
+    color: var(--ant-color-text-secondary);
+    background: var(--ant-color-fill-alter);
+    font-size: 13px;
+    font-weight: 500;
+    &::before {
+      display: none;
+    }
+  }
+  .ant-table-thead > tr > th,
+  .ant-table-tbody > tr > td {
+    padding: 12px 16px;
+    vertical-align: middle;
+    border-bottom-color: var(--ant-color-border-secondary);
+    overflow-wrap: anywhere;
+  }
+  .ant-table-pagination {
+    margin-bottom: 0;
+  }
+  .ant-table-cell.ant-table-selection-column {
+    padding-inline: 8px;
+  }
+}
+.admin-table-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  white-space: nowrap;
+}
+.ant-btn.admin-table-action {
+  flex: none;
+  width: 32px;
+  min-width: 32px;
+  height: 32px;
+  padding: 0;
+  border-radius: 6px;
+  box-shadow: none;
+}
+.admin-table-date {
+  display: inline-flex;
+  flex-direction: column;
+  gap: 2px;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+  > span:last-child {
+    color: var(--ant-color-text-secondary);
+    font-size: 12px;
+  }
+}
+.admin-table-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-width: 0;
+}
+
+.admin-table-name {
+  font-weight: 600;
+}
+
+.admin-table-meta {
+  color: var(--ant-color-text-secondary);
+}
+
+.admin-table-number {
+  font-variant-numeric: tabular-nums;
+}
+
+.admin-table-status {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 6px;
+  color: var(--ant-color-text-secondary);
+  font-size: 13px;
+
+  &[data-tone='success'] {
+    color: var(--ant-color-success-text);
+  }
+  &[data-tone='warning'] {
+    color: var(--ant-color-warning-text);
+  }
+  &[data-tone='error'] {
+    color: var(--ant-color-error-text);
+  }
+  &[data-tone='info'] {
+    color: var(--ant-color-info-text);
+  }
+}
+
+.admin-table-empty.ant-empty {
+  margin-block: 8px;
+
+  .ant-empty-image {
+    height: 32px;
+  }
+
+  .ant-empty-footer {
+    margin-top: 12px;
+  }
+}

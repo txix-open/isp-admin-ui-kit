@@ -1,53 +1,129 @@
-@use "src/constants/style/styleConst" as *;
+.login-page-shell {
+  min-height: 100vh;
+  min-height: 100dvh;
+  background-color: var(--ant-color-bg-layout);
+  background-image: radial-gradient(
+    ellipse 640px 440px at 50% 44%,
+    color-mix(in srgb, var(--ant-color-primary) 9%, transparent),
+    transparent
+  );
+}
 
 .login-page {
-  height: 100vh;
-  background: $background-color;
+  --login-input-border: color-mix(
+    in srgb,
+    var(--ant-color-text-placeholder) 70%,
+    var(--ant-color-border)
+  );
 
-  display: flex;
+  display: grid;
+  flex: 1;
+  grid-template-columns: minmax(0, 1fr);
+  align-items: center;
+  justify-items: center;
+  min-width: 0;
+  padding: 24px;
+  color: var(--ant-color-text);
+  font-family: var(--ant-font-family);
+
+  &__panel {
+    width: 100%;
+    max-width: 416px;
+    padding: 32px;
+    border: 1px solid var(--ant-color-border-secondary);
+    border-radius: var(--admin-panel-radius, 16px);
+    background: var(--ant-color-bg-container);
+    box-shadow: var(--ant-page-panel-shadow);
+  }
+
+  &__heading {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 24px;
+  }
+
+  &__brand-mark {
+    display: grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    border: 1px solid var(--ant-color-primary-border);
+    border-radius: 9px;
+    background: var(--ant-color-primary-bg);
+    color: var(--ant-color-primary-text);
+    font-size: 20px;
+  }
+
+  &__brand {
+    color: var(--ant-color-text-secondary);
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 16px;
+  }
+
+  &__title {
+    margin: 0;
+    font-size: 24px;
+    font-weight: 600;
+    line-height: 28px;
+    letter-spacing: -0.02em;
+  }
+
+  &__fields {
+    display: grid;
+    gap: 16px;
+  }
+
+  .ant-form-item {
+    margin-bottom: 0;
+  }
+
+  .ant-form-item-label {
+    padding-bottom: 6px;
+    text-align: start;
+
+    > label {
+      height: auto;
+      font-size: 13px;
+      font-weight: 500;
+    }
+  }
 
   .ant-input {
-    width: 300px;
-    text-align: center;
+    text-align: start;
   }
 
-  .ant-divider-horizontal {
-    margin-top: $basic-margin !important;
+  .ant-input-outlined {
+    --ant-color-border: var(--login-input-border);
   }
 
-  .ant-form-item-explain-error {
-    margin-bottom: $basic-margin;
+  .ant-divider {
+    margin: 18px 0;
+    color: var(--ant-color-text-secondary);
+    font-size: 12px;
   }
 
-  .color {
-    color: $text-color-gray;
+  &__content__submit-btn.ant-btn {
+    margin-top: 4px;
   }
 
-  &__content {
-    max-width: 360px;
-    margin: auto;
-    display: flex;
-    flex-direction: column;
+  &__content__submit-oAuth-btn.ant-btn {
+    height: auto;
+    min-height: var(--ant-control-height-lg);
+    padding-block: 8px;
+    white-space: normal;
 
-    &__title {
-      text-align: center;
-      font-family: 'Roboto', sans-serif;
-      font-size: $text-size;
-      line-height: 20px;
-      color: $text-color-gray;
-    }
-
-    &__submit-oAuth-btn {
-      background: #0000000f;
-      margin-top: 4 * $basic-margin;
-
-      &:hover {
-        background: rgba(0, 0, 0, 0.09) !important;
-      }
+    > span:not(.ant-btn-icon) {
+      overflow-wrap: anywhere;
     }
   }
 
-  .requiredInput::after {
-    content: "";
+  @media (max-width: 480px) {
+    padding: 16px;
+
+    &__panel {
+      padding: 24px;
+    }
   }
 }

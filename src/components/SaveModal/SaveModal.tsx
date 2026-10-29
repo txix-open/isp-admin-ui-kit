@@ -10,12 +10,15 @@ const SaveModal: FC<SaveModalPropsType> = ({
   open,
   onClose,
   onOk,
-  changes
+  changes,
+  loading
 }) => {
   return (
     <div className="save-modal">
       <Modal
-        title="Сохранить"
+        title="Сохранить изменения доступа?"
+        loading={loading}
+        confirmDisabled={!changes.allowed.length && !changes.denied.length}
         open={open}
         onClose={onClose}
         onOk={onOk}
@@ -24,7 +27,7 @@ const SaveModal: FC<SaveModalPropsType> = ({
         <div className="save-modal__changes-list">
           {changes.allowed.length > 0 && (
             <div className="save-modal__changes-list__changes-section">
-              <h3 className="text-allowed">Разрешили:</h3>
+              <h3 className="text-allowed">Будет разрешено</h3>
               <ul>
                 {changes.allowed.map((allowItem: string, i: number) => (
                   <li className="text-allowed" key={i}>
@@ -37,7 +40,7 @@ const SaveModal: FC<SaveModalPropsType> = ({
 
           {changes.denied.length > 0 && (
             <div className="save-modal__changes-list__changes-section">
-              <h3 className="text-denied">Запретили:</h3>
+              <h3 className="text-denied">Будет запрещено</h3>
               <ul>
                 {changes.denied.map((deniedItem: string, i: number) => (
                   <li className="text-denied" key={i}>
