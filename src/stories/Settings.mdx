@@ -12,30 +12,9 @@ import { Meta } from '@storybook/addon-docs/blocks';
 npm install isp-admin-ui-kit
 ```
 
-### Дополнительные зависимости
+### Совместимые зависимости
 
-Библиотека требует установки следующих зависимостей для корректной работы:
-
-```bash
-npm install @monaco-editor/react antd axios dayjs monaco-editor react react-dom react-hook-form react-router-dom react-redux @reduxjs/toolkit swagger-ui-react
-```
-
-**Версии зависимостей**
-
-| Пакет | Версия |
-|-------|--------|
-| `@monaco-editor/react` | `^4.7.0` |
-| `@reduxjs/toolkit` | `^2.2.3` |
-| `antd` | `>=5.12.2` |
-| `axios` | `^1.7.7` |
-| `dayjs` | `^1.11.10` |
-| `monaco-editor` | `^0.55.1` |
-| `react` | `>=18.2.0 <19` |
-| `react-dom` | `>=18.2.0 <19` |
-| `react-hook-form` | `^7.54.0` |
-| `react-redux` | `^9.1.0` |
-| `react-router-dom` | `^6.22.3` |
-| `swagger-ui-react` | `^5.31.0` |
+Диапазоны версий React, Ant Design и остальных зависимостей указаны в `peerDependencies` установленного пакета. Для интеграции используйте те же экземпляры React и React DOM, что и приложение.
 
 ---
 
@@ -47,7 +26,7 @@ npm install @monaco-editor/react antd axios dayjs monaco-editor react react-dom 
 
 ```tsx
 import * as monaco from 'monaco-editor';
-import loader from '@monaco-editor/react';
+import { loader } from '@monaco-editor/react';
 
 // Конфигурация
 loader.config({ monaco });
@@ -62,10 +41,9 @@ await loader.init();
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import * as monaco from 'monaco-editor';
-import loader from '@monaco-editor/react';
+import { loader } from '@monaco-editor/react';
 import { baseSetupStore, AdminBase } from 'isp-admin-ui-kit';
 import { Provider } from 'react-redux';
-import { BrowserRouter } from 'react-router-dom';
 
 const init = async () => {
   // 1. Monaco Editor
@@ -79,9 +57,7 @@ const init = async () => {
   ReactDOM.createRoot(document.getElementById('root')!).render(
     <React.StrictMode>
       <Provider store={store}>
-        <BrowserRouter>
-          <AdminBase />
-        </BrowserRouter>
+        <AdminBase />
       </Provider>
     </React.StrictMode>
   );
@@ -90,14 +66,9 @@ const init = async () => {
 init();
 ```
 
-## Настройка Monaco Worker (Vite / Rollup)
+## Monaco Workers в Vite
 
-⚠️ Важно: Если ваше приложение или библиотека собирается через Vite или Rollup, необходимо явно подключить Monaco Workers.
-Без этого редактор может выдавать ошибки или не работать подсветка синтаксиса.
-
-🔧 Пример настройки
-
-Добавьте конфигурацию до инициализации loader:
+Подключите workers в точке входа Vite до вызова `loader.init()`.
 ```jsx
 import { loader } from '@monaco-editor/react';
 import * as monaco from 'monaco-editor';
@@ -170,14 +141,11 @@ import AdminBase from 'isp-admin-ui-kit';
 ```tsx
 import { baseSetupStore } from 'isp-admin-ui-kit';
 import { Provider } from 'react-redux';
-import { BrowserRouter } from 'react-router-dom';
 
 const store = baseSetupStore();
 
 <Provider store={store}>
-  <BrowserRouter>
-    <AdminBase />
-  </BrowserRouter>
+  <AdminBase />
 </Provider>;
 ```
 

@@ -1,0 +1,13 @@
+@mixin stable-entity-fields {
+  .ant-form-item-control {
+    display: grid;
+    grid-template-rows: auto minmax(22px, auto);
+  }
+  .ant-form-item-control-input {
+    grid-row: 1;
+  }
+  .ant-form-item-additional {
+    grid-row: 2;
+    margin-bottom: 0;
+  }
+}

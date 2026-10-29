@@ -1,7 +1,9 @@
-@use "src/constants/style/styleConst" as *;
+@use 'src/constants/style/styleConst' as *;
 
 .variable-column-search {
-  padding: 8px;
+  width: 304px;
+  max-width: calc(100vw - 32px);
+  padding: 12px;
 
   &__input {
     margin-bottom: 8px;
@@ -22,6 +24,6 @@
   }
 }
 
-.variable-column-search__filtered-icon{
-  color: $text-color-blue
+.variable-column-search__filtered-icon {
+  color: $text-color-blue;
 }

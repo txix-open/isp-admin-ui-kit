@@ -3,6 +3,8 @@ import { Input, message } from 'antd'
 import { SearchProps } from 'antd/es/input'
 import { useNavigate } from 'react-router-dom'
 
+import { notifyApiError } from '@utils/apiErrorNotifications'
+
 import applicationsApi from '@services/applicationsService'
 
 import { routePaths } from '@routes/routePaths'
@@ -41,10 +43,10 @@ const SearchAppByToken = () => {
       })
       .catch((e) => {
         if (e?.status === 404) {
-          message.error('Приложение с таким токеном не найдено')
+          notifyApiError(e, 'Приложение с таким токеном не найдено')
           return
         }
-        message.error('Что-то пошло не так')
+        notifyApiError(e, 'Что-то пошло не так')
       })
   }
 

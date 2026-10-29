@@ -112,7 +112,7 @@ const applicationsApi = createApi({
       }),
       invalidatesTags: ['Applications']
     }),
-    getNextAppId: builder.mutation<void, void>({
+    getNextAppId: builder.mutation<number, void>({
       query: () => ({
         url: apiPaths.getNextAppId
       }),

@@ -1,8 +1,9 @@
-import { message } from 'antd'
 import { AxiosError } from 'axios'
 import { ReactNode } from 'react'
 
 import { MSPError } from '@type/index'
+
+import { notifyApiError } from './apiErrorNotifications'
 
 type ApiErrorMessage = ReactNode | ((data: MSPError) => ReactNode)
 
@@ -89,11 +90,11 @@ export const handleApiError = (
   }
 
   if (messageContent) {
-    message.error(messageContent)
+    notifyApiError(error, messageContent)
     return
   }
 
   if (fallbackMessage) {
-    message.error(fallbackMessage)
+    notifyApiError(error, fallbackMessage)
   }
 }

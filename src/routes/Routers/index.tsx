@@ -1,8 +1,8 @@
-import { Spin } from 'antd'
 import { ComponentType, lazy, Suspense } from 'react'
 import { RouteObject, Navigate } from 'react-router-dom'
 
 import LayoutComponent from '@components/Layout'
+import { PageLoading } from '@components/PageLayout'
 
 import ModulesRelationsDiagram from '@pages/ModuleRelationsPage'
 
@@ -37,7 +37,7 @@ const VariablesPage = lazy(() => import('@pages/VariablesPage'))
 const VariableEditor = lazy(() => import('@pages/VariableEditor'))
 
 const lazyElement = (Component: ComponentType) => (
-  <Suspense fallback={<Spin />}>
+  <Suspense fallback={<PageLoading label="Загрузка страницы…" />}>
     <Component />
   </Suspense>
 )

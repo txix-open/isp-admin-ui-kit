@@ -1,0 +1,50 @@
+.configuration-editor-json {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+  border: 1px solid var(--ant-color-border);
+  border-radius: 12px;
+  background: var(--ant-color-bg-container);
+  box-shadow: var(--ant-box-shadow-tertiary, 0 2px 8px rgb(0 0 0 / 6%));
+
+  &__header {
+    flex: none;
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--ant-color-border-secondary);
+    border-radius: 12px 12px 0 0;
+    background: var(--ant-color-fill-alter);
+
+    h2 {
+      margin: 0;
+      color: var(--ant-color-text);
+      font-size: 15px;
+      font-weight: 600;
+      line-height: 22px;
+    }
+    p {
+      margin: 4px 0 0;
+      color: var(--ant-color-text-secondary);
+      font-size: 13px;
+      line-height: 20px;
+    }
+  }
+
+  &__body {
+    min-width: 0;
+    flex: 1;
+    min-height: 0;
+    padding: 20px;
+    overflow: auto;
+    scrollbar-gutter: stable;
+  }
+
+  @media (max-width: 767px) {
+    &__header,
+    &__body {
+      padding: 12px;
+    }
+  }
+}

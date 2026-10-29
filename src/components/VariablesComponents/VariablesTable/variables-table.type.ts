@@ -2,7 +2,11 @@ import { TableProps } from 'antd'
 
 export interface VariablesTablePropsType {
   dataTable: VariableType[]
-  onRemoveVariable: (variableName: string) => void
+  onCreate?: () => void
+  onRemoveVariable: (variableName: string) => void | Promise<void>
+  loading?: boolean
+  unavailable?: boolean
+  removingName?: string
 }
 
 export type OnChange = NonNullable<TableProps<VariableType>['onChange']>

@@ -13,11 +13,17 @@ const ConfigSchemaModal: FC<ConfigSchemaModalPropsType> = ({
   schema = {}
 }) => {
   return (
-    <div className="config-schema-modal">
-      <Modal title="Текущая схема" open={open} onClose={onClose}>
+    <Modal
+      title="Текущая схема"
+      open={open}
+      onClose={onClose}
+      width={1040}
+      className="config-schema-modal"
+    >
+      <div className="config-schema-modal__surface">
         <JsonSchemaViewer schema={schema} />
-      </Modal>
-    </div>
+      </div>
+    </Modal>
   )
 }
 

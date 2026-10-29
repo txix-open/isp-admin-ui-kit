@@ -21,18 +21,27 @@ const ConfigurationPreviewModal: FC<ConfigurationPreviewModalPropsType> = ({
     ? `Версия: ${config.configVersion}`
     : config.name
   return (
-    <div className="configuration-preview-modal">
-      <Modal title={configName || ''} open={open} onClose={onClose}>
+    <Modal
+      title={configName || 'Конфигурация'}
+      open={open}
+      onClose={onClose}
+      width={1040}
+      className="configuration-preview-modal"
+    >
+      <div className="configuration-preview-modal__surface">
         <ReactJsonView
           theme={changeTheme ? 'twilight' : ''}
           src={data}
-          name={false}
+          name={null}
+          style={{ backgroundColor: 'transparent', margin: 0 }}
+          displayObjectSize={false}
+          enableClipboard
           sortKeys={true}
           displayDataTypes={false}
           editKeys={false}
         />
-      </Modal>
-    </div>
+      </div>
+    </Modal>
   )
 }
 

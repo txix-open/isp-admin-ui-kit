@@ -1,5 +1,5 @@
 import { DeleteOutlined, WarningOutlined } from '@ant-design/icons'
-import { Button, Popconfirm, Tag, Tooltip, Tree, TreeProps } from 'antd'
+import { Empty, Popconfirm, Tag, Tooltip, Tree, TreeProps } from 'antd'
 import {
   FC,
   memo,
@@ -13,6 +13,12 @@ import {
 
 import { AccessListTreePropsType } from '@widgets/AccessListTree/access-list-tree.type'
 
+import { TableActionButton } from '@components/TableUI'
+
+import {
+  getHttpMethodLabel,
+  matchesAccessRoute
+} from '@utils/accessRouteFilters'
 import { httpMethodColors } from '@utils/httpMethodColorUtils'
 
 import useRole from '@hooks/useRole'
@@ -76,18 +82,20 @@ const AccessListTree: FC<AccessListTreePropsType> = ({
   selectedMethod = [],
   selectedHttpMethods = [],
   showChangedOnly = false,
+  disabled = false,
   onCheck = [],
   onRemoveUnknownMethods = undefined
 }) => {
   const { hasPermission } = useRole()
   const containerRef = useRef<HTMLDivElement>(null)
   const wasFilteredRef = useRef(false)
+  const filterSignatureRef = useRef('')
   const expandedBeforeFilterRef = useRef<string[]>([])
   const [expandedKeys, setExpandedKeys] = useState<string[]>([])
   const [treeHeight, setTreeHeight] = useState(360)
 
   const handleRemoveUnknownMethods = (methods: BaseEndpoint[]) => {
-    if (!onRemoveUnknownMethods) {
+    if (!onRemoveUnknownMethods || disabled) {
       return
     }
     onRemoveUnknownMethods(methods)
@@ -109,12 +117,23 @@ const AccessListTree: FC<AccessListTreePropsType> = ({
                 {onRemoveUnknownMethods && (
                   <Tooltip title="Удалить">
                     <Popconfirm
-                      title="Удалить все неизвестные методы?"
+                      title="Удалить показанные неизвестные методы?"
+                      description="Методы будут удалены из сохранённых прав приложения."
+                      okText="Удалить"
+                      cancelText="Отмена"
+                      okButtonProps={{ danger: true }}
+                      disabled={disabled}
                       onConfirm={() =>
                         handleRemoveUnknownMethods(unknownMethods)
                       }
                     >
-                      <Button icon={<DeleteOutlined />} />
+                      <TableActionButton
+                        danger
+                        disabled={disabled}
+                        aria-label="Удалить показанные неизвестные методы"
+                        onClick={(event) => event.stopPropagation()}
+                        icon={<DeleteOutlined />}
+                      />
                     </Popconfirm>
                   </Tooltip>
                 )}
@@ -190,26 +209,42 @@ const AccessListTree: FC<AccessListTreePropsType> = ({
               .filter(Boolean)
               .join(' ')}
           >
-            {obj.httpMethod && (
+            {
               <span className="access-list-tree__method-tag">
                 <Tag
                   className="access-list-tree__inner-tag"
                   color={httpMethodColors[obj.httpMethod]}
                   bordered={false}
+                  title={
+                    obj.httpMethod?.trim() ? undefined : 'HTTP-метод не указан'
+                  }
                 >
-                  {obj.httpMethod}
+                  {getHttpMethodLabel(obj.httpMethod)}
                 </Tag>
               </span>
-            )}
-            <div>{renderHighlightedPath(obj.path, searchValue)}</div>
+            }
+            <span className="access-list-tree__path" title={obj.path}>
+              {renderHighlightedPath(obj.path, searchValue.trim())}
+            </span>
 
             {showRemoveBtn && (
               <Tooltip title="Удалить">
                 <Popconfirm
                   title="Удалить неизвестный метод?"
+                  description={`${getHttpMethodLabel(obj.httpMethod)} ${obj.path}`}
+                  okText="Удалить"
+                  cancelText="Отмена"
+                  okButtonProps={{ danger: true }}
+                  disabled={disabled}
                   onConfirm={() => handleRemoveUnknownMethods([obj])}
                 >
-                  <Button icon={<DeleteOutlined />} />
+                  <TableActionButton
+                    danger
+                    disabled={disabled}
+                    aria-label={`Удалить неизвестный метод ${getHttpMethodLabel(obj.httpMethod)} ${obj.path}`}
+                    onClick={(event) => event.stopPropagation()}
+                    icon={<DeleteOutlined />}
+                  />
                 </Popconfirm>
               </Tooltip>
             )}
@@ -232,25 +267,22 @@ const AccessListTree: FC<AccessListTreePropsType> = ({
         changed
       }
     },
-    [isMethodChanged, onRemoveUnknownMethods, searchValue]
+    [isMethodChanged, onRemoveUnknownMethods, searchValue, disabled]
   )
 
   const filteredRoutes = useMemo(() => {
     const filteredRoute: Record<string, EndpointType[]> = {}
 
-    const hasHttpFilter = selectedHttpMethods.length > 0
-
     Object.keys(defaultAllRoutes).forEach((groupName) => {
       const filterArray = defaultAllRoutes[groupName].filter((endpoint) => {
-        const matchesSearch = searchValue
-          ? endpoint.path.toLowerCase().includes(searchValue)
+        const matchesChanged = showChangedOnly
+          ? isMethodChanged(endpoint)
           : true
-        const matchesHttpMethod = hasHttpFilter
-          ? selectedHttpMethods.includes(endpoint.httpMethod)
-          : true
-        const matchesChanged = showChangedOnly ? isMethodChanged(endpoint) : true
 
-        return matchesSearch && matchesHttpMethod && matchesChanged
+        return (
+          matchesAccessRoute(endpoint, searchValue, selectedHttpMethods) &&
+          matchesChanged
+        )
       })
 
       if (filterArray.length) {
@@ -269,7 +301,7 @@ const AccessListTree: FC<AccessListTreePropsType> = ({
 
   const treeData = useMemo(
     () => createTreeData(filteredRoutes),
-    [filteredRoutes, createTreeNode, onRemoveUnknownMethods]
+    [filteredRoutes, createTreeNode, onRemoveUnknownMethods, disabled]
   )
 
   const getCheckedKeys = () => {
@@ -319,41 +351,65 @@ const AccessListTree: FC<AccessListTreePropsType> = ({
     () => Object.values(treeData).map((node) => node.key),
     [treeData]
   )
+  const filterSignature = JSON.stringify([
+    searchValue,
+    showChangedOnly,
+    selectedHttpMethods,
+    groupKeys
+  ])
 
   useEffect(() => {
-    if (isFilteredMode && !wasFilteredRef.current) {
-      expandedBeforeFilterRef.current = expandedKeys
-      setExpandedKeys(groupKeys)
+    if (isFilteredMode) {
+      if (!wasFilteredRef.current)
+        expandedBeforeFilterRef.current = expandedKeys
+      if (filterSignatureRef.current !== filterSignature)
+        setExpandedKeys(groupKeys)
+      filterSignatureRef.current = filterSignature
     } else if (!isFilteredMode && wasFilteredRef.current) {
       setExpandedKeys(expandedBeforeFilterRef.current)
+      filterSignatureRef.current = ''
     }
 
     wasFilteredRef.current = isFilteredMode
-  }, [isFilteredMode, expandedKeys, groupKeys])
+  }, [isFilteredMode, expandedKeys, groupKeys, filterSignature])
 
   useEffect(() => {
-    const updateHeight = () => {
-      setTreeHeight(Math.max(360, window.innerHeight - 315))
-    }
-
+    const container = containerRef.current
+    if (!container) return
+    const updateHeight = () =>
+      setTreeHeight(Math.max(1, Math.floor(container.clientHeight)))
     updateHeight()
-
-    window.addEventListener('resize', updateHeight)
-    return () => window.removeEventListener('resize', updateHeight)
+    const observer = new ResizeObserver(updateHeight)
+    observer.observe(container)
+    return () => observer.disconnect()
   }, [])
 
   return (
     <div ref={containerRef} className="access-list-tree">
-      <Tree
-        className="app-access-content__main__tree"
-        checkable={hasPermission(PermissionKeysType.app_access_edit)}
-        checkedKeys={filteredKeys}
-        expandedKeys={expandedKeys}
-        height={treeHeight}
-        onExpand={(keys) => setExpandedKeys(keys as string[])}
-        onCheck={onCheck as TreeProps['onCheck']}
-        treeData={treeData}
-      />
+      {!treeData.length ? (
+        <Empty
+          image={Empty.PRESENTED_IMAGE_SIMPLE}
+          description={
+            isFilteredMode
+              ? 'По заданным условиям методы не найдены'
+              : 'Маршрутов пока нет'
+          }
+        />
+      ) : (
+        <Tree
+          itemHeight={36}
+          blockNode
+          disabled={disabled}
+          className="app-access-content__main__tree"
+          checkable={hasPermission(PermissionKeysType.app_access_edit)}
+          checkedKeys={filteredKeys}
+          expandedKeys={expandedKeys}
+          height={treeHeight}
+          onExpand={(keys) => setExpandedKeys(keys as string[])}
+          onCheck={onCheck as TreeProps['onCheck']}
+          treeData={treeData}
+        />
+      )}
     </div>
   )
 }

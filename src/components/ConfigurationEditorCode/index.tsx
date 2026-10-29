@@ -1,10 +1,19 @@
-import { Spin } from 'antd'
+import { Alert } from 'antd'
 import type { IDisposable } from 'monaco-editor'
 import type * as Monaco from 'monaco-editor'
-import { FC, lazy, Suspense, useContext, useEffect, useState } from 'react'
+import {
+  FC,
+  lazy,
+  Suspense,
+  useContext,
+  useEffect,
+  useRef,
+  useState
+} from 'react'
+
+import { PageLoading } from '@components/PageLayout'
 
 import { ConfigurationEditorPropsType } from '@pages/ConfigurationEditorPage/ConfigurationEditor.type'
-import { ConfigType } from '@pages/ModulesPage/module.type'
 
 import variablesApi from '@services/variablesService'
 
@@ -16,17 +25,18 @@ const ConfigurationEditorCode: FC<ConfigurationEditorPropsType> = ({
   setDisableBtn = () => {},
   bufConfig,
   setBufConfig,
-  jsonSchema
+  jsonSchema,
+  disabled = false
 }) => {
   const editorValue = JSON.stringify(bufConfig?.data, null, '\t')
-  const [completionDisposable, setCompletionDisposable] =
-    useState<IDisposable>()
+  const contentSubscription = useRef<IDisposable>()
+  const suggestionTimer = useRef<ReturnType<typeof setTimeout>>()
+  const [parseError, setParseError] = useState(false)
   const [monacoInstance, setMonacoInstance] = useState<typeof Monaco | null>(
     null
   )
   const { data: variables = [] } = variablesApi.useGetAllVariablesQuery()
   const { changeTheme } = useContext(Context)
-  const arrayValues = variables.map((word) => word.name)
 
   useEffect(() => {
     if (monacoInstance && jsonSchema) {
@@ -45,17 +55,11 @@ const ConfigurationEditorCode: FC<ConfigurationEditorPropsType> = ({
   }, [monacoInstance, jsonSchema])
 
   useEffect(() => {
-    return () => {
-      if (typeof completionDisposable?.dispose === 'function') {
-        completionDisposable?.dispose()
-      }
-    }
-  }, [completionDisposable])
-
-  const handleChange = (data: string | undefined) => {
     if (monacoInstance) {
-      setCompletionDisposable(
-        monacoInstance.languages.registerCompletionItemProvider('json', {
+      const arrayValues = variables.map((word) => word.name)
+      const provider = monacoInstance.languages.registerCompletionItemProvider(
+        'json',
+        {
           triggerCharacters: ['"', '(', ')', ':'],
           provideCompletionItems: (model, position) => {
             const currentLineText = model.getLineContent(position.lineNumber)
@@ -119,81 +123,96 @@ const ConfigurationEditorCode: FC<ConfigurationEditorPropsType> = ({
 
             return { suggestions: [] }
           }
-        })
+        }
       )
+      return () => provider.dispose()
     }
+  }, [monacoInstance, variables])
 
-    if (data) {
-      try {
-        const newData = {
-          ...bufConfig,
-          data: { ...JSON.parse(data) }
-        } as ConfigType
-        setDisableBtn(false)
-        setBufConfig(newData)
-      } catch (error) {
-        setDisableBtn(true)
-      }
+  useEffect(
+    () => () => {
+      contentSubscription.current?.dispose()
+      clearTimeout(suggestionTimer.current)
+    },
+    []
+  )
+
+  const handleChange = (value: string | undefined) => {
+    if (disabled) return
+    try {
+      const data = JSON.parse(value ?? '')
+      if (data === null || typeof data !== 'object')
+        throw new Error('Expected JSON object')
+      setDisableBtn(false)
+      setParseError(false)
+      setBufConfig((previous) => (previous ? { ...previous, data } : previous))
+    } catch {
+      setDisableBtn(true)
+      setParseError(true)
     }
   }
 
   return (
-    <div>
-      <Suspense fallback={<Spin />}>
-        <MonacoEditor
-          onMount={(editor, monaco) => {
-            setMonacoInstance(monaco as typeof Monaco)
-            const provider = monaco.languages.registerCompletionItemProvider(
-              'json',
-              {
-                triggerCharacters: ['"', '(', ')'],
-                provideCompletionItems: () => {
-                  return { suggestions: [] }
-                }
-              }
-            )
-
-            editor.onDidChangeModelContent(() => {
-              const position = editor.getPosition()
-              if (!position) return
-
-              const model = editor.getModel()
-              if (!model) return
-
-              const lineContent = model.getLineContent(position.lineNumber)
-              const textBeforeCursor = lineContent.substring(
-                0,
-                position.column - 1
-              )
-
-              if (
-                textBeforeCursor.includes('"_Var(') &&
-                !lineContent.includes('"_Var()"')
-              ) {
-                setTimeout(() => {
-                  editor.trigger('', 'editor.action.triggerSuggest', {})
-                }, 100)
-              }
-            })
-            return () => provider?.dispose()
-          }}
-          width="auto"
-          height="100vh"
-          language="json"
-          theme={changeTheme ? 'vs-dark' : 'vs-white'}
-          defaultValue={editorValue}
-          onChange={(value) => handleChange(value)}
-          options={{
-            quickSuggestions: {
-              strings: true
-            },
-            minimap: {
-              enabled: false
-            },
-            fontSize: 16
-          }}
+    <div className="configuration-editor-page__code">
+      {parseError && (
+        <Alert
+          type="error"
+          showIcon
+          title="Некорректный JSON"
+          description="Исправьте JSON, чтобы сохранить конфигурацию или переключить режим. Введённый текст остаётся в редакторе."
         />
-      </Suspense>
+      )}
+      <div className="configuration-editor-page__code-surface">
+        <Suspense fallback={<PageLoading label="Загрузка редактора…" />}>
+          <MonacoEditor
+            onMount={(editor, monaco) => {
+              setMonacoInstance(monaco as typeof Monaco)
+              contentSubscription.current = editor.onDidChangeModelContent(
+                () => {
+                  const position = editor.getPosition()
+                  if (!position) return
+
+                  const model = editor.getModel()
+                  if (!model) return
+
+                  const lineContent = model.getLineContent(position.lineNumber)
+                  const textBeforeCursor = lineContent.substring(
+                    0,
+                    position.column - 1
+                  )
+
+                  if (
+                    textBeforeCursor.includes('"_Var(') &&
+                    !lineContent.includes('"_Var()"')
+                  ) {
+                    clearTimeout(suggestionTimer.current)
+                    suggestionTimer.current = setTimeout(() => {
+                      editor.trigger('', 'editor.action.triggerSuggest', {})
+                    }, 100)
+                  }
+                }
+              )
+            }}
+            width="auto"
+            height="100%"
+            language="json"
+            theme={changeTheme ? 'vs-dark' : 'vs-white'}
+            defaultValue={editorValue}
+            onChange={(value) => handleChange(value)}
+            options={{
+              readOnly: disabled,
+              automaticLayout: true,
+              quickSuggestions: {
+                strings: true
+              },
+              minimap: {
+                enabled: false
+              },
+              fontSize: 16
+            }}
+          />
+        </Suspense>
+      </div>
     </div>
   )
 }

@@ -13,6 +13,10 @@ const securityLogServiceApi = createApi({
   tagTypes: ['logs', 'events'],
   baseQuery: axiosBaseQuery({ baseUrl: apiPaths.baseAdminUrl }),
   endpoints: (builder) => ({
+    getLogsPage: builder.query<LogResponseType, LimitOffsetRequestType>({
+      query: (request) => ({ url: apiPaths.getAllLogs, data: request }),
+      providesTags: ['logs']
+    }),
     getAllLogs: builder.mutation<LogResponseType, LimitOffsetRequestType>({
       query: (request) => ({ url: apiPaths.getAllLogs, data: request }),
       invalidatesTags: () => ['logs']

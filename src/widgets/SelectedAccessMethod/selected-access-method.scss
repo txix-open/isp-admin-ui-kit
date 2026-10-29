@@ -1,23 +1,12 @@
-@use 'sass:math';
 @use 'src/constants/style/styleConst' as *;
 
 .selected-access-method {
+  flex: 1;
+  min-height: 0;
+  min-width: 0;
   overflow-y: auto;
-  height: calc(100vh - 315px);
-  padding-right: math.div($basic-padding, 2);
   position: relative;
   scrollbar-color: var(--ant-color-fill-secondary) transparent;
-  box-shadow:
-    0 2px 8px var(--ant-shadow-color),
-    0 0 0 1px var(--ant-color-border);
-  border-radius: 4px;
-  transition: box-shadow 0.2s ease;
-
-  &:hover {
-    box-shadow:
-      0 4px 12px var(--ant-shadow-color),
-      0 0 0 1px var(--ant-color-primary-border);
-  }
 
   &--empty {
     display: flex;
@@ -57,7 +46,7 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    min-width: 68px;
+    min-width: 56px;
     flex-shrink: 0;
     margin-right: $basic-margin;
   }

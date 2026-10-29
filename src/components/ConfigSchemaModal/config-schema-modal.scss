@@ -1,11 +1,11 @@
-@use "src/constants/style/styleConst" as *;
-
-.config-schema-modal {
-  .modal__wrap {
-    min-width: 880px;
-  }
-
+.config-schema-modal__surface {
+  min-width: 0;
+  padding: 16px;
+  overflow: auto;
+  border: 1px solid var(--ant-color-border-secondary);
+  border-radius: 8px;
+  background: var(--ant-color-bg-layout);
   .json-schema-view {
-    padding: $basic-padding
+    min-width: 560px;
   }
 }

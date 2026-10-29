@@ -5,14 +5,15 @@ import { useForm } from 'react-hook-form'
 
 import { apiPaths } from '@constants/api/apiPaths'
 
-import Modal from '@widgets/Modal'
-
 import {
   ChangePasswordModalProps,
   ChangePasswordModalType
 } from '@components/ChangePasswordModal/change-password-modal.type'
+import EntityFormModal from '@components/EntityFormModal'
 
 import { ChangeProfilePassword } from '@pages/ProfilePage/profile-page.type'
+
+import { ignoreApiError, notifyApiError } from '@utils/apiErrorNotifications'
 
 import useLogout from '@hooks/useLogout'
 
@@ -29,36 +30,45 @@ const ChangePasswordModal: FC<ChangePasswordModalProps> = ({
     clearErrors,
     watch,
     reset,
-    trigger
+    trigger,
+    formState: { isSubmitting }
   } = useForm<ChangePasswordModalType>({
     mode: 'onChange'
   })
   const [loading, setLoading] = useState(false)
   const { logoutUser } = useLogout()
 
-  const onSubmit = async (formValue: ChangePasswordModalType) => {
+  const onSubmit = (formValue: ChangePasswordModalType) => {
+    if (loading || isSubmitting) return
     setLoading(true)
-    try {
-      await apiService.post<ChangeProfilePassword>(apiPaths.changePassword, {
+    return apiService
+      .post<ChangeProfilePassword>(apiPaths.changePassword, {
         oldPassword: formValue.oldPassword,
         newPassword: formValue.newPassword
       })
-      await logoutUser()
-      message.success('Пароль успешно изменен')
-      clearErrors('oldPassword')
-      onClose()
-    } catch (error: any) {
-      if (error.response.data.errorCode === 1001) {
-        setError('oldPassword', {
-          message: 'Не верный текущий пароль'
-        })
-      }
-    } finally {
-      setLoading(false)
-    }
+      .then(() => logoutUser())
+      .then(() => {
+        message.success('Пароль успешно изменен')
+        clearErrors('oldPassword')
+        onClose()
+      })
+      .catch((error) => {
+        if (Number(error.response?.data?.errorCode) === 1001) {
+          ignoreApiError(error)
+          setError('oldPassword', {
+            message: 'Неверный текущий пароль'
+          })
+        } else {
+          notifyApiError(error, 'Не удалось изменить пароль')
+        }
+      })
+      .finally(() => {
+        setLoading(false)
+      })
   }
 
   const handleCloseModal = () => {
+    if (loading || isSubmitting) return
     onClose()
     reset()
   }
@@ -67,55 +77,61 @@ const ChangePasswordModal: FC<ChangePasswordModalProps> = ({
   const newPassword = watch('newPassword')
 
   useEffect(() => {
-    trigger('newPassword')
-    trigger('confirmPassword')
-  }, [newPassword, confirmPassword])
+    if (open && (newPassword || confirmPassword)) {
+      void trigger(['newPassword', 'confirmPassword'])
+    }
+  }, [open, newPassword, confirmPassword, trigger])
+
+  useEffect(() => {
+    if (open) reset({ oldPassword: '', newPassword: '', confirmPassword: '' })
+  }, [open, reset])
 
   return (
-    <Modal
+    <EntityFormModal
       title="Сменить пароль"
       open={open}
       onClose={handleCloseModal}
-      onOk={handleSubmit(onSubmit)}
-      footer={{ onOkText: 'Изменить пароль', onCanselText: 'Отмена' }}
-      loading={loading}
+      onSubmit={handleSubmit(onSubmit)}
+      submitText="Изменить пароль"
+      busy={loading || isSubmitting}
     >
-      <form key="change-pass-modal">
-        <FormInputPassword
-          rules={{
-            required: { value: true, message: 'Поле не может быть пустым' }
-          }}
-          label="Текущий пароль"
-          control={control}
-          name="oldPassword"
-        />
-        <FormInputPassword
-          rules={{
-            required: { value: true, message: 'Поле не может быть пустым' },
-            validate: (value) => {
-              return value === confirmPassword || 'Пароли не совпадают'
-            }
-          }}
-          label="Новый пароль"
-          control={control}
-          name="newPassword"
-        />
+      <FormInputPassword
+        rules={{
+          required: { value: true, message: 'Поле не может быть пустым' }
+        }}
+        label="Текущий пароль"
+        control={control}
+        name="oldPassword"
+        disabled={loading || isSubmitting}
+      />
+      <FormInputPassword
+        rules={{
+          required: { value: true, message: 'Поле не может быть пустым' },
+          validate: (value) => {
+            return value === confirmPassword || 'Пароли не совпадают'
+          }
+        }}
+        label="Новый пароль"
+        control={control}
+        name="newPassword"
+        disabled={loading || isSubmitting}
+      />
 
-        <FormInputPassword
-          rules={{
-            required: { value: true, message: 'Поле не может быть пустым' },
-            validate: (value) => {
-              if (value !== newPassword) return 'Пароли не совпадают'
-              if (!value) return 'Поле не может быть пустым'
-              return true
-            }
-          }}
-          label="Подтвердите пароль"
-          control={control}
-          name="confirmPassword"
-        />
-      </form>
-    </Modal>
+      <FormInputPassword
+        rules={{
+          required: { value: true, message: 'Поле не может быть пустым' },
+          validate: (value) => {
+            if (value !== newPassword) return 'Пароли не совпадают'
+            if (!value) return 'Поле не может быть пустым'
+            return true
+          }
+        }}
+        label="Подтвердите пароль"
+        control={control}
+        name="confirmPassword"
+        disabled={loading || isSubmitting}
+      />
+    </EntityFormModal>
   )
 }
 export default ChangePasswordModal

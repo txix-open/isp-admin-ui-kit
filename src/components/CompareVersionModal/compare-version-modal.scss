@@ -1,43 +1,79 @@
-@use "src/constants/style/styleConst" as *;
-
 .compare-version-modal {
-  .modal__wrap {
-    width: 100%;
-    height: 100%;
-    justify-content: initial;
+  .modal__container {
+    display: flex;
+    flex-direction: column;
+    height: calc(100dvh - 128px);
   }
 
   .modal__content {
-    overflow: initial;
+    display: flex;
+    flex: 1;
+    max-height: none;
+    min-width: 0;
+    min-height: 0;
+    overflow: hidden;
+    color: var(--ant-color-text);
+  }
+
+  &__description {
+    margin: 0;
+    overflow-wrap: anywhere;
+    color: var(--ant-color-text-secondary);
   }
 
   &__header {
-    margin-top: $basic-margin;
     display: flex;
+    flex: 0 0 auto;
+    flex-wrap: wrap;
     justify-content: space-between;
-    margin-bottom: $basic-margin;
+    gap: 8px 24px;
+    padding: 12px 0;
+    color: var(--ant-color-text-secondary);
+    font-variant-numeric: tabular-nums;
+  }
 
+  &__toolbar {
+    flex: 0 0 auto;
+    padding-top: 12px;
+
+    .ant-radio-group {
+      display: flex;
+      flex-wrap: wrap;
+    }
+    > p {
+      margin: 8px 0 0;
+      color: var(--ant-color-text-secondary);
+      font-size: 13px;
+    }
+  }
+
+  &__editor {
+    flex: 1;
+    min-width: 0;
+    min-height: 0;
+    position: relative;
+  }
+
+  &__loading {
+    display: flex;
+    flex: 1;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    color: var(--ant-color-text-secondary);
   }
 
   &__content {
-    .monaco-diff-editor {
-      overflow-y: auto;
-      height: calc(90vh - 150px) !important;
-    }
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    min-width: 0;
+    min-height: 0;
+  }
 
-    &__table {
-      overflow-y: auto;
-      height: calc(90vh - 50px);
-
-      &__current-version-cell {
-        display: flex;
-        justify-content: space-between;
-        gap: 10px;
-      }
-
-      &__row {
-        cursor: pointer;
-      }
+  @media (max-width: 767px) {
+    .modal__container {
+      height: calc(100dvh - 64px);
     }
   }
 }
