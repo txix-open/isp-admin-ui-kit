@@ -1,54 +1,78 @@
 import { FormInput, FormTextArea } from 'isp-ui-kit'
-import { FC, useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 
 import { ValidationRules } from '@constants/form/validationRules'
 
-import Modal from '@widgets/Modal'
+import EntityFormModal from '@components/EntityFormModal'
 
-import { AppGroupModalType } from '@components/AppGroupModal/app-group-modal.type'
+import { NewApplicationsGroupType } from '@pages/ApplicationsPage/applications.type'
 
-import { ApplicationsGroupType } from '@pages/ApplicationsPage/applications.type'
+import useUnsavedChanges from '@hooks/useUnsavedChanges'
 
-const AppGroupModal: FC<AppGroupModalType> = ({
+import { AppGroupModalType } from './app-group-modal.type'
+
+const AppGroupModal = ({
   title,
+  open,
   onClose,
   onOk,
-  open,
   appGroup
-}) => {
-  const { handleSubmit, control, reset } = useForm<ApplicationsGroupType>({
-    mode: 'onChange',
-    defaultValues: appGroup
+}: AppGroupModalType) => {
+  const {
+    control,
+    handleSubmit,
+    formState: { isDirty, isSubmitting }
+  } = useForm<NewApplicationsGroupType>({
+    defaultValues: {
+      name: appGroup?.name ?? '',
+      description: appGroup?.description ?? ''
+    }
+  })
+  const draftGuard = useUnsavedChanges({
+    dirty: open && isDirty,
+    busy: open && isSubmitting,
+    overlay: true,
+    overlayParam: 'dialog',
+    label: appGroup ? `Группа «${appGroup.name}»` : 'Новая группа приложений'
+  })
+  const close = () => {
+    if (!isSubmitting) draftGuard.requestLeave(onClose)
+  }
+  const submit = handleSubmit((values) => {
+    if (!isDirty || isSubmitting) return
+    return onOk(values, draftGuard.markSaved)
   })
 
-  useEffect(() => {
-    reset(appGroup)
-  }, [open])
-
   return (
-    <Modal
-      onOk={handleSubmit(onOk)}
+    <EntityFormModal
       title={title}
       open={open}
-      footer={{ onCanselText: 'Отмена', onOkText: 'Сохранить' }}
-      onClose={onClose}
+      onClose={close}
+      onSubmit={submit}
+      busy={isSubmitting}
+      submitDisabled={!isDirty}
+      submitText={appGroup ? 'Сохранить изменения' : 'Создать группу'}
     >
-      <form>
-        <FormInput
-          control={control}
-          name="name"
-          label="Наименование"
-          rules={{ required: ValidationRules.required }}
-        />
-        <FormTextArea
-          autoSize={{ minRows: 2, maxRows: 6 }}
-          control={control}
-          label="Описание"
-          name="description"
-        />
-      </form>
-    </Modal>
+      <p>
+        {appGroup
+          ? 'Изменения применятся после сохранения.'
+          : 'Группа ещё не создана. Она появится в списке после нажатия «Создать группу».'}
+      </p>
+      <FormInput
+        control={control}
+        name="name"
+        label="Название группы"
+        rules={{ required: ValidationRules.required }}
+        disabled={isSubmitting}
+      />
+      <FormTextArea
+        control={control}
+        name="description"
+        label="Описание"
+        autoSize={{ minRows: 2, maxRows: 6 }}
+        disabled={isSubmitting}
+      />
+    </EntityFormModal>
   )
 }
 

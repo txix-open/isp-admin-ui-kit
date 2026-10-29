@@ -1,4 +1,4 @@
-import { EmptyData, NoData } from 'isp-ui-kit'
+import { Empty } from 'antd'
 import { memo } from 'react'
 import { Outlet } from 'react-router-dom'
 
@@ -9,11 +9,11 @@ const ModuleTabContent = ({
   currentModule
 }: ModuleTabContentPropsType) => {
   if (!selectedItemId) {
-    return <EmptyData />
+    return <Empty description="Выберите модуль слева" />
   }
 
   if (!currentModule) {
-    return <NoData />
+    return <Empty description="Модуль не найден или больше недоступен" />
   }
 
   return <Outlet />

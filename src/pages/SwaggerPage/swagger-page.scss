@@ -1,32 +1,104 @@
-.swagger-page {
+.swagger-shell {
   height: 100vh;
+  height: 100dvh;
+  min-width: 0;
   min-height: 0;
-  display: flex;
-  flex-direction: column;
-  width: 100%;
-  overflow-x: hidden;
-  overflow-y: auto;
+  padding: 12px;
+  overflow: hidden;
+  background: var(--ant-color-bg-layout);
+}
+.swagger-screen {
+  height: 100%;
+}
 
+.swagger-page {
+  --swagger-viewport-height: 100%;
+  flex: 1;
+  min-height: 0;
+  min-width: 0;
+  width: 100%;
+  overflow: auto;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
+
+  &:focus-visible {
+    outline: 2px solid var(--ant-color-primary);
+    outline-offset: -2px;
+  }
+
+  &__meta {
+    display: inline-flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px 16px;
+    .ant-tag {
+      margin: 0;
+    }
+  }
   &__loader,
   &__no-data {
-    flex: 1;
     display: flex;
+    flex-direction: column;
     justify-content: center;
     align-items: center;
-  }
-
-  &__no-data {
-    color: var(--ant-color-text-secondary);
-    font-size: 16px;
-  }
-
-  &__content {
-    flex: 0 0 auto;
+    gap: 16px;
     min-height: 100%;
+    padding: 24px;
+    color: var(--ant-color-text-secondary);
+  }
+  &__content {
+    min-width: 0;
+    min-height: 100%;
+    position: relative;
+  }
+  &__content a[href='https://redocly.com/redoc/'] {
+    display: none !important;
+  }
+  &__rendering {
+    position: sticky;
+    top: 0;
+    z-index: 3;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 12px;
+    background: var(--ant-color-bg-container);
+    color: var(--ant-color-text-secondary);
+    font-size: 13px;
+  }
 
-    a[href='https://redocly.com/redoc/'] {
-      display: none !important;
+  .redoc-wrap {
+    background: var(--ant-color-bg-container);
+    color: var(--ant-color-text);
+  }
+  .api-content {
+    min-width: 0;
+    background: var(--ant-color-bg-container);
+  }
+  .menu-content {
+    top: 0 !important;
+    height: var(--swagger-viewport-height) !important;
+    max-height: var(--swagger-viewport-height);
+    border-inline-end: 1px solid var(--ant-color-border-secondary);
+  }
+  .menu-content input {
+    font-family: inherit;
+  }
+  @media (max-width: 49.999rem) {
+    .menu-content {
+      top: calc(100dvh - var(--swagger-viewport-height) - 12px) !important;
+      left: 12px;
+      width: calc(100% - 24px);
+      border-radius: 16px;
     }
+  }
+  pre {
+    max-width: 100%;
+    overflow: auto;
+  }
+  code {
+    overflow-wrap: anywhere;
   }
 
   &__mermaid {
@@ -36,7 +108,6 @@
     border: 1px solid var(--ant-color-border-secondary);
     border-radius: 8px;
     background: var(--ant-color-bg-container);
-
     svg {
       display: block;
       max-width: 100%;
@@ -44,73 +115,54 @@
       margin: 0 auto;
     }
   }
-
   &__mermaid-error {
     border: 1px solid var(--ant-color-error);
   }
 
+  &--dark {
+    color-scheme: dark;
+  }
+
+  // Keep response badges, HTTP methods and syntax highlighting in their own colors.
   &--dark .redoc-wrap {
-    background: #18181b !important;
-    color: #e4e4e7 !important;
-
-    [data-section-id],
-    [data-section-id] > div,
-    .api-content,
-    .api-info,
-    .markdown,
-    [class*='Markdown'],
-    [class*='Schema'],
-    [class*='Description'] {
-      background-color: #18181b !important;
-      color: #e4e4e7 !important;
+    .http-verb,
+    .operation-type {
+      color: #141414;
     }
-
-    li.react-tabs__tab--selected {
-      background-color: transparent;
+    [role='tab'][aria-selected='true'] {
+      background: #20375b;
+      border-color: #69b1ff;
     }
-
-    p,
-    li,
-    span,
-    h1,
-    h2,
-    h3,
-    h4,
-    h5,
-    h5 > span {
-      color: inherit;
+    button > svg polygon {
+      fill: currentColor;
     }
-
-    pre,
-    code {
-      background: #09090b !important;
-      color: #fde047 !important;
+    div:has(> .dropdown-select) {
+      color: #f0f0f0;
+      background-color: #262626;
+      border-color: #434343;
     }
-
+    .dropdown-select option {
+      color: #f0f0f0;
+      background-color: #262626;
+    }
+    .search-input {
+      color: #f0f0f0;
+      &::placeholder {
+        color: #a6a6a6;
+      }
+    }
     table {
-      background: #18181b !important;
-      border-color: #3f3f46 !important;
+      background: transparent;
+      border-color: var(--ant-color-border);
     }
-
-    thead,
-    tbody,
-    tr,
-    th,
-    td {
-      background: #18181b !important;
-      border-color: #3f3f46 !important;
-      color: #e4e4e7 !important;
-    }
-
+    td,
     th {
-      background: #27272a !important;
-      color: #fafafa !important;
+      border-color: var(--ant-color-border);
     }
-
-    td code,
-    th code {
-      background: #09090b !important;
-      color: #fde047 !important;
+  }
+  @media (max-width: 767px) {
+    &__meta {
+      gap: 6px 10px;
     }
   }
 }

@@ -1,0 +1,202 @@
+.page-layout {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-width: 0;
+  min-height: 0;
+  color: var(--ant-color-text);
+  --workspace-gap: 12px;
+
+  @media (max-width: 767px) {
+    --workspace-gap: 8px;
+  }
+
+  &__body {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    gap: 16px;
+    min-width: 0;
+    min-height: 0;
+    margin-top: var(--workspace-gap);
+    padding: 24px;
+    background: var(--ant-color-bg-container);
+    border: 1px solid var(--ant-color-border-secondary);
+    border-radius: var(--admin-panel-radius, 16px);
+    box-shadow: var(--ant-page-panel-shadow);
+    overflow: auto;
+  }
+
+  &__summary {
+    margin: 0;
+    color: var(--ant-color-text-secondary);
+    font-size: 13px;
+  }
+
+  &--split {
+    > .page-layout__body {
+      padding: 0;
+      background: transparent;
+      border: 0;
+      border-radius: 0;
+      box-shadow: none;
+      gap: var(--workspace-gap);
+      overflow: visible;
+      > .ant-alert {
+        flex: none;
+      }
+    }
+
+    .workspace-card,
+    .column:not(.collapsed) {
+      background: var(--ant-color-bg-container);
+      border: 1px solid var(--ant-color-border-secondary);
+      border-radius: var(--admin-panel-radius, 16px);
+      box-shadow: var(--ant-page-panel-shadow), 0 4px 16px rgb(15 23 42 / 4%);
+    }
+
+    .workspace-card--navigation {
+      overflow: visible;
+    }
+
+    .column__header {
+      border-start-start-radius: var(--admin-panel-radius, 16px);
+      border-start-end-radius: var(--admin-panel-radius, 16px);
+    }
+
+    .column--modern .column__items__item.active .ant-list-item-meta-title {
+      font-weight: 600;
+    }
+
+    .column--modern .ant-list-item-meta-description {
+      color: var(--ant-color-text-secondary);
+    }
+
+    // Navigation wrappers include controls above Column; resize handles remain outside the card.
+    .workspace-card--navigation > .column {
+      background: transparent;
+      border: 0;
+      border-radius: inherit;
+      box-shadow: none;
+    }
+
+    .column.collapsed,
+    .workspace-card--navigation:has(> .column.collapsed) {
+      background: transparent;
+      border: 0;
+      box-shadow: none;
+    }
+  }
+
+  &__table {
+    min-width: 0;
+    .ant-table-cell {
+      overflow-wrap: anywhere;
+    }
+  }
+}
+
+.page-header {
+  flex: none;
+  padding: 8px 16px;
+  color: var(--ant-color-text);
+  font-family: var(--ant-font-family);
+  border-bottom: 1px solid var(--ant-color-border-secondary);
+  background: var(--ant-color-bg-container);
+
+  &--screen {
+    border: 1px solid var(--ant-color-border-secondary);
+    border-radius: var(--admin-panel-radius, 16px);
+    box-shadow: var(--ant-page-panel-shadow), 0 4px 16px rgb(15 23 42 / 4%);
+  }
+
+  &__inner {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 12px;
+    align-items: center;
+  }
+
+  &__heading {
+    flex: 1;
+    min-width: min(180px, 100%);
+  }
+  &__title {
+    margin: 0;
+    font-size: 22px;
+    font-weight: 600;
+    line-height: 30px;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+  &__title[tabindex='-1']:focus {
+    outline: none;
+  }
+  &__context,
+  &__description {
+    color: var(--ant-color-text-secondary);
+    font-size: 13px;
+    line-height: 20px;
+  }
+  &__context {
+    margin: 0 0 2px;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+  &__description {
+    margin-top: 4px;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    overflow: hidden;
+    overflow-wrap: anywhere;
+  }
+  &__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+}
+
+@media (max-width: 767px) {
+  .page-layout__body {
+    padding: 16px;
+  }
+  .page-header__back {
+    flex-basis: 100%;
+  }
+}
+
+// Split workspaces with independently scrolling panels stay within the shell.
+.admin-shell .site-layout__content:has(> .page-layout--local-scroll) {
+  display: flex;
+  flex-direction: column;
+  overflow: clip;
+}
+
+.page-layout.page-layout--local-scroll {
+  flex: 1 1 0;
+  overflow: hidden;
+
+  > .page-layout__body {
+    overflow: hidden;
+  }
+}
+
+.page-loading {
+  display: grid;
+  flex: 1 0 auto;
+  align-content: center;
+  justify-items: center;
+  gap: 12px;
+  min-height: 160px;
+  padding: 16px;
+  color: var(--ant-color-text-secondary);
+  text-align: center;
+}
+
+.site-layout__content > .page-loading {
+  min-height: 100%;
+}

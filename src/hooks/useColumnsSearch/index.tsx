@@ -27,6 +27,7 @@ export const useColumnSearch = <T,>() => {
         <Input
           ref={searchInput}
           placeholder="Введите значение"
+          aria-label="Значение фильтра"
           value={selectedKeys[0]}
           onChange={(e) =>
             setSelectedKeys(e.target.value ? [e.target.value] : [])
@@ -34,12 +35,12 @@ export const useColumnSearch = <T,>() => {
           onPressEnter={() => confirm()}
           className="variable-column-search__input"
         />
-        <Space className="variable-column-search__buttons">
+        <Space wrap className="variable-column-search__buttons">
           <Button
             type="primary"
             onClick={() => confirm()}
             icon={<SearchOutlined />}
-            size="small"
+            size="middle"
             className="variable-column-search__buttons__find"
           >
             Найти
@@ -49,12 +50,12 @@ export const useColumnSearch = <T,>() => {
               clearFilters?.()
               confirm()
             }}
-            size="small"
+            size="middle"
             className="variable-column-search__buttons__clear"
           >
             Сбросить
           </Button>
-          <Button type="link" size="small" onClick={() => close()}>
+          <Button size="middle" onClick={() => close()}>
             Закрыть
           </Button>
         </Space>
@@ -63,7 +64,7 @@ export const useColumnSearch = <T,>() => {
     filterIcon: (filtered) => (
       <SearchOutlined
         style={{
-          color: filtered ? 'variable-column-search__filtered-icon' : undefined
+          color: filtered ? 'var(--ant-color-primary)' : undefined
         }}
       />
     ),

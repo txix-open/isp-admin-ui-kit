@@ -1,26 +1,77 @@
 import { UIDataType } from '@pages/ProfilePage/profile-page.type'
 
-const drawSVG = (color: string) =>
-  `<svg width="24" height="24" xmlns="http://www.w3.org/2000/svg" fill-rule="evenodd" clip-rule="evenodd" fill="${color}"><path d="M24 19h-1v-2.2c-1.853 4.237-6.083 7.2-11 7.2-6.623 0-12-5.377-12-12h1c0 6.071 4.929 11 11 11 4.66 0 8.647-2.904 10.249-7h-2.249v-1h4v4zm-11.036 0h-1.886c-.34-.957-.437-1.571-1.177-1.878h-.001c-.743-.308-1.251.061-2.162.494l-1.333-1.333c.427-.899.804-1.415.494-2.163-.308-.74-.926-.839-1.878-1.177v-1.886c.954-.339 1.57-.437 1.878-1.178.308-.743-.06-1.248-.494-2.162l1.333-1.333c.918.436 1.421.801 2.162.494l.001-.001c.74-.307.838-.924 1.177-1.877h1.886c.34.958.437 1.57 1.177 1.877l.001.001c.743.308 1.252-.062 2.162-.494l1.333 1.333c-.435.917-.801 1.421-.494 2.161v.001c.307.739.915.835 1.878 1.178v1.886c-.953.338-1.571.437-1.878 1.178-.308.743.06 1.249.494 2.162l-1.333 1.333c-.92-.438-1.42-.802-2.157-.496-.746.31-.844.926-1.183 1.88zm-.943-4.667c-1.289 0-2.333-1.044-2.333-2.333 0-1.289 1.044-2.334 2.333-2.334 1.289 0 2.333 1.045 2.333 2.334 0 1.289-1.044 2.333-2.333 2.333zm-8.021-5.333h-4v-4h1v2.2c1.853-4.237 6.083-7.2 11-7.2 6.623 0 12 5.377 12 12h-1c0-6.071-4.929-11-11-11-4.66 0-8.647 2.904-10.249 7h2.249v1z"></path></svg>`
+const defaultColor = '#1677ff'
+const defaultTitle = 'Панель управления'
+let configuredTitle = defaultTitle
 
-export const createSVG = (color: string) => {
-  const svgString = drawSVG(color)
-  return btoa(svgString) // base64
+/** Keep the last configured name when a refresh returns an empty or missing name. */
+export const initUITitle = (name?: string) => {
+  if (typeof name === 'string' && name.trim()) configuredTitle = name.trim()
+  document.title = configuredTitle
 }
+
+// Canvas normalizes CSS colors without interpolating configuration into SVG markup.
+const getIconColors = (color: string) => {
+  const canvas = document.createElement('canvas')
+  canvas.width = canvas.height = 1
+  const context = canvas.getContext('2d')
+  if (!context) return { background: defaultColor, foreground: '#ffffff' }
+  context.fillStyle = defaultColor
+  context.fillStyle =
+    (typeof color === 'string' && color.trim()) || defaultColor
+  context.fillRect(0, 0, 1, 1)
+  const [red, green, blue, alpha] = context.getImageData(0, 0, 1, 1).data
+  if (!alpha) return { background: defaultColor, foreground: '#ffffff' }
+  const opacity = alpha / 255
+  const rgb = [red, green, blue].map((value) =>
+    Math.round(value * opacity + 255 * (1 - opacity))
+  )
+  const luminance = rgb
+    .map((value) => {
+      const channel = value / 255
+      return channel <= 0.04045
+        ? channel / 12.92
+        : Math.pow((channel + 0.055) / 1.055, 2.4)
+    })
+    .reduce(
+      (sum, value, index) => sum + value * [0.2126, 0.7152, 0.0722][index],
+      0
+    )
+  return {
+    background: `rgb(${rgb.join(',')})`,
+    foreground: luminance > 0.3 ? '#101828' : '#ffffff'
+  }
+}
+
+const drawSVG = (color: string) => {
+  const { background, foreground } = getIconColors(color)
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64">
+  <defs><linearGradient id="sheen" x2="0" y2="1"><stop stop-color="#fff" stop-opacity=".12"/><stop offset="1" stop-color="#000" stop-opacity=".08"/></linearGradient></defs>
+  <rect x="2" y="2" width="60" height="60" rx="16" fill="${background}"/>
+  <rect x="2" y="2" width="60" height="60" rx="16" fill="url(#sheen)"/>
+  <rect x="2.5" y="2.5" width="59" height="59" rx="15.5" fill="none" stroke="${foreground}" stroke-opacity=".16"/>
+  <g stroke="${foreground}" stroke-width="4" stroke-linecap="round" opacity=".6"><path d="M16 21h32M16 32h32M16 43h32"/></g>
+  <g fill="${foreground}" stroke="${background}" stroke-width="3"><rect x="23" y="15" width="8" height="12" rx="4"/><rect x="37" y="26" width="8" height="12" rx="4"/><rect x="19" y="37" width="8" height="12" rx="4"/></g>
+</svg>`
+}
+
+export const createSVG = (color: string) => btoa(drawSVG(color))
 
 export const initSVG = (color: string) => {
   const favicon = document.createElement('link')
   favicon.id = 'favicon'
-  favicon.rel = 'shortcut icon'
-  favicon.type = 'image/x-icon'
+  favicon.rel = 'icon'
+  favicon.type = 'image/svg+xml'
+  favicon.sizes.add('any')
   favicon.href = `data:image/svg+xml;base64,${createSVG(color)}`
   return favicon
 }
 
 export const initUI = (ui: UIDataType) => {
-  let favicon = document.getElementById('favicon')
-  favicon = initSVG(ui.primaryColor)
-  const titles = document.getElementsByTagName('title')
-  document.head.insertBefore(favicon, titles[0])
-  document.title = ui.name
+  initUITitle(ui.name)
+  const favicon = initSVG(ui.primaryColor)
+  const existing = document.head.querySelectorAll('link[rel~="icon"]')
+  existing.forEach((icon) => icon.remove())
+  document.getElementById('favicon')?.remove()
+  document.head.append(favicon)
 }

@@ -30,20 +30,40 @@ function isEmpty(value: unknown): boolean {
 }
 
 function cleanEmptyParamsObject(obj: any): any {
+  return cleanEmptyParamsObjectWithArrayIndices(obj)
+}
+
+function cleanEmptyParamsObjectWithArrayIndices(
+  obj: any,
+  onArrayCleaned?: (original: unknown[], retainedIndices: number[]) => void
+): any {
   if (typeof obj !== 'object' || obj === null) {
     return obj
   }
 
   if (Array.isArray(obj)) {
-    return obj.map(cleanEmptyParamsObject).filter((item) => !isEmpty(item))
+    const retainedIndices: number[] = []
+    const cleaned = obj
+      .map((item) =>
+        cleanEmptyParamsObjectWithArrayIndices(item, onArrayCleaned)
+      )
+      .filter((item, index) => {
+        if (isEmpty(item)) return false
+        if (onArrayCleaned) retainedIndices.push(index)
+        return true
+      })
+    onArrayCleaned?.(obj, retainedIndices)
+    return cleaned
   }
 
   return Object.keys(obj).reduce(
     (acc, key) => {
-      const value = cleanEmptyParamsObject(obj[key])
+      const value = cleanEmptyParamsObjectWithArrayIndices(
+        obj[key],
+        onArrayCleaned
+      )
 
       if (!isEmpty(value)) {
-
         acc[key] = value
       }
 
@@ -53,10 +73,15 @@ function cleanEmptyParamsObject(obj: any): any {
   )
 }
 
- function fastDeepEqualLite(a: any, b: any): boolean {
+function fastDeepEqualLite(a: any, b: any): boolean {
   if (a === b) return true
 
-  if (typeof a !== 'object' || typeof b !== 'object' || a === null || b === null) {
+  if (
+    typeof a !== 'object' ||
+    typeof b !== 'object' ||
+    a === null ||
+    b === null
+  ) {
     return false
   }
 
@@ -86,4 +111,9 @@ function cleanEmptyParamsObject(obj: any): any {
   return true
 }
 
-export { sortObject, cleanEmptyParamsObject, fastDeepEqualLite }
+export {
+  sortObject,
+  cleanEmptyParamsObject,
+  cleanEmptyParamsObjectWithArrayIndices,
+  fastDeepEqualLite
+}

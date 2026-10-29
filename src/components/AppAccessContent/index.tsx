@@ -1,34 +1,54 @@
-import { SearchOutlined } from '@ant-design/icons'
 import {
+  CheckCircleOutlined,
+  DownOutlined,
+  EditOutlined,
+  EllipsisOutlined,
+  FilterOutlined,
+  WarningOutlined,
+  ClearOutlined,
+  InfoCircleOutlined,
+  ReloadOutlined,
+  SaveOutlined,
+  SearchOutlined,
+  UndoOutlined
+} from '@ant-design/icons'
+import {
+  Alert,
   Button,
   Card,
+  Dropdown,
+  Popover,
   Input,
   message,
-  Progress,
+  Result,
   Segmented,
-  Space,
   Spin,
-  Statistic,
   Tag,
+  Tooltip,
   TreeProps
 } from 'antd'
-import { ChangeEvent, FC, memo, useEffect, useMemo, useState } from 'react'
-import { Navigate, useSearchParams } from 'react-router-dom'
+import { ChangeEvent, FC, memo, useMemo, useState } from 'react'
+import { useSearchParams } from 'react-router-dom'
 
 import AccessListTree from '@widgets/AccessListTree'
 import SelectedAccessMethod from '@widgets/SelectedAccessMethod'
 
 import { AppAccessContentPropsType } from '@components/AppAccessContent/app-access-content.type'
+import { PageHeader } from '@components/PageLayout'
 import SaveModal from '@components/SaveModal/SaveModal'
 
+import {
+  getHttpMethodLabel,
+  matchesAccessRoute
+} from '@utils/accessRouteFilters'
+import { notifyApiError } from '@utils/apiErrorNotifications'
 import { setUrlValue } from '@utils/columnLayoutUtils'
 
 import useRole from '@hooks/useRole'
+import useUnsavedChanges from '@hooks/useUnsavedChanges'
 
 import accessListApi from '@services/accessListService'
 import routeApi from '@services/routeService'
-
-import { routePaths } from '@routes/routePaths'
 
 import {
   AccessListDeleteListRequestType,
@@ -47,38 +67,37 @@ const getMethodKey = (method: string, httpMethod?: string) =>
 
 const AppAccessContent: FC<AppAccessContentPropsType> = ({
   id,
-  paramPrefix
+  paramPrefix,
+  name
 }) => {
-  const { CheckableTag } = Tag
   const [showSaveModal, setShowSaveModal] = useState<boolean>(false)
   const [selectedHttpMethods, setSelectedHttpMethods] = useState<string[]>([])
   const [viewMode, setViewMode] = useState<AccessViewModeType>('all')
-  const [isModeTransition, setIsModeTransition] = useState(false)
+  const [activePanel, setActivePanel] = useState('routes')
+  const [filtersOpen, setFiltersOpen] = useState(false)
   const [messageApi, contextHolder] = message.useMessage()
   const { hasPermission } = useRole()
 
   const canWrite = hasPermission(PermissionKeysType.app_access_edit)
 
-  const {
-    data: methods = [],
-    isLoading: isMethodsLoading,
-    isError: isMethodsError,
-    isSuccess: isMethodsSuccess
-  } = accessListApi.useGetByIdQuery({ id })
-  const [setList] = accessListApi.useSetListMutation()
-  const [deleteList] = accessListApi.useDeleteListMutation()
-
-  const {
-    data: routes = {
-      originalResponse: [],
-      moduleEndpoints: {},
-      allRouteMap: {}
-    },
-    isLoading: isRouteLoading,
-    isError: isRouteError,
-    isSuccess: isRouteSuccess
-  } = routeApi.useGetAllRoutesQuery()
-  const { moduleEndpoints } = routes
+  const canRead = hasPermission(PermissionKeysType.app_access_view)
+  const validId = Number.isSafeInteger(id) && id >= 0
+  const methodsQuery = accessListApi.useGetByIdQuery(
+    { id },
+    { skip: !canRead || !validId }
+  )
+  const methods = methodsQuery.data ?? []
+  const [setList, { isLoading: isSavingAccess }] =
+    accessListApi.useSetListMutation()
+  const [deleteList, { isLoading: isDeletingAccess }] =
+    accessListApi.useDeleteListMutation()
+  const routesQuery = routeApi.useGetAllRoutesQuery(undefined, {
+    skip: !canRead || !validId
+  })
+  const moduleEndpoints = routesQuery.data?.moduleEndpoints ?? {}
+  const busy = isSavingAccess || isDeletingAccess
+  const hasData =
+    methodsQuery.data !== undefined && routesQuery.data !== undefined
   const [selectedMethod, setSelectedMethod] = useState<AccessListMethodType[]>(
     []
   )
@@ -86,93 +105,58 @@ const AppAccessContent: FC<AppAccessContentPropsType> = ({
   const [searchParams, setSearchParams] = useSearchParams()
   const searchValue = searchParams.get(paramPrefix) || ''
 
-  const isLoading = isMethodsLoading || isRouteLoading
-  const isError = isMethodsError || isRouteError
-  const isSuccess = isMethodsSuccess && isRouteSuccess
+  const isLoading =
+    !hasData &&
+    (methodsQuery.isLoading ||
+      methodsQuery.isFetching ||
+      routesQuery.isLoading ||
+      routesQuery.isFetching)
+  const isError = methodsQuery.isError || routesQuery.isError
+  const isFetching = methodsQuery.isFetching || routesQuery.isFetching
+  const refetch = () => {
+    void methodsQuery.refetch()
+    void routesQuery.refetch()
+  }
 
   const openSuccessMessage = (body: string) => {
     messageApi.success(body)
   }
 
-  const openErrorMessage = (body: string) => {
-    messageApi.error(body)
-  }
-
-  const createAllMethodList = (status: boolean) => {
-    return Object.values(moduleEndpoints)
-      .flat()
-      .map((key) => {
-        return {
-          method: key.path,
-          value: status,
-          httpMethod: key.httpMethod
-        }
-      })
-  }
-
-  const handleOnCheck: TreeProps['onCheck'] = (_, info): void | never[] => {
+  const handleOnCheck: TreeProps['onCheck'] = (_, info) => {
+    if (!canWrite || busy) return
     const node = info.node as any
-
-    if (!node.children) {
-      setSelectedMethod((prev) => {
-        const newValue = !node.checked
-
-        const currentMethod = methods.find(
-          (m) => m.method === node.path && m.httpMethod === node.httpMethod
-        )
-        const currentValue = currentMethod?.value ?? false
-
-        if (currentValue === newValue) {
-          return prev.filter(
-            (item) =>
-              !(
-                item.method === node.path && item.httpMethod === node.httpMethod
-              )
-          )
-        }
-
-        const filtered = prev.filter(
-          (item) =>
-            !(item.method === node.path && item.httpMethod === node.httpMethod)
-        )
-        return [
-          ...filtered,
-          {
-            method: node.path,
-            httpMethod: node.httpMethod,
-            value: newValue
-          }
-        ]
-      })
-      return
-    }
-
-    const newChanges = node.children.map((child: any) => ({
-      method: child.path,
-      httpMethod: child.httpMethod,
-      value: !node.checked
-    }))
-
-    setSelectedMethod((prev) => {
-      const filtered = prev.filter(
-        (item) =>
-          !node.children?.some(
-            (child: any) =>
-              child.path === item.method && child.httpMethod === item.httpMethod
-          )
+    const targets = (node.children ?? [node]).filter((child: any) => {
+      const key = getMethodKey(child.path, child.httpMethod)
+      const changed =
+        key in selectedMethodStatusMap &&
+        selectedMethodStatusMap[key] !== (currentMethodStatus[key] ?? false)
+      return (
+        matchesAccessRoute(child, searchValue, selectedHttpMethods) &&
+        (viewMode !== 'changed' || changed)
       )
-
-      const validChanges = newChanges.filter((change: any) => {
-        const currentMethod = methods.find(
-          (m) =>
-            m.method === change.method && m.httpMethod === change.httpMethod
-        )
-        const currentValue = currentMethod?.value ?? false
-        return currentValue !== change.value
-      })
-
-      return [...filtered, ...validChanges]
     })
+    const targetKeys = new Set(
+      targets.map((child: any) => getMethodKey(child.path, child.httpMethod))
+    )
+    const updates = targets
+      .map((child: any) => ({
+        method: child.path,
+        httpMethod: child.httpMethod,
+        value: info.checked
+      }))
+      .filter(
+        (change: AccessListMethodType) =>
+          (currentMethodStatus[
+            getMethodKey(change.method, change.httpMethod)
+          ] ?? false) !== change.value
+      )
+    setSelectedMethod((previous) => [
+      ...previous.filter(
+        (method) =>
+          !targetKeys.has(getMethodKey(method.method, method.httpMethod))
+      ),
+      ...updates
+    ])
   }
 
   const handleInputOnChange = (e: ChangeEvent<HTMLInputElement>) => {
@@ -188,39 +172,73 @@ const AppAccessContent: FC<AppAccessContentPropsType> = ({
         httpMethod: obj.httpMethod
       }))
     }
-    deleteList(sendData)
+    if (!canWrite || busy) return
+    return deleteList(sendData)
       .unwrap()
       .then(() => {
-        openSuccessMessage('Методы успешно удалены')
+        const removed = new Set(
+          methods.map((method) => getMethodKey(method.path, method.httpMethod))
+        )
+        setSelectedMethod((previous) =>
+          previous.filter(
+            (method) =>
+              !removed.has(getMethodKey(method.method, method.httpMethod))
+          )
+        )
+        openSuccessMessage('Неизвестные методы удалены')
       })
-      .catch(() => {
-        openErrorMessage('Не удалось удалить методы')
+      .catch((error) => {
+        notifyApiError(error, 'Не удалось удалить методы')
       })
   }
 
   const saveChanges = () => {
-    if (selectedMethod.length === 0) {
+    if (!canWrite || busy) return
+    if (pendingChanges.length === 0) {
       openSuccessMessage('Нет изменений для сохранения')
       return
     }
-    setList({
+    return setList({
       appId: id,
-      methods: selectedMethod
+      methods: pendingChanges
     })
+      .unwrap()
       .then(() => {
+        draftGuard.markSaved()
         openSuccessMessage('Статус методов успешно изменен')
         setShowSaveModal(false)
         setSelectedMethod([])
       })
-      .catch(() => {
-        openErrorMessage('Не удалось изменить статус методов')
-        setShowSaveModal(false)
+      .catch((error) => {
+        notifyApiError(error, 'Не удалось изменить статус методов')
       })
   }
 
-  const setAllMethods = (status: boolean) => {
-    const methods = createAllMethodList(status)
-    setSelectedMethod(methods)
+  const setAllMethods = (value: boolean) => {
+    if (!canWrite || busy) return
+    const targets = new Map(
+      Object.values(moduleEndpoints)
+        .flat()
+        .map((endpoint) => [
+          getMethodKey(endpoint.path, endpoint.httpMethod),
+          endpoint
+        ])
+    )
+    const updates = Array.from(targets.values(), (endpoint) => ({
+      method: endpoint.path,
+      httpMethod: endpoint.httpMethod,
+      value
+    })).filter(
+      (method) =>
+        (currentMethodStatus[getMethodKey(method.method, method.httpMethod)] ??
+          false) !== value
+    )
+    setSelectedMethod((previous) => [
+      ...previous.filter(
+        (method) => !targets.has(getMethodKey(method.method, method.httpMethod))
+      ),
+      ...updates
+    ])
   }
 
   const defaultAllRoutes = useMemo(() => {
@@ -247,7 +265,7 @@ const AppAccessContent: FC<AppAccessContentPropsType> = ({
       copyAllRoutes[unknownMethodKey] = missingRoute
     }
     return copyAllRoutes
-  }, [isSuccess, moduleEndpoints, methods])
+  }, [moduleEndpoints, methods])
 
   const currentMethodStatus = useMemo(
     () =>
@@ -275,20 +293,31 @@ const AppAccessContent: FC<AppAccessContentPropsType> = ({
     [selectedMethod]
   )
 
+  const pendingChanges = selectedMethod.filter(
+    (method) =>
+      method.value !==
+      (currentMethodStatus[getMethodKey(method.method, method.httpMethod)] ??
+        false)
+  )
+
   const changes = {
     allowed: selectedMethod
       .filter((method) => {
         const key = getMethodKey(method.method, method.httpMethod)
         return method.value && !currentMethodStatus[key]
       })
-      .map((method) => `${method.httpMethod} ${method.method}`),
+      .map(
+        (method) => `${getHttpMethodLabel(method.httpMethod)} ${method.method}`
+      ),
 
     denied: selectedMethod
       .filter((method) => {
         const key = getMethodKey(method.method, method.httpMethod)
         return !method.value && currentMethodStatus[key]
       })
-      .map((method) => `${method.httpMethod} ${method.method}`)
+      .map(
+        (method) => `${getHttpMethodLabel(method.httpMethod)} ${method.method}`
+      )
   }
 
   const isNoChanges =
@@ -344,186 +373,398 @@ const AppAccessContent: FC<AppAccessContentPropsType> = ({
 
   const changedMethodsCount = changes.allowed.length + changes.denied.length
   const unknownMethodsCount = defaultAllRoutes[unknownMethodKey]?.length || 0
-  const allowedPercent = totalMethodsCount
-    ? Math.round((allowedMethodsCount / totalMethodsCount) * 100)
-    : 0
   const uniqueHttpMethods = useMemo(
     () =>
       Array.from(
         new Set(
           Object.values(defaultAllRoutes)
             .flat()
-            .map((endpoint) => endpoint.httpMethod)
+            .map((endpoint) => endpoint.httpMethod?.trim() || '')
         )
       ).sort(),
     [defaultAllRoutes]
   )
 
-  useEffect(() => {
-    setIsModeTransition(true)
-    const timer = setTimeout(() => {
-      setIsModeTransition(false)
-    }, 180)
+  const draftGuard = useUnsavedChanges({
+    dirty: canWrite && !isNoChanges,
+    busy: isSavingAccess,
+    label: `Права приложения «${name || `#${id}`}»`
+  })
 
-    return () => clearTimeout(timer)
-  }, [viewMode])
+  if (!canRead)
+    return <Result status="403" title="Нет доступа к правам приложения" />
+  if (!validId)
+    return <Result status="404" title="Некорректный идентификатор приложения" />
+  if (isLoading)
+    return (
+      <div className="app-access-content__state" role="status">
+        <Spin />
+        Загрузка прав и маршрутов…
+      </div>
+    )
+  if (!hasData)
+    return (
+      <Result
+        status="error"
+        title="Не удалось загрузить права приложения"
+        extra={
+          <Button
+            icon={<ReloadOutlined />}
+            onClick={refetch}
+            loading={isFetching}
+          >
+            Повторить
+          </Button>
+        }
+      />
+    )
 
-  if (isLoading) {
-    return <Spin className="spin" />
+  const hasFilters = Boolean(
+    searchValue || selectedHttpMethods.length || viewMode === 'changed'
+  )
+  const clearFilters = () => {
+    setSelectedHttpMethods([])
+    setViewMode('all')
+    setUrlValue('', setSearchParams, paramPrefix)
   }
+  const knownCount = Object.values(moduleEndpoints).reduce(
+    (count, endpoints) => count + endpoints.length,
+    0
+  )
 
-  if (isError) {
-    return <Navigate to={routePaths.error} />
-  }
+  const renderViewMode = () => (
+    <Segmented
+      aria-label="Отображение методов"
+      value={viewMode}
+      options={[
+        { label: 'Все методы', value: 'all' },
+        { label: 'Изменённые', value: 'changed' }
+      ]}
+      onChange={(value) => setViewMode(value as AccessViewModeType)}
+    />
+  )
+  const renderMethodFilters = () => (
+    <div
+      className="app-access-content__http-filters"
+      role="group"
+      aria-label="HTTP-методы"
+    >
+      {uniqueHttpMethods.map((method) => (
+        <Button
+          key={method}
+          aria-pressed={selectedHttpMethods.includes(method)}
+          type={selectedHttpMethods.includes(method) ? 'primary' : 'default'}
+          onClick={() =>
+            setSelectedHttpMethods((previous) =>
+              previous.includes(method)
+                ? previous.filter((item) => item !== method)
+                : [...previous, method]
+            )
+          }
+        >
+          {getHttpMethodLabel(method)}
+        </Button>
+      ))}
+      <Button
+        icon={<ClearOutlined />}
+        disabled={!hasFilters}
+        onClick={clearFilters}
+      >
+        Сбросить фильтры
+      </Button>
+    </div>
+  )
+
   return (
-    <div className="app-access-content">
+    <section className="app-access-content" aria-label="Права приложения">
       {contextHolder}
       {showSaveModal && (
         <SaveModal
           onOk={saveChanges}
-          open={showSaveModal}
+          open
           onClose={() => setShowSaveModal(false)}
+          loading={isSavingAccess}
           changes={changes}
         />
       )}
-      <div className="app-access-content__toolbar">
-        <div className="app-access-content__header">
-          <Input
-            prefix={<SearchOutlined />}
-            allowClear
-            className="app-access-content__main__tree-search-input"
-            value={searchValue}
-            placeholder="Найти метод"
-            onChange={handleInputOnChange}
+      <PageHeader
+        level={2}
+        focusOnMount
+        title={name || `Приложение #${id}`}
+        context={`ID ${id} · Доступ к методам`}
+        actions={
+          <>
+            <span
+              className="app-access-content__secondary-actions"
+              data-editable={canWrite}
+            >
+              <Button
+                icon={<ReloadOutlined />}
+                loading={isFetching}
+                disabled={busy}
+                onClick={refetch}
+              >
+                Обновить
+              </Button>
+              {canWrite && (
+                <Button
+                  icon={<UndoOutlined />}
+                  disabled={busy || isNoChanges}
+                  onClick={() => setSelectedMethod([])}
+                >
+                  Отменить изменения
+                </Button>
+              )}
+            </span>
+            {canWrite && (
+              <>
+                <Button
+                  type="primary"
+                  icon={<SaveOutlined />}
+                  disabled={busy || isNoChanges}
+                  loading={isSavingAccess}
+                  onClick={() => setShowSaveModal(true)}
+                >
+                  Сохранить изменения
+                </Button>
+              </>
+            )}
+            {canWrite && (
+              <Dropdown
+                trigger={['click']}
+                menu={{
+                  items: [
+                    {
+                      key: 'refresh',
+                      label: 'Обновить',
+                      icon: <ReloadOutlined />,
+                      disabled: busy || isFetching,
+                      onClick: refetch
+                    },
+                    {
+                      key: 'undo',
+                      label: 'Отменить изменения',
+                      icon: <UndoOutlined />,
+                      disabled: busy || isNoChanges,
+                      onClick: () => setSelectedMethod([])
+                    }
+                  ]
+                }}
+              >
+                <Button
+                  className="app-access-content__mobile-only"
+                  aria-label="Другие действия с правами"
+                  icon={<EllipsisOutlined />}
+                />
+              </Dropdown>
+            )}
+          </>
+        }
+      />
+      <div className="app-access-content__workspace">
+        {isError && (
+          <Alert
+            type="warning"
+            showIcon
+            title="Не удалось обновить данные. Черновик сохранён в форме."
+            action={
+              <Button onClick={refetch} loading={isFetching}>
+                Повторить
+              </Button>
+            }
           />
-          <Segmented
-            className="app-access-content__view-mode"
-            value={viewMode}
-            options={[
-              {
-                label: (
-                  <span className="app-access-content__view-mode-label">
-                    Все
-                  </span>
-                ),
-                value: 'all'
-              },
-              {
-                label: (
-                  <span className="app-access-content__view-mode-label">
-                    Только изменённые
-                  </span>
-                ),
-                value: 'changed'
+        )}
+        <div className="app-access-content__toolbar">
+          <div className="app-access-content__filters">
+            <Input
+              prefix={<SearchOutlined />}
+              allowClear
+              aria-label="Найти метод"
+              value={searchValue}
+              placeholder="Путь или HTTP-метод"
+              onChange={handleInputOnChange}
+            />
+            <div className="app-access-content__desktop-view-mode">
+              {renderViewMode()}
+            </div>
+            <Popover
+              open={filtersOpen}
+              onOpenChange={setFiltersOpen}
+              trigger="click"
+              placement="bottomRight"
+              title="Фильтры методов"
+              content={
+                <div
+                  className="app-access-content__filter-popup"
+                  onKeyDown={(event) => {
+                    if (event.key === 'Escape') {
+                      event.stopPropagation()
+                      setFiltersOpen(false)
+                    }
+                  }}
+                >
+                  {renderViewMode()}
+                  {renderMethodFilters()}
+                </div>
               }
-            ]}
-            onChange={(value) => setViewMode(value as AccessViewModeType)}
-          />
+            >
+              <Button
+                className="app-access-content__mobile-only"
+                icon={<FilterOutlined />}
+                type={hasFilters ? 'primary' : 'default'}
+                aria-label="Фильтры методов"
+                onKeyDown={(event) => {
+                  if (event.key === 'Escape') setFiltersOpen(false)
+                }}
+              >
+                Фильтры
+              </Button>
+            </Popover>
+          </div>
+          <div className="app-access-content__desktop-filters">
+            {renderMethodFilters()}
+          </div>
           {canWrite && (
-            <div className="app-access-content__header__action-buttons">
-              <Button
-                disabled={!canWrite}
-                onClick={() => {
-                  setAllMethods(false)
+            <div className="app-access-content__bulk">
+              <span className="app-access-content__bulk-desktop">
+                <Tooltip title="Все опубликованные маршруты, включая скрытые фильтрами. Изменения остаются в черновике до сохранения.">
+                  <span>
+                    Все маршруты <InfoCircleOutlined />
+                  </span>
+                </Tooltip>
+                <Button
+                  disabled={busy || !knownCount}
+                  onClick={() => setAllMethods(true)}
+                >
+                  Разрешить все
+                </Button>
+                <Button
+                  disabled={busy || !knownCount}
+                  onClick={() => setAllMethods(false)}
+                >
+                  Запретить все
+                </Button>
+              </span>
+              <Dropdown
+                trigger={['click']}
+                menu={{
+                  items: [
+                    {
+                      key: 'allow',
+                      label: 'Разрешить все маршруты',
+                      disabled: busy || !knownCount,
+                      onClick: () => setAllMethods(true)
+                    },
+                    {
+                      key: 'deny',
+                      label: 'Запретить все маршруты',
+                      danger: true,
+                      disabled: busy || !knownCount,
+                      onClick: () => setAllMethods(false)
+                    }
+                  ]
                 }}
               >
-                Запретить все
-              </Button>
-              <Button
-                disabled={!canWrite}
-                onClick={() => {
-                  setAllMethods(true)
-                }}
-              >
-                Выбрать все
-              </Button>
-              <Button
-                type="primary"
-                disabled={isNoChanges}
-                onClick={() => {
-                  setShowSaveModal(true)
-                }}
-              >
-                Сохранить
-              </Button>
+                <Button
+                  className="app-access-content__mobile-only"
+                  disabled={busy || !knownCount}
+                  title="Все опубликованные маршруты, включая скрытые фильтрами"
+                >
+                  Все маршруты <DownOutlined />
+                </Button>
+              </Dropdown>
             </div>
           )}
         </div>
-        <div className="app-access-content__http-filters">
-          {uniqueHttpMethods.map((method) => (
-            <CheckableTag
-              key={method}
-              checked={selectedHttpMethods.includes(method)}
-              onChange={(checked) => {
-                setSelectedHttpMethods((prev) =>
-                  checked ? [...prev, method] : prev.filter((m) => m !== method)
-                )
-              }}
+        <div
+          className="app-access-content__summary"
+          role="status"
+          aria-live="polite"
+        >
+          <span>
+            <CheckCircleOutlined /> Разрешено {allowedMethodsCount} из{' '}
+            {totalMethodsCount}
+          </span>
+          <Tag
+            color={changedMethodsCount ? 'processing' : undefined}
+            icon={<EditOutlined />}
+            title={`Несохранённых изменений: ${changedMethodsCount}`}
+          >
+            <span className="app-access-content__metric-label">
+              Изменений:{' '}
+            </span>
+            {changedMethodsCount}
+          </Tag>
+          {unknownMethodsCount > 0 && (
+            <Tag
+              color="warning"
+              icon={<WarningOutlined />}
+              title={`Неизвестных маршрутов: ${unknownMethodsCount}`}
             >
-              {method}
-            </CheckableTag>
-          ))}
-          {selectedHttpMethods.length > 0 && (
-            <Button
-              type="link"
-              size="small"
-              onClick={() => setSelectedHttpMethods([])}
-            >
-              Сбросить фильтры
-            </Button>
+              <span className="app-access-content__metric-label">
+                Неизвестных:{' '}
+              </span>
+              {unknownMethodsCount}
+            </Tag>
           )}
+          {!canWrite && <span>Только просмотр</span>}
+        </div>
+        <Segmented
+          className="app-access-content__panel-tabs"
+          aria-label="Рабочая панель"
+          value={activePanel}
+          options={[
+            { label: 'Маршруты', value: 'routes' },
+            { label: 'Разрешённые', value: 'result' }
+          ]}
+          onChange={(value) => setActivePanel(String(value))}
+          block
+        />
+        <div className="app-access-content__main">
+          <Card
+            className="app-access-content__panel"
+            data-active={activePanel === 'routes'}
+            title="Маршруты"
+            extra={
+              <Tooltip title="Выбор группы применяется к видимым методам. Подсветка отмечает несохранённые изменения.">
+                <InfoCircleOutlined />
+              </Tooltip>
+            }
+          >
+            <AccessListTree
+              searchValue={searchValue}
+              onCheck={handleOnCheck}
+              defaultAllRoutes={defaultAllRoutes}
+              methods={methods}
+              selectedMethod={selectedMethod}
+              selectedHttpMethods={selectedHttpMethods}
+              showChangedOnly={viewMode === 'changed'}
+              disabled={busy}
+              onRemoveUnknownMethods={
+                canWrite ? handleRemoveUnknowMethods : undefined
+              }
+            />
+          </Card>
+          <Card
+            className="app-access-content__panel"
+            data-active={activePanel === 'result'}
+            title={`Разрешённые методы · ${allowedMethodsCount}`}
+            extra={
+              <Tooltip title="Результат с учётом несохранённых изменений">
+                <InfoCircleOutlined />
+              </Tooltip>
+            }
+          >
+            <SelectedAccessMethod
+              unknownMethodKey={unknownMethodKey}
+              methods={methods}
+              selectedMethod={selectedMethod}
+              allRoutes={defaultAllRoutes}
+            />
+          </Card>
         </div>
       </div>
-      <Space className="app-access-content__stats" size={16} wrap>
-        <Card
-          size="small"
-          className="app-access-content__stats-card app-access-content__stats-card--progress"
-        >
-          <div className="app-access-content__stats-progress-title">
-            Разрешено {allowedMethodsCount}/{totalMethodsCount}
-          </div>
-          <Progress percent={allowedPercent} size="small" showInfo={false} />
-        </Card>
-        <Card size="small" className="app-access-content__stats-card">
-          <Statistic title="Всего методов" value={totalMethodsCount} />
-        </Card>
-        <Card size="small" className="app-access-content__stats-card">
-          <Statistic title="Изменено" value={changedMethodsCount} />
-        </Card>
-        {unknownMethodsCount > 0 && (
-          <Card size="small" className="app-access-content__stats-card">
-            <Statistic title="Неизвестные" value={unknownMethodsCount} />
-          </Card>
-        )}
-      </Space>
-      <div
-        className={`app-access-content__main ${isModeTransition ? 'app-access-content__main--mode-transition' : ''}`}
-      >
-        <Card className="app-access-content__panel" title="Дерево маршрутов">
-          <AccessListTree
-            searchValue={searchValue}
-            onCheck={handleOnCheck}
-            defaultAllRoutes={defaultAllRoutes}
-            methods={methods}
-            selectedMethod={selectedMethod}
-            selectedHttpMethods={selectedHttpMethods}
-            showChangedOnly={viewMode === 'changed'}
-            onRemoveUnknownMethods={canWrite && handleRemoveUnknowMethods}
-          />
-        </Card>
-        <Card
-          className="app-access-content__panel"
-          title={`Разрешенные методы (${allowedMethodsCount})`}
-        >
-          <SelectedAccessMethod
-            unknownMethodKey={unknownMethodKey}
-            methods={methods}
-            selectedMethod={selectedMethod}
-            allRoutes={defaultAllRoutes}
-          />
-        </Card>
-      </div>
-    </div>
+    </section>
   )
 }
 

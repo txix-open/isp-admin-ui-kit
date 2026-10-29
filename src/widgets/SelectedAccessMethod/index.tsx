@@ -3,6 +3,7 @@ import { FC, useEffect, useMemo, useRef, useState } from 'react'
 
 import { SelectedAccessMethodPropsType } from '@widgets/SelectedAccessMethod/selected-access-method.type'
 
+import { getHttpMethodLabel } from '@utils/accessRouteFilters'
 import { httpMethodColors } from '@utils/httpMethodColorUtils'
 
 import { AccessListMethodType } from '@type/accessList.type'
@@ -107,22 +108,39 @@ const SelectedAccessMethod: FC<SelectedAccessMethodPropsType> = ({
   }, [methods, selectedMethod, allRoutes, unknownMethodKey])
 
   useEffect(() => {
+    const container = containerRef.current
+    if (!container) return
     const updateHeight = () => {
-      setViewportHeight(Math.max(360, window.innerHeight - 315))
+      setViewportHeight(Math.max(1, Math.floor(container.clientHeight)))
+      setScrollTop(container.scrollTop)
     }
-
     updateHeight()
+    const observer = new ResizeObserver(updateHeight)
+    observer.observe(container)
+    return () => observer.disconnect()
+  }, [enabledMethods.length > 0])
 
-    window.addEventListener('resize', updateHeight)
-    return () => window.removeEventListener('resize', updateHeight)
-  }, [])
+  useEffect(() => {
+    const container = containerRef.current
+    if (container) {
+      const top = Math.max(
+        0,
+        Math.min(
+          container.scrollTop,
+          enabledMethods.length * rowHeight - container.clientHeight
+        )
+      )
+      container.scrollTop = top
+      setScrollTop(top)
+    }
+  }, [enabledMethods.length])
 
   if (!enabledMethods.length) {
     return (
       <div className="selected-access-method selected-access-method--empty">
         <Empty
           image={Empty.PRESENTED_IMAGE_SIMPLE}
-          description="Нет разрешенных методов"
+          description="Нет разрешённых методов"
         />
       </div>
     )
@@ -140,7 +158,10 @@ const SelectedAccessMethod: FC<SelectedAccessMethodPropsType> = ({
       className="selected-access-method"
       onScroll={(event) => setScrollTop(event.currentTarget.scrollTop)}
     >
-      <div className="selected-access-method__virtual" style={{ height: totalHeight }}>
+      <div
+        className="selected-access-method__virtual"
+        style={{ height: totalHeight }}
+      >
         {visibleMethods.map((method, index) => {
           const isUnknown = Boolean(checkIsUnknownMethod(method))
           const top = (startIndex + index) * rowHeight
@@ -152,23 +173,26 @@ const SelectedAccessMethod: FC<SelectedAccessMethodPropsType> = ({
               style={{ top, height: rowHeight }}
             >
               <div className="selected-access-method__row-content">
-                {method.httpMethod && (
+                {
                   <span className="selected-access-method__method-tag">
                     <Tag
-                      color={httpMethodColors[method.httpMethod]}
+                      color={httpMethodColors[method.httpMethod ?? '']}
                       bordered={false}
+                      title={
+                        method.httpMethod?.trim()
+                          ? undefined
+                          : 'HTTP-метод не указан'
+                      }
                     >
-                      {method.httpMethod}
+                      {getHttpMethodLabel(method.httpMethod)}
                     </Tag>
                   </span>
-                )}
+                }
                 <Text
                   ellipsis
                   className={[
                     'selected-access-method__text',
-                    isUnknown
-                      ? 'selected-access-method__unknown'
-                      : undefined
+                    isUnknown ? 'selected-access-method__unknown' : undefined
                   ]
                     .filter(Boolean)
                     .join(' ')}

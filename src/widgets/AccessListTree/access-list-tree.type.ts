@@ -1,6 +1,10 @@
 import { TreeProps } from 'antd'
 
-import { AccessListMethodType, BaseEndpoint, EndpointType } from '@type/accessList.type'
+import {
+  AccessListMethodType,
+  BaseEndpoint,
+  EndpointType
+} from '@type/accessList.type'
 
 export interface AccessListTreePropsType {
   searchValue: string
@@ -10,5 +14,6 @@ export interface AccessListTreePropsType {
   selectedMethod: AccessListMethodType[]
   selectedHttpMethods: string[]
   showChangedOnly: boolean
+  disabled?: boolean
   onRemoveUnknownMethods?: (methods: BaseEndpoint[]) => void
 }

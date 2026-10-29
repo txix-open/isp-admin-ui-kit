@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict'
-import test from 'node:test'
+import { test } from '@playwright/test'
 
 import { filterMenuByPermissions } from '../src/components/Layout/filter-menu.ts'
 

@@ -1,223 +1,42 @@
-@use "../../constants/style/styleConst" as *;
+@use '../../constants/style/styleConst' as *;
 
 .configuration-editor-page {
   display: flex;
   flex-direction: column;
-  -ms-overflow-style: none; /* IE и Edge */
-  scrollbar-width: none;
   border-left: 1px solid $border-color;
-  height: 100vh;
-  overflow: auto;
-  padding-bottom: 80px;
-
-  &::-webkit-scrollbar {
-    display: none;
-  }
-
-  .react-json-view {
-    margin: $basic-margin *3 0 $basic-margin *2 0;
-  }
-
-  &__header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: $basic-padding *2 $basic-padding;
-    border-bottom: 1px solid $border-color;
-  }
-
-  &__controll {
-    display: flex;
-  }
-
-  &__save-btn {
-    width: auto;
-    margin-left: $basic-margin;
-  }
+  height: 100%;
+  min-height: 0;
+  min-width: 0;
+  overflow: hidden;
 
   &__content {
-    padding: $basic-padding * 3 $basic-padding;
-  }
-
-  .rjsf {
-    display: block;
-    width: 100%;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    gap: 12px;
+    min-height: 0;
     min-width: 0;
+    overflow: hidden;
+    padding: 16px 24px 24px;
 
-    .form-group {
-      width: 100%;
-    }
-
-    .ant-form-item {
-      margin-bottom: 16px;
-    }
-
-    .ant-form-item-label {
-      text-align: start;
-      max-width: 100%;
-      text-overflow: ellipsis;
-      padding: 0 0 4px;
-      line-height: 20px;
-
-      > label {
-        display: inline-flex;
-        align-items: center;
-        height: auto;
-        min-height: 20px;
-        line-height: 20px;
-      }
-    }
-
-    .configuration-editor-page__root-tabs.ant-tabs-right {
+    > .ant-radio-group {
+      flex: none;
+      align-self: flex-start;
       display: flex;
-      width: 100%;
-      min-width: 0;
-      align-items: stretch;
-
-      > .ant-tabs-content-holder {
-        flex: 1 1 auto;
-        min-width: 0;
-      }
-
-      > .ant-tabs-nav {
-        width: 250px;
-        flex: 0 0 250px;
-
-        .ant-tabs-tab-btn {
-          text-align: left;
-          white-space: normal;
-        }
-      }
-
-      .ant-tabs-content,
-      .ant-tabs-tabpane {
-        width: 100%;
-        min-width: 0;
-      }
+      flex-wrap: wrap;
     }
 
-    .ant-form-item-control-input {
-      min-height: 32px;
+    > .ant-alert {
+      flex: none;
     }
 
-    .collapseArray_item_content {
-      width: 100%;
-      min-width: 0;
-      
-      .ant-btn {
-        position: relative;
-        top: 10px;
-      }
+    @media (max-width: 767px) {
+      padding: 16px;
     }
-
-    .ant-collapse-header {
-      align-items: center;
-      padding: 4px 11px;
-
-      .ant-collapse-header-text {
-        display: inline;
-        max-width: 100%;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-        overflow: hidden;
-
-        .ant-btn {
-          top: 0;
-        }
-      }
-    }
-
-    .collapseArray_item {
-      display: flex;
-      align-items: flex-start;
-      width: 100%;
-      margin-bottom: 24px;
-
-      .ant-form-item {
-        align-items: baseline;
-        align-content: end;
-        margin-bottom: 16px;
-      }
-
-      .anticon-delete {
-        margin-left: auto;
-        padding-left: 8px;
-      }
-
-      > .ant-btn {
-        flex: 0 0 auto;
-        margin-left: 8px;
-      }
-    }
-
-    .ant-col-sm-16 {
-      max-width: 100%;
-    }
-
-    .ant-col .ant-form-item-control {
-      max-width: 100%;
-    }
-
-    .ant-form-item-control-input-content {
-      width: 100%;
-      max-width: 100%;
-      flex: auto;
-
-      .ant-collapse {
-        border-radius: 6px;
-      }
-    }
-
-    .flex-space-between {
-      display: flex;
-      flex-direction: row !important;
-      justify-content: space-between;
-
-      &__plus {
-        margin-left: 8px;
-      }
-    }
-  }
-
-  .collapse {
-    .configEditor_collapseObject {
-      border-radius: 6px;
-
-      .ant-row {
-        .ant-col {
-          align-content: center;
-          padding-bottom: 5px;
-
-          .ant-form-item {
-            align-items: baseline;
-            align-content: end;
-            margin-bottom: 16px;
-          }
-        }
-      }
-    }
-  }
-
-  .ant-btn-group {
-    margin-top: 40px;
-  }
-
-  .ant-row .ant-row-end {
-    width: 60px;
-    margin: 0 0 $basic-margin auto !important;
   }
 
   &__form {
-    padding: $basic-padding;
-  }
-
-  .modal__wrap {
-    min-height: 110px;
-  }
-
-  .confirm-btn {
-    width: auto;
-    min-width: 190px;
+    padding: 0;
   }
 
   .error-data {
@@ -226,20 +45,86 @@
   }
 }
 
-.change-status {
-  font-size: 12px;
-  &-circle {
-    display: inline-block;
-    border-radius: 50%;
-    height: 4px;
-    width: 4px;
-    margin-left: 2px;
-    margin-bottom: 6px;
+.configuration-editor-page {
+  &__editor {
+    border: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    margin: 0;
+    min-width: 0;
+    min-height: 0;
+    overflow: hidden;
+
+    &--form {
+      overflow: auto;
+      scrollbar-gutter: stable;
+    }
   }
-  &_green {
-    background-color: green;
+
+  &__save-note {
+    max-width: 100%;
+    flex: none;
+    align-self: flex-start;
+    margin: 0;
+    padding: 0;
+    height: auto;
+    white-space: normal;
+    text-align: start;
+    color: var(--ant-color-text-secondary);
+    font-size: 13px;
+    line-height: 20px;
   }
-  &_red {
-    background-color: red;
+
+  &__code {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    flex: 1;
+    min-height: 0;
+    min-width: 0;
+    overflow: hidden;
+
+    > .ant-alert {
+      flex: none;
+    }
+  }
+
+  &__code-surface {
+    flex: 1;
+    min-height: 0;
+    min-width: 0;
+    overflow: hidden;
+  }
+
+  &__content > .ant-alert {
+    margin-bottom: 0;
+  }
+}
+
+.configuration-editor-page__changes-button.ant-btn {
+  padding: 0;
+  height: auto;
+  line-height: inherit;
+  vertical-align: baseline;
+  font-size: inherit;
+}
+
+.configuration-editor-page__save-note-details {
+  max-width: min(360px, calc(100vw - 48px));
+  margin: 0;
+  font-size: 13px;
+  line-height: 20px;
+}
+
+@media (max-width: 767px) {
+  .configuration-editor-page > .page-header {
+    .page-header__back {
+      flex-basis: auto;
+    }
+    .page-header__actions {
+      gap: 8px;
+    }
   }
 }

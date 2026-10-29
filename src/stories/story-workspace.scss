@@ -1,0 +1,36 @@
+.story-workspace {
+  box-sizing: border-box;
+  height: min(720px, 85vh);
+  min-height: 320px;
+  padding: 12px;
+  background: var(--ant-color-bg-layout);
+  color: var(--ant-color-text);
+}
+
+.story-workspace__columns {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 2fr);
+  flex: 1;
+  min-height: 0;
+  gap: var(--workspace-gap);
+
+  > .workspace-card {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    overflow: hidden;
+  }
+}
+
+.story-workspace__scroll {
+  min-height: 0;
+  overflow: auto;
+  padding: 12px;
+}
+
+@media (max-width: 600px) {
+  .story-workspace__columns {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: minmax(0, 1fr) minmax(0, 2fr);
+  }
+}

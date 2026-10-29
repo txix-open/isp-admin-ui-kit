@@ -1,16 +1,19 @@
 import { FormInput } from 'isp-ui-kit'
-import { FC } from 'react'
+import { FC, useEffect } from 'react'
 import { useForm } from 'react-hook-form'
-import { useNavigate, useParams } from 'react-router-dom'
+import { useLocation, useNavigate, useParams } from 'react-router-dom'
 
 import { ValidationRules } from '@constants/form/validationRules'
 
-import Modal from '@widgets/Modal'
-
+import EntityFormModal from '@components/EntityFormModal'
 import {
   ConfigNameFormType,
   SetConfigNameModalProps
 } from '@components/SetConfigNameModal/set-config-name-modal.type'
+
+import { getModuleScrollState } from '@utils/moduleNavigation'
+
+import useUnsavedChanges from '@hooks/useUnsavedChanges'
 
 import { routePaths } from '@routes/routePaths'
 
@@ -19,15 +22,33 @@ const SetConfigNameModal: FC<SetConfigNameModalProps> = ({
   onClose,
   currentModule = {}
 }) => {
-  const { control, handleSubmit, reset } = useForm<ConfigNameFormType>({
-    mode: 'onChange'
+  const {
+    control,
+    handleSubmit,
+    reset,
+    formState: { isDirty }
+  } = useForm<ConfigNameFormType>({
+    mode: 'onChange',
+    defaultValues: { name: '' }
   })
+  useEffect(() => {
+    if (open) reset({ name: '' })
+  }, [open, reset])
   const navigate = useNavigate()
+  const { search } = useLocation()
   const { id: moduleId } = useParams()
+  const draftGuard = useUnsavedChanges({
+    dirty: open && isDirty,
+    label: 'Название новой конфигурации'
+  })
   const onSubmit = ({ name }: ConfigNameFormType) => {
-    navigate(`/${moduleId}/${routePaths.configEditor}/new`, {
-      state: { currentModule, name: name }
-    })
+    draftGuard.markSaved()
+    navigate(
+      { pathname: `/${moduleId}/${routePaths.configEditor}/new`, search },
+      {
+        state: { currentModule, name, ...getModuleScrollState() }
+      }
+    )
   }
 
   const handleCloseModal = () => {
@@ -36,22 +57,23 @@ const SetConfigNameModal: FC<SetConfigNameModalProps> = ({
   }
 
   return (
-    <Modal
-      title="Создать конфигурацию"
+    <EntityFormModal
+      title="Новая конфигурация"
       open={open}
-      onClose={handleCloseModal}
-      onOk={handleSubmit(onSubmit)}
-      footer={{ onOkText: 'Сохранить', onCanselText: 'Отмена' }}
+      onClose={() => draftGuard.requestLeave(handleCloseModal)}
+      onSubmit={handleSubmit(onSubmit)}
+      submitText="Продолжить"
     >
-      <form key="set-name-config-modal">
-        <FormInput
-          control={control}
-          name="name"
-          label="Наименование"
-          rules={{ required: ValidationRules.required }}
-        />
-      </form>
-    </Modal>
+      <p>
+        Укажите название. На следующем шаге откроется редактор конфигурации.
+      </p>
+      <FormInput
+        control={control}
+        name="name"
+        label="Название конфигурации"
+        rules={{ required: ValidationRules.required }}
+      />
+    </EntityFormModal>
   )
 }
 export default SetConfigNameModal

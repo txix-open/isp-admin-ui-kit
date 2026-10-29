@@ -1,6 +1,4 @@
-import { Button } from 'antd'
-import { useEffect } from 'react'
-import CloseBtn from 'src/ui/CloseBtn'
+import { Button, Modal as AntModal } from 'antd'
 
 import { ModalPropsType } from '@widgets/Modal/modal.type'
 
@@ -8,61 +6,65 @@ import './modal.scss'
 
 const Modal = ({
   open,
-  onOk = () => {},
+  onOk,
   footer,
   title,
   children,
   onClose = () => {},
-  loading = false
+  loading = false,
+  width = 640,
+  className = '',
+  actions,
+  confirmDisabled = false
 }: ModalPropsType) => {
-  const handleKeyDown = (event: KeyboardEvent) => {
-    if (event.key === 'Escape' && !loading) {
-      onClose()
-    }
+  const close = () => {
+    if (!loading) onClose()
   }
-
-  const closeModal = () => {
-    if (loading) {
-      return
-    }
-    onClose()
-    document.body.classList.remove('modal-open')
-  }
-
-  useEffect(() => {
-    document.addEventListener('keydown', handleKeyDown)
-
-    if (open) {
-      document.body.classList.add('modal-open')
-    }
-
-    return () => {
-      document.removeEventListener('keydown', handleKeyDown)
-    }
-  }, [open])
-
-  if (!open) {
-    return null
-  }
-
   return (
-    <section className="modal" onClick={closeModal}>
-      <div className="modal__wrap" onClick={(event) => event.stopPropagation()}>
-        <h1 className="modal__title">{title}</h1>
-        <div className="modal__content">{children}</div>
-        {footer && (
-          <div className="modal__footer">
-            <Button type="default" onClick={closeModal} disabled={loading}>
+    <AntModal
+      title={title}
+      open={open}
+      onCancel={close}
+      width={width}
+      rootClassName={`admin-modal-root ${className}`}
+      className="admin-modal modal__wrap"
+      classNames={{
+        container: 'modal__container',
+        body: 'modal__content',
+        title: 'modal__title',
+        footer: 'modal__footer'
+      }}
+      destroyOnHidden
+      mask={{ closable: false }}
+      keyboard={!loading}
+      closable={loading ? false : { 'aria-label': 'Закрыть' }}
+      footer={
+        actions ??
+        (footer ? (
+          <>
+            <Button onClick={close} disabled={loading}>
               {footer.onCanselText}
             </Button>
-            <Button type="primary" onClick={onOk} loading={loading}>
+            <Button
+              type="primary"
+              onClick={() => {
+                if (!loading && !confirmDisabled) onOk?.()
+              }}
+              loading={loading}
+              disabled={loading || confirmDisabled}
+            >
               {footer.onOkText}
             </Button>
-          </div>
-        )}
-        <CloseBtn onClick={closeModal} ariaLabel="close" />
-      </div>
-    </section>
+          </>
+        ) : (
+          <Button onClick={close} disabled={loading}>
+            Закрыть
+          </Button>
+        ))
+      }
+    >
+      {children}
+    </AntModal>
   )
 }
 

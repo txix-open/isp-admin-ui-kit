@@ -8,6 +8,7 @@ import { darkTheme, lightTheme } from '@constants/theme'
 
 import { AdminBasePropsType } from '@components/admin-base.type'
 
+import { initUITitle } from '@utils/UIUtiles'
 import { getCleanPath } from '@utils/routeUtils'
 
 import { Context } from '@stores/index'
@@ -17,8 +18,10 @@ import { routePaths } from '@routes/routePaths'
 
 import './admin-base.scss'
 
+const emptyCustomRouters: NonNullable<AdminBasePropsType['customRouters']> = []
+
 const AdminBase: FC<AdminBasePropsType> = ({
-  customRouters = [],
+  customRouters = emptyCustomRouters,
   defaultRoutePath,
   configProviderProps = {},
   excludePermissions = []
@@ -54,7 +57,9 @@ const AdminBase: FC<AdminBasePropsType> = ({
   }, [configProviderProps, theme])
 
   useEffect(() => {
+    initUITitle()
     return routerConfig.subscribe((state) => {
+      initUITitle()
       const currentPathname = getCleanPath(state.location.pathname)
       const fullPath = `${currentPathname}${state.location.search}${state.location.hash}`
       const prevRoute = sessionStorage.getItem(sessionStorageKeys.PREV_ROUTE)
@@ -79,12 +84,7 @@ const AdminBase: FC<AdminBasePropsType> = ({
         excludePermissions
       }}
     >
-      <ConfigProvider
-        key={changeTheme ? 'dark' : 'light'}
-        theme={theme}
-        locale={ruRu}
-        {...configProviderProps}
-      >
+      <ConfigProvider theme={theme} locale={ruRu} {...configProviderProps}>
         <RouterProvider router={routerConfig} />
       </ConfigProvider>
     </Context.Provider>
