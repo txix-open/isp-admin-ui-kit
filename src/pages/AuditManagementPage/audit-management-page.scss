@@ -1,0 +1,34 @@
+@use 'src/constants/style/styleConst' as *;
+
+.audit-management-page {
+  min-height: 100%;
+  background: var(--ant-color-bg-container, #fff);
+
+  &__header {
+    border-bottom: 1px solid $border-color;
+    padding: 3 * $basic-padding;
+
+    h1 {
+      margin: 0;
+      font-weight: 500;
+      font-size: 20px;
+      line-height: 28px;
+    }
+  }
+
+  &__content {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 3 * $basic-padding;
+  }
+
+  &__checkbox-group {
+    display: flex;
+    flex-direction: column;
+    gap: $basic-margin;
+    margin-block-start: $basic-margin;
+    margin-inline-start: 2 * $basic-margin;
+    font-size: 15px;
+  }
+}
