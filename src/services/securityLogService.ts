@@ -6,6 +6,7 @@ import { axiosBaseQuery } from '@utils/apiUtils'
 
 import { LimitOffsetRequestType } from '@type/index'
 import { LogEventType, LogResponseType, SetEventType } from '@type/log.type'
+import type { TableSearchParams } from '@type/table-search.type'
 
 const securityLogServiceApi = createApi({
   reducerPath: 'securityLogService',
@@ -16,6 +17,13 @@ const securityLogServiceApi = createApi({
     getAllLogs: builder.mutation<LogResponseType, LimitOffsetRequestType>({
       query: (request) => ({ url: apiPaths.getAllLogs, data: request }),
       invalidatesTags: () => ['logs']
+    }),
+    searchLogs: builder.query<
+      LogResponseType,
+      LimitOffsetRequestType & TableSearchParams
+    >({
+      query: (request) => ({ url: apiPaths.getAllLogs, data: request }),
+      providesTags: () => ['logs']
     }),
     getLogEvents: builder.query<LogEventType[], void>({
       query: () => ({ url: apiPaths.getLogEvents }),

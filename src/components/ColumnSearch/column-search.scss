@@ -1,0 +1,18 @@
+.admin-column-search {
+  display: grid;
+  gap: 8px;
+  min-width: 230px;
+  max-width: calc(100vw - 24px);
+  padding: 8px;
+
+  .ant-input-number,
+  .ant-select {
+    width: 100%;
+  }
+}
+
+.admin-column-search-match {
+  background-color: #ffc069;
+  color: #141414;
+  padding: 0;
+}

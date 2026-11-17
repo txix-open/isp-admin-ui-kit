@@ -6,6 +6,7 @@ import { axiosBaseQuery } from '@utils/apiUtils'
 
 import { LimitOffsetRequestType } from '@type/index'
 import { SessionResponseType } from '@type/session.type'
+import type { TableSearchParams } from '@type/table-search.type'
 
 const sessionServiceApi = createApi({
   reducerPath: 'sessionService',
@@ -13,7 +14,10 @@ const sessionServiceApi = createApi({
   tagTypes: ['sessions'],
   baseQuery: axiosBaseQuery({ baseUrl: apiPaths.baseAdminUrl }),
   endpoints: (builder) => ({
-    getAllSessions: builder.query<SessionResponseType, LimitOffsetRequestType>({
+    getAllSessions: builder.query<
+      SessionResponseType,
+      LimitOffsetRequestType & TableSearchParams
+    >({
       query: (request) => ({ url: apiPaths.getAllSession, data: request }),
       providesTags: () => ['sessions']
     }),

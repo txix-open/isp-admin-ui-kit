@@ -1,5 +1,6 @@
 import { LogoutOutlined } from '@ant-design/icons'
 import {
+  Alert,
   Button,
   Popconfirm,
   Spin,
@@ -10,15 +11,19 @@ import {
 } from 'antd'
 import { ColumnsType } from 'antd/es/table'
 import dayjs from 'dayjs'
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 
 import { dateFormats } from '@constants/date'
 import { SessionStatusKeysType, sessionStatuses } from '@constants/statuses'
 
+import { getColumnSearchProps } from '@components/ColumnSearch'
+import { highlightSearchMatch } from '@components/ColumnSearch/highlightSearchMatch'
+
 import { getUserFullName } from '@utils/userUtils/getFullNameUtil'
 
 import useRole from '@hooks/useRole'
+import { useTableSearch } from '@hooks/useTableSearch'
 
 import sessionServiceApi from '@services/sessionService'
 import userServiceApi from '@services/userService'
@@ -33,17 +38,29 @@ import './sessions-page.scss'
 const limit = 10
 
 const SessionsPage = () => {
-  const [offset, setOffset] = useState<number>(0)
-  const { data, isLoading: isLoadingSession } =
-    sessionServiceApi.useGetAllSessionsQuery({ limit, offset })
+  const {
+    query,
+    searchParams,
+    currentPage,
+    setCurrentPage,
+    handleTableChange
+  } = useTableSearch<SessionType>(
+    ['createdAt', 'expiredAt'],
+    ['userId', 'status']
+  )
+  const { currentData, data, isFetching, isError } =
+    sessionServiceApi.useGetAllSessionsQuery({
+      limit,
+      offset: (currentPage - 1) * limit,
+      ...searchParams
+    })
   const [revokeSession] = sessionServiceApi.useRevokeSessionMutation()
   const { data: allUsers = [], isLoading: isUsersLoading } =
     userServiceApi.useGetAllUsersQuery()
   const { role, hasPermission } = useRole()
   const navigate = useNavigate()
-  const [currentPage, setCurrentPage] = useState(1)
 
-  const isLoading = isUsersLoading || isLoadingSession
+  const isLoading = isUsersLoading
 
   const isPageAvailable = hasPermission(PermissionKeysType.session_view)
   const hasRevokePermission = hasPermission(PermissionKeysType.session_revoke)
@@ -60,12 +77,6 @@ const SessionsPage = () => {
     }
   }, [role])
 
-  const handleChangePagination = (page: number) => {
-    setCurrentPage(page)
-    const currentOffset = (page - 1) * limit
-    setOffset(currentOffset)
-  }
-
   const handleRevokeSessions = (id: number) => {
     revokeSession(id)
       .unwrap()
@@ -73,7 +84,7 @@ const SessionsPage = () => {
       .catch(() => message.error('Не удалось завершить сессию'))
   }
 
-  if (isLoading || !data) {
+  if (isLoading) {
     return <Spin />
   }
 
@@ -82,6 +93,15 @@ const SessionsPage = () => {
       title: 'Пользователь',
       dataIndex: 'userId',
       key: 'userId',
+      sorter: true,
+      ...getColumnSearchProps({
+        title: 'Пользователь',
+        type: 'select',
+        options: allUsers.map((user) => ({
+          value: user.id,
+          label: getUserFullName(user)
+        }))
+      }),
       render: (value) => {
         const user = allUsers.find((el) => el.id === value)
         return user && getUserFullName(user)
@@ -90,12 +110,21 @@ const SessionsPage = () => {
     {
       title: 'Идентификатор',
       dataIndex: 'id',
-      key: 'id'
+      key: 'id',
+      sorter: true,
+      ...getColumnSearchProps({ title: 'Идентификатор', type: 'number' }),
+      render: (value: number) => highlightSearchMatch(value, query?.id)
     },
     {
       title: 'Дата начала сессии',
       dataIndex: 'createdAt',
       key: 'createdAt',
+      sorter: true,
+      ...getColumnSearchProps({
+        title: 'Дата начала сессии',
+        type: 'date',
+        showTime: true
+      }),
       render: (value) => {
         return dayjs(value).format(dateFormats.fullFormat)
       }
@@ -104,6 +133,12 @@ const SessionsPage = () => {
       title: 'Дата окончания сессии',
       dataIndex: 'expiredAt',
       key: 'expiredAt',
+      sorter: true,
+      ...getColumnSearchProps({
+        title: 'Дата окончания сессии',
+        type: 'date',
+        showTime: true
+      }),
       render: (value) => {
         return dayjs(value).format(dateFormats.fullFormat)
       }
@@ -112,6 +147,15 @@ const SessionsPage = () => {
       title: 'Статус',
       dataIndex: 'status',
       key: 'status',
+      sorter: true,
+      ...getColumnSearchProps({
+        title: 'Статус',
+        type: 'select',
+        options: Object.entries(sessionStatuses).map(([value, label]) => ({
+          value,
+          label
+        }))
+      }),
       render: (value: SessionStatusKeysType) => sessionStatuses[value]
     },
     {
@@ -142,7 +186,7 @@ const SessionsPage = () => {
     }
   ]
 
-  const { totalCount, items } = data
+  const totalCount = (currentData ?? data)?.totalCount ?? 0
   return (
     <section className="sessions-page">
       <header className="sessions-page__header">
@@ -154,12 +198,20 @@ const SessionsPage = () => {
         </span>
       </header>
       <section className="sessions-page__content">
+        {isError && (
+          <Alert
+            type="error"
+            title="Не удалось загрузить пользовательские сессии"
+          />
+        )}
         <div className="sessions-page__content__wrap-table">
           <Table
             className="sessions-page__content__table"
             rowKey={(record) => record.id}
             pagination={false}
-            dataSource={items}
+            dataSource={currentData?.items ?? []}
+            loading={isFetching}
+            onChange={handleTableChange}
             columns={columns}
           />
         </div>
@@ -169,7 +221,8 @@ const SessionsPage = () => {
             current={currentPage}
             total={totalCount}
             pageSize={limit}
-            onChange={handleChangePagination}
+            onChange={setCurrentPage}
+            disabled={isFetching}
           />
         </div>
       </section>

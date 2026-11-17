@@ -5,7 +5,16 @@ import {
   PlusSquareOutlined,
   UnlockOutlined
 } from '@ant-design/icons'
-import { Button, message, Popconfirm, Spin, Table, Tag, Tooltip } from 'antd'
+import {
+  Alert,
+  Button,
+  message,
+  Popconfirm,
+  Spin,
+  Table,
+  Tag,
+  Tooltip
+} from 'antd'
 import { ColumnsType } from 'antd/es/table'
 import dayjs from 'dayjs'
 import { useEffect } from 'react'
@@ -13,9 +22,13 @@ import { useNavigate } from 'react-router-dom'
 
 import { dateFormats } from '@constants/date'
 
+import { getColumnSearchProps } from '@components/ColumnSearch'
+import { highlightSearchMatch } from '@components/ColumnSearch/highlightSearchMatch'
+
 import { getUserFullName } from '@utils/userUtils/getFullNameUtil'
 
 import useRole from '@hooks/useRole'
+import { useTableSearch } from '@hooks/useTableSearch'
 
 import roleApi from '@services/roleService'
 import userServiceApi from '@services/userService'
@@ -28,8 +41,24 @@ import { UserType } from '@type/user.type'
 import './users-page.scss'
 
 const UsersPage = () => {
-  const { data: allUsers = [], isLoading: isUsersLoading } =
-    userServiceApi.useGetAllUsersQuery()
+  const { query, searchParams, handleTableChange } = useTableSearch<UserType>(
+    ['lastSessionCreatedAt'],
+    ['userId', 'roles']
+  )
+  const {
+    data: userOptions = [],
+    isLoading: isUsersLoading,
+    isError: isUsersError
+  } = userServiceApi.useGetAllUsersQuery()
+  const {
+    currentData: searchResults,
+    isFetching: isSearching,
+    isError: isSearchError
+  } = userServiceApi.useGetAllUsersQuery(searchParams, {
+    skip: !searchParams
+  })
+  const allUsers = searchParams ? (searchResults ?? []) : userOptions
+  const searchedRoles = query?.roles
   const { data: roles, isLoading: isRolesLoading } =
     roleApi.useGetAllRolesQuery()
   const [blockUser] = userServiceApi.useBlockUserMutation()
@@ -112,58 +141,86 @@ const UsersPage = () => {
     {
       title: 'id',
       dataIndex: 'id',
-      key: 'id'
+      key: 'id',
+      sorter: true,
+      ...getColumnSearchProps({ title: 'id', type: 'number' }),
+      render: (value: number) => highlightSearchMatch(value, query?.id)
     },
     {
       title: 'Пользователь',
-      dataIndex: 'name',
-      key: 'name',
+      dataIndex: 'userId',
+      key: 'userId',
+      sorter: true,
+      ...getColumnSearchProps({
+        title: 'Пользователь',
+        type: 'select',
+        options: userOptions.map((user) => ({
+          value: user.id,
+          label: getUserFullName(user)
+        }))
+      }),
       render: (_, record) => getUserFullName(record)
     },
     {
       title: 'Описание',
       dataIndex: 'description',
-      key: 'description'
+      key: 'description',
+      sorter: true,
+      ...getColumnSearchProps({ title: 'Описание' }),
+      render: (value: string) => highlightSearchMatch(value, query?.description)
     },
     {
       title: 'Email',
       dataIndex: 'email',
       key: 'email',
-      render: (value, record) => {
+      sorter: true,
+      ...getColumnSearchProps({ title: 'Email' }),
+      render: (value: string, record) => {
+        const email = highlightSearchMatch(value, query?.email)
         if (record.blocked) {
           return (
             <div>
-              {value} <Tag color="red">Заблокирован</Tag>
+              {email} <Tag color="red">Заблокирован</Tag>
             </div>
           )
         }
 
-        return value
+        return email
       }
     },
     {
       title: 'Роль',
       dataIndex: 'roles',
       key: 'roles',
+      ...getColumnSearchProps({
+        title: 'Роль',
+        type: 'select',
+        options:
+          roles?.map(({ id, name }) => ({ value: id, label: name })) ?? []
+      }),
       render: (values: number[]) => {
-        const labels: string[] = []
-        values.forEach((value: number) => {
-          const roleLabel = roles?.find((el) => el.id === value)
-          if (roleLabel) {
-            labels.push(roleLabel.name)
-          }
+        return values.flatMap((id) => {
+          const role = roles?.find((item) => item.id === id)
+          if (!role) return []
+
+          const selected =
+            Array.isArray(searchedRoles) && searchedRoles.includes(id)
+          return (
+            <div key={id} className="role-item">
+              {selected
+                ? highlightSearchMatch(role.name, role.name)
+                : role.name}
+            </div>
+          )
         })
-        return labels.map((label) => (
-          <div key={label} className="role-item">
-            {label}
-          </div>
-        ))
       }
     },
     {
       title: 'Последняя сессия',
       dataIndex: 'lastSessionCreatedAt',
       key: 'lastSessionCreatedAt',
+      sorter: true,
+      ...getColumnSearchProps({ title: 'Последняя сессия', type: 'date' }),
       render: (value: string) =>
         value ? dayjs(value).format(dateFormats.fullFormat) : ''
     },
@@ -234,11 +291,16 @@ const UsersPage = () => {
         )}
       </header>
       <section className="users-page__content">
+        {(isUsersError || isSearchError) && (
+          <Alert type="error" title="Не удалось загрузить пользователей" />
+        )}
         <div className="users-page__content__wrap-table">
           <Table
             data-cy="users-page__content__table"
             rowKey={(record) => record.id}
             pagination={false}
+            loading={isSearching}
+            onChange={handleTableChange}
             dataSource={allUsers}
             columns={columns}
           />
