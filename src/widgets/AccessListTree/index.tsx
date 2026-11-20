@@ -13,6 +13,7 @@ import {
 
 import { AccessListTreePropsType } from '@widgets/AccessListTree/access-list-tree.type'
 
+import { getAccessMethodKey as getNodeKey } from '@utils/accessListUtils'
 import { httpMethodColors } from '@utils/httpMethodColorUtils'
 
 import useRole from '@hooks/useRole'
@@ -27,9 +28,6 @@ import { PermissionKeysType } from '@type/roles.type'
 import './access-list-tree.scss'
 
 const unknownMethodKey = 'неизвестные методы'
-
-const getNodeKey = (path: string, httpMethod?: string) =>
-  httpMethod ? `${httpMethod}:${path}` : path
 
 const renderHighlightedPath = (path: string, search: string): ReactNode => {
   if (!search) {
@@ -248,7 +246,9 @@ const AccessListTree: FC<AccessListTreePropsType> = ({
         const matchesHttpMethod = hasHttpFilter
           ? selectedHttpMethods.includes(endpoint.httpMethod)
           : true
-        const matchesChanged = showChangedOnly ? isMethodChanged(endpoint) : true
+        const matchesChanged = showChangedOnly
+          ? isMethodChanged(endpoint)
+          : true
 
         return matchesSearch && matchesHttpMethod && matchesChanged
       })

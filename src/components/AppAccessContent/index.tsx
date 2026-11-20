@@ -21,6 +21,10 @@ import SelectedAccessMethod from '@widgets/SelectedAccessMethod'
 import { AppAccessContentPropsType } from '@components/AppAccessContent/app-access-content.type'
 import SaveModal from '@components/SaveModal/SaveModal'
 
+import {
+  getAccessMethodKey as getMethodKey,
+  updateAccessMethodChanges
+} from '@utils/accessListUtils'
 import { setUrlValue } from '@utils/columnLayoutUtils'
 
 import useRole from '@hooks/useRole'
@@ -42,8 +46,6 @@ import './app-access-content.scss'
 
 const unknownMethodKey = 'неизвестные методы'
 type AccessViewModeType = 'all' | 'changed'
-const getMethodKey = (method: string, httpMethod?: string) =>
-  `${httpMethod || ''}_${method}`
 
 const AppAccessContent: FC<AppAccessContentPropsType> = ({
   id,
@@ -110,69 +112,18 @@ const AppAccessContent: FC<AppAccessContentPropsType> = ({
       })
   }
 
-  const handleOnCheck: TreeProps['onCheck'] = (_, info): void | never[] => {
+  const handleOnCheck: TreeProps['onCheck'] = (_, info) => {
     const node = info.node as any
-
-    if (!node.children) {
-      setSelectedMethod((prev) => {
-        const newValue = !node.checked
-
-        const currentMethod = methods.find(
-          (m) => m.method === node.path && m.httpMethod === node.httpMethod
-        )
-        const currentValue = currentMethod?.value ?? false
-
-        if (currentValue === newValue) {
-          return prev.filter(
-            (item) =>
-              !(
-                item.method === node.path && item.httpMethod === node.httpMethod
-              )
-          )
-        }
-
-        const filtered = prev.filter(
-          (item) =>
-            !(item.method === node.path && item.httpMethod === node.httpMethod)
-        )
-        return [
-          ...filtered,
-          {
-            method: node.path,
-            httpMethod: node.httpMethod,
-            value: newValue
-          }
-        ]
-      })
-      return
-    }
-
-    const newChanges = node.children.map((child: any) => ({
-      method: child.path,
-      httpMethod: child.httpMethod,
-      value: !node.checked
+    const endpoints = node.children || [node]
+    const changes = endpoints.map((endpoint: BaseEndpoint) => ({
+      method: endpoint.path,
+      httpMethod: endpoint.httpMethod,
+      value: info.checked
     }))
 
-    setSelectedMethod((prev) => {
-      const filtered = prev.filter(
-        (item) =>
-          !node.children?.some(
-            (child: any) =>
-              child.path === item.method && child.httpMethod === item.httpMethod
-          )
-      )
-
-      const validChanges = newChanges.filter((change: any) => {
-        const currentMethod = methods.find(
-          (m) =>
-            m.method === change.method && m.httpMethod === change.httpMethod
-        )
-        const currentValue = currentMethod?.value ?? false
-        return currentValue !== change.value
-      })
-
-      return [...filtered, ...validChanges]
-    })
+    setSelectedMethod((previousChanges) =>
+      updateAccessMethodChanges(methods, previousChanges, changes)
+    )
   }
 
   const handleInputOnChange = (e: ChangeEvent<HTMLInputElement>) => {
@@ -207,6 +158,7 @@ const AppAccessContent: FC<AppAccessContentPropsType> = ({
       appId: id,
       methods: selectedMethod
     })
+      .unwrap()
       .then(() => {
         openSuccessMessage('Статус методов успешно изменен')
         setShowSaveModal(false)
@@ -232,7 +184,8 @@ const AppAccessContent: FC<AppAccessContentPropsType> = ({
     methods.forEach((item) => {
       const hasRoute = allRoutesArray.some(
         (route) =>
-          route.path === item.method && route.httpMethod === item.httpMethod
+          getMethodKey(route.path, route.httpMethod) ===
+          getMethodKey(item.method, item.httpMethod)
       )
 
       if (!hasRoute) {
@@ -281,14 +234,18 @@ const AppAccessContent: FC<AppAccessContentPropsType> = ({
         const key = getMethodKey(method.method, method.httpMethod)
         return method.value && !currentMethodStatus[key]
       })
-      .map((method) => `${method.httpMethod} ${method.method}`),
+      .map(({ httpMethod, method }) =>
+        httpMethod ? `${httpMethod} ${method}` : method
+      ),
 
     denied: selectedMethod
       .filter((method) => {
         const key = getMethodKey(method.method, method.httpMethod)
         return !method.value && currentMethodStatus[key]
       })
-      .map((method) => `${method.httpMethod} ${method.method}`)
+      .map(({ httpMethod, method }) =>
+        httpMethod ? `${httpMethod} ${method}` : method
+      )
   }
 
   const isNoChanges =
