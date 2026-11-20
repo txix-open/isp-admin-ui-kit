@@ -41,7 +41,7 @@ const mocks = {
   '@stores/redusers/ProfileSlice': `export const StateProfileStatus = { resolved: 'resolved', pending: 'pending', rejected: 'rejected', notInit: 'notInit' };`,
   '@widgets/Header': `import Header from ${JSON.stringify(path.join(root, 'src/widgets/Header/index.tsx'))}; export default (props) => window.layoutFixtures.fullApp ? <Header {...props} /> : <div style={{ padding: 12 }}>ISP · Тест</div>`,
   '@routes/ModuleGuard': `import Guard from ${JSON.stringify(path.join(root, 'src/routes/ModuleGuard/index.tsx'))}; export default (props) => window.layoutFixtures.fullApp ? <Guard {...props} /> : props.children;`,
-  '@services/userService': `import { useMutation } from ${JSON.stringify(path.join(root, 'tests/application-service-fixtures.ts'))}; export default { useCreateUserMutation: () => useMutation('createUser'), useUpdateUserMutation: () => useMutation('updateUser'), useBlockUserMutation: () => useMutation('blockUser'), useDeleteUserMutation: () => useMutation('deleteUser'), useGetAllUsersQuery: (_, options) => ({ data: options?.skip ? undefined : window.layoutFixtures.users, isLoading: false, ...window.layoutFixtures.queryStates.users, refetch: () => {} }), useGetAllPermissionsQuery: () => ({ data: window.layoutFixtures.permissions, isLoading: false }) };`,
+  '@services/userService': `import { useMutation } from ${JSON.stringify(path.join(root, 'tests/application-service-fixtures.ts'))}; export default { useCreateUserMutation: () => useMutation('createUser'), useUpdateUserMutation: () => useMutation('updateUser'), useBlockUserMutation: () => useMutation('blockUser'), useDeleteUserMutation: () => useMutation('deleteUser'), useGetAllUsersQuery: (args, options) => (window.layoutFixtures.queryCalls.push({ service: 'users', args, skip: options?.skip }), { data: options?.skip ? undefined : window.layoutFixtures.users, isLoading: false, ...window.layoutFixtures.queryStates.users, refetch: () => {} }), useGetAllPermissionsQuery: () => ({ data: window.layoutFixtures.permissions, isLoading: false }) };`,
   '@services/roleService': `import { useMutation } from ${JSON.stringify(path.join(root, 'tests/application-service-fixtures.ts'))}; export default { useGetAllRolesQuery: () => ({ data: window.layoutFixtures.roles, isLoading: false }), useCreateRoleMutation: () => useMutation('createRole'), useUpdateRoleMutation: () => useMutation('updateRole'), useRemoveRoleMutation: () => useMutation('deleteRole') };`,
   '@services/modulesService': `export { modulesApi as default } from ${JSON.stringify(path.join(root, 'tests/module-service-fixtures.ts'))};`,
   '@services/variablesService': `import { useMutation } from ${JSON.stringify(path.join(root, 'tests/application-service-fixtures.ts'))}; const mutation = () => [() => { throw new Error('Service calls are disabled in layout tests'); }, { isLoading: false }]; export default { useGetAllVariablesQuery: (_, options = {}) => { window.layoutFixtures.queryCalls.push({ service: 'variables', skip: options.skip }); return { data: options.skip ? undefined : Object.values(window.layoutFixtures.variables), isLoading: false, isFetching: false, ...window.layoutFixtures.queryStates.variables, refetch: () => { window.layoutFixtures.retried = 'variables'; } }; }, useGetVariableByNameQuery: (name, options) => ({ data: options.skip ? undefined : window.layoutFixtures.variables[name], isLoading: false }), useCreateVariableMutation: () => useMutation('createVariable'), useUpdateVariableMutation: () => useMutation('updateVariable'), useDeleteVariableMutation: () => [mutation()[0], { isLoading: Boolean(window.layoutFixtures.removingName), originalArgs: window.layoutFixtures.removingName }] };`
@@ -59,6 +59,11 @@ for (const [service, hook, fixture] of [
         const data = options.skip ? undefined : window.layoutFixtures.${fixture};
         return { data, currentData: data, isLoading: false, isFetching: false, ...state, refetch: () => { window.layoutFixtures.retried = '${fixture}'; } };
       },
+      useGetLogEventsQuery: () => {
+        window.layoutFixtures.queryCalls.push({ service: 'audit' });
+        return { data: window.layoutFixtures.auditEvents, isLoading: false, isFetching: false, ...window.layoutFixtures.queryStates.audit, refetch: () => { window.layoutFixtures.retried = 'audit'; } };
+      },
+      useSetLogEventsMutation: () => useMutation('setAuditEvents'),
       useRevokeSessionMutation: () => useMutation('revokeSession')
     };
   `
@@ -78,7 +83,8 @@ const result = await build({
   },
   define: {
     'process.env.NODE_ENV': '"development"',
-    'import.meta.env': '{"BASE_URL":"/","VITE_ENABLE_OAUTH_LOGIN":true,"VITE_CLIENT_NAME":"fixture-client"}'
+    'import.meta.env':
+      '{"BASE_URL":"/","VITE_ENABLE_OAUTH_LOGIN":true,"VITE_CLIENT_NAME":"fixture-client"}'
   },
   loader: {
     '.svg': 'dataurl',

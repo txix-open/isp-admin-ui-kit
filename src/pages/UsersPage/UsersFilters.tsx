@@ -8,13 +8,15 @@ type UsersFiltersProps = {
   roleOptions: { value: number; label: string }[]
   onChange: (name: 'search' | 'role' | 'status', value: string) => void
   onReset: () => void
+  hasTableFilters?: boolean
 }
 
 const UsersFilters = ({
   filters,
   roleOptions,
   onChange,
-  onReset
+  onReset,
+  hasTableFilters = false
 }: UsersFiltersProps) => {
   const activeFilters: { name: 'search' | 'role' | 'status'; label: string }[] =
     []
@@ -85,7 +87,7 @@ const UsersFilters = ({
       </div>
       <Button
         icon={<ClearOutlined />}
-        disabled={!activeFilters.length && !filters.search}
+        disabled={!activeFilters.length && !filters.search && !hasTableFilters}
         onClick={onReset}
       >
         Сбросить фильтры

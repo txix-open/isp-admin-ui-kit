@@ -20,6 +20,7 @@ import { useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 
 import { getColumnSearchProps } from '@components/ColumnSearch'
+import TableSearchControls from '@components/ColumnSearch/TableSearchControls'
 import { highlightSearchMatch } from '@components/ColumnSearch/highlightSearchMatch'
 import DownloadCsvButton from '@components/DownloadCsvButton'
 import EntityDrawer from '@components/EntityDrawer'
@@ -131,6 +132,7 @@ const UsersPage = () => {
   }
 
   const resetFilters = () => {
+    tableSearch.reset()
     const params = new URLSearchParams(searchParams)
     for (const key of ['search', 'role', 'status', 'page']) params.delete(key)
     setSearchParams(params, { replace: true })
@@ -408,6 +410,7 @@ const UsersPage = () => {
       }
     >
       <UsersFilters
+        hasTableFilters={Boolean(tableSearch.searchParams)}
         filters={filters}
         roleOptions={roleOptions}
         onChange={updateFilter}
@@ -454,6 +457,41 @@ const UsersPage = () => {
           title="Список ограничен 1000 пользователями. Поиск и фильтры применяются к этому списку."
         />
       )}
+      <TableSearchControls
+        query={tableSearch.query}
+        order={tableSearch.order}
+        columns={columns}
+        options={{
+          userId: (userOptionsQuery.data ?? []).map((user) => ({
+            value: user.id,
+            label: getUserFullName(user)
+          })),
+          roles: roleOptions
+        }}
+        onRemove={(field) => {
+          tableSearch.removeFilter(field)
+          setSearchParams(
+            (current) => {
+              const next = new URLSearchParams(current)
+              next.delete('page')
+              return next
+            },
+            { replace: true }
+          )
+        }}
+        onClearSort={() => {
+          tableSearch.clearSort()
+          setSearchParams(
+            (current) => {
+              const next = new URLSearchParams(current)
+              next.delete('page')
+              return next
+            },
+            { replace: true }
+          )
+        }}
+        onReset={resetFilters}
+      />
       <p className="users-page__summary" role="status">
         {usersQuery.isLoading
           ? 'Загрузка пользователей…'
@@ -499,12 +537,12 @@ const UsersPage = () => {
               (usersQuery.isError && !usersQuery.data) ? null : (
                 <TableEmpty
                   description={
-                    hasFilters
+                    hasFilters || tableSearch.query
                       ? 'По заданным условиям пользователи не найдены'
                       : 'Пользователей пока нет'
                   }
                 >
-                  {hasFilters ? (
+                  {hasFilters || tableSearch.query ? (
                     <Button onClick={resetFilters}>Сбросить фильтры</Button>
                   ) : hasCreateUserPermission ? (
                     <Button onClick={openCreate}>Новый пользователь</Button>
@@ -513,13 +551,15 @@ const UsersPage = () => {
               )
           }}
           dataSource={filteredUsers}
-          columns={columns.filter(
-            (column) =>
-              column.key !== 'actions' ||
-              hasBlockUserPermission ||
-              hasUpdateUserPermission ||
-              hasDeleteUserPermission
-          )}
+          columns={tableSearch
+            .applyToColumns(columns)
+            .filter(
+              (column) =>
+                column.key !== 'actions' ||
+                hasBlockUserPermission ||
+                hasUpdateUserPermission ||
+                hasDeleteUserPermission
+            )}
         />
       </div>
       {hasCreateUserPermission && createOpen && (

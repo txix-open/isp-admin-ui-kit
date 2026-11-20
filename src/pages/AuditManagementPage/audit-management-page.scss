@@ -1,34 +1,69 @@
-@use 'src/constants/style/styleConst' as *;
-
 .audit-management-page {
-  min-height: 100%;
-  background: var(--ant-color-bg-container, #fff);
+  &__settings {
+    width: 100%;
+    max-width: 1040px;
+    margin-inline: auto;
+  }
 
-  &__header {
-    border-bottom: 1px solid $border-color;
-    padding: 3 * $basic-padding;
+  &__toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px 16px;
+    padding-bottom: 16px;
+  }
 
-    h1 {
-      margin: 0;
+  &__summary {
+    color: var(--ant-color-text-secondary);
+    font-size: 13px;
+  }
+
+  &__events {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    border-top: 1px solid var(--ant-color-border-secondary);
+  }
+
+  &__event {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px 24px;
+    padding-block: 16px;
+    border-bottom: 1px solid var(--ant-color-border-secondary);
+
+    .ant-checkbox-wrapper {
+      flex: 1;
+      min-width: 0;
+      align-items: flex-start;
       font-weight: 500;
-      font-size: 20px;
-      line-height: 28px;
+      overflow-wrap: anywhere;
+    }
+
+    .ant-checkbox {
+      margin-top: 3px;
+    }
+
+    .admin-table-status {
+      flex-shrink: 0;
+      font-size: 13px;
     }
   }
 
-  &__content {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    padding: 3 * $basic-padding;
-  }
+  @media (max-width: 575px) {
+    &__event {
+      flex-wrap: wrap;
+      gap: 8px;
 
-  &__checkbox-group {
-    display: flex;
-    flex-direction: column;
-    gap: $basic-margin;
-    margin-block-start: $basic-margin;
-    margin-inline-start: 2 * $basic-margin;
-    font-size: 15px;
+      .ant-checkbox-wrapper {
+        flex-basis: 100%;
+      }
+
+      .admin-table-status {
+        margin-inline-start: 24px;
+      }
+    }
   }
 }

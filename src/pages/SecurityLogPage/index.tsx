@@ -3,6 +3,7 @@ import { Alert, Button, Table } from 'antd'
 import { ColumnsType } from 'antd/es/table'
 
 import { getColumnSearchProps } from '@components/ColumnSearch'
+import TableSearchControls from '@components/ColumnSearch/TableSearchControls'
 import { highlightSearchMatch } from '@components/ColumnSearch/highlightSearchMatch'
 import DownloadCsvButton from '@components/DownloadCsvButton'
 import PageLayout, { PageAccessDenied } from '@components/PageLayout'
@@ -150,6 +151,29 @@ const SecurityLogPage = () => {
           }
         />
       )}
+      <TableSearchControls
+        query={tableSearch.query}
+        order={tableSearch.order}
+        columns={tableSearch.applyToColumns(columns)}
+        options={{
+          userId: (usersQuery.data ?? []).map((user) => ({
+            value: user.id,
+            label: getUserFullName(user)
+          }))
+        }}
+        onRemove={(field) => {
+          tableSearch.removeFilter(field)
+          changePage(1)
+        }}
+        onClearSort={() => {
+          tableSearch.clearSort()
+          changePage(1)
+        }}
+        onReset={() => {
+          tableSearch.reset()
+          changePage(1)
+        }}
+      />
       <p className="page-layout__summary" role="status">
         {query.isFetching
           ? 'Загрузка событий…'
@@ -168,7 +192,7 @@ const SecurityLogPage = () => {
         rowKey="id"
         loading={query.isFetching}
         dataSource={data?.items ?? []}
-        columns={columns}
+        columns={tableSearch.applyToColumns(columns)}
         scroll={{ x: 800 }}
         pagination={{
           current: page,
@@ -181,7 +205,24 @@ const SecurityLogPage = () => {
         locale={{
           emptyText:
             query.isFetching || (query.isError && !data) ? null : (
-              <TableEmpty description="Событий пока нет" />
+              <TableEmpty
+                description={
+                  tableSearch.query
+                    ? 'По заданным условиям события не найдены'
+                    : 'Событий пока нет'
+                }
+              >
+                {tableSearch.query && (
+                  <Button
+                    onClick={() => {
+                      tableSearch.reset()
+                      changePage(1)
+                    }}
+                  >
+                    Сбросить фильтры
+                  </Button>
+                )}
+              </TableEmpty>
             )
         }}
       />

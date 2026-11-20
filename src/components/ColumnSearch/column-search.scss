@@ -1,9 +1,59 @@
 .admin-column-search {
   display: grid;
   gap: 8px;
-  min-width: 230px;
+  width: 320px;
+  min-width: min(280px, calc(100vw - 24px));
+  box-sizing: border-box;
   max-width: calc(100vw - 24px);
-  padding: 8px;
+  padding: 12px;
+
+  .ant-picker {
+    max-width: 100%;
+  }
+
+  &__heading,
+  &__actions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+  }
+
+  &__heading {
+    font-weight: 600;
+  }
+
+  &__actions {
+    margin-top: 4px;
+    padding-top: 12px;
+    border-top: 1px solid var(--ant-color-border-secondary);
+  }
+
+  &__dates,
+  &__dates label {
+    display: grid;
+    gap: 8px;
+  }
+
+  &__dates label > span {
+    font-size: 13px;
+    color: var(--ant-color-text-secondary);
+  }
+
+  &__date-boundary {
+    display: flex;
+    gap: 8px;
+
+    .ant-picker {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .admin-column-search__time {
+      width: 124px;
+      flex: 0 0 124px;
+    }
+  }
 
   .ant-input-number,
   .ant-select {
@@ -12,7 +62,59 @@
 }
 
 .admin-column-search-match {
-  background-color: #ffc069;
-  color: #141414;
+  background-color: var(--ant-color-warning-bg);
+  color: var(--ant-color-text);
   padding: 0;
+}
+
+.admin-table-filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+
+  &__list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    min-width: 0;
+    max-width: 100%;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  li {
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  li .ant-btn {
+    max-width: 100%;
+    color: var(--ant-color-primary-text);
+    background: var(--ant-color-primary-bg);
+    border-color: var(--ant-color-primary-border);
+  }
+
+  &__label {
+    min-width: 0;
+    max-width: 320px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
+
+@media (max-width: 575px) {
+  .admin-table-filter-popup {
+    left: 12px !important;
+    right: 12px !important;
+    width: auto !important;
+    min-width: 0 !important;
+
+    .admin-column-search {
+      width: 100%;
+    }
+  }
 }

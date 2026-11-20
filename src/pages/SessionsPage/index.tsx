@@ -5,6 +5,7 @@ import { ColumnsType } from 'antd/es/table'
 import { SessionStatusKeysType, sessionStatuses } from '@constants/statuses'
 
 import { getColumnSearchProps } from '@components/ColumnSearch'
+import TableSearchControls from '@components/ColumnSearch/TableSearchControls'
 import { highlightSearchMatch } from '@components/ColumnSearch/highlightSearchMatch'
 import DownloadCsvButton from '@components/DownloadCsvButton'
 import PageLayout, { PageAccessDenied } from '@components/PageLayout'
@@ -96,7 +97,7 @@ const SessionsPage = () => {
     {
       title: 'ID сессии',
       dataIndex: 'id',
-      ...getColumnSearchProps<SessionType>({ title: 'ID', type: 'number' }),
+      ...getColumnSearchProps<SessionType>({ title: 'ID сессии', type: 'number' }),
       sorter: true,
       key: 'id',
       render: (value) => highlightSearchMatch(value, tableSearch.query?.id),
@@ -251,6 +252,33 @@ const SessionsPage = () => {
           }
         />
       )}
+      <TableSearchControls
+        query={tableSearch.query}
+        order={tableSearch.order}
+        columns={tableSearch.applyToColumns(columns)}
+        options={{
+          userId: (usersQuery.data ?? []).map((user) => ({
+            value: user.id,
+            label: getUserFullName(user)
+          })),
+          status: Object.entries(sessionStatuses).map(([value, label]) => ({
+            value,
+            label
+          }))
+        }}
+        onRemove={(field) => {
+          tableSearch.removeFilter(field)
+          changePage(1)
+        }}
+        onClearSort={() => {
+          tableSearch.clearSort()
+          changePage(1)
+        }}
+        onReset={() => {
+          tableSearch.reset()
+          changePage(1)
+        }}
+      />
       <p className="page-layout__summary" role="status">
         {query.isFetching
           ? 'Загрузка сессий…'
@@ -269,7 +297,7 @@ const SessionsPage = () => {
         rowKey="id"
         loading={query.isFetching}
         dataSource={data?.items ?? []}
-        columns={columns}
+        columns={tableSearch.applyToColumns(columns)}
         scroll={{ x: 1000 }}
         pagination={{
           current: page,
@@ -282,7 +310,24 @@ const SessionsPage = () => {
         locale={{
           emptyText:
             query.isFetching || (query.isError && !data) ? null : (
-              <TableEmpty description="Сессий пока нет" />
+              <TableEmpty
+                description={
+                  tableSearch.query
+                    ? 'По заданным условиям сессии не найдены'
+                    : 'Сессий пока нет'
+                }
+              >
+                {tableSearch.query && (
+                  <Button
+                    onClick={() => {
+                      tableSearch.reset()
+                      changePage(1)
+                    }}
+                  >
+                    Сбросить фильтры
+                  </Button>
+                )}
+              </TableEmpty>
             )
         }}
       />

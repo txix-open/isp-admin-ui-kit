@@ -20,6 +20,7 @@ import { darkTheme, lightTheme } from '../src/constants/theme'
 import AllVersionsPage from '../src/pages/AllVersionsPage'
 import AppAccessPage from '../src/pages/AppAccessPage'
 import ApplicationsPage from '../src/pages/ApplicationsPage'
+import AuditManagementPage from '../src/pages/AuditManagementPage'
 import ConfigurationEditorPage from '../src/pages/ConfigurationEditorPage'
 import '../src/pages/ConfigurationEditorPage/configuration-editor-page.scss'
 import ConfigurationsPage from '../src/pages/ConfigurationsPage'
@@ -116,6 +117,24 @@ Object.assign(window, {
     roles: [role],
     permissions,
     users: [user],
+    auditEvents: [
+      {
+        event: 'login_logout',
+        name: 'Вход и выход пользователей',
+        enabled: true
+      },
+      { event: 'role_changed', name: 'Изменение ролей', enabled: true },
+      {
+        event: 'user_changed',
+        name: 'Изменение пользователей',
+        enabled: false
+      },
+      {
+        event: 'user_blocked',
+        name: 'Блокировка пользователей',
+        enabled: false
+      }
+    ],
     queryStates: {},
     queryCalls: [],
     mutationCalls: [],
@@ -292,6 +311,7 @@ function show(
             <Route path="/variables/:id" element={<VariableEditor />} />
             <Route path="/sessions" element={<SessionsPage />} />
             <Route path="/security_logs" element={<SecurityLogPage />} />
+            <Route path="/auditManagement" element={<AuditManagementPage />} />
             <Route path="/roles" element={<RolesPage />} />
             <Route path="/roles/:id" element={<RolesPage />} />
           </Route>

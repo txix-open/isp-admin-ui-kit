@@ -1,5 +1,12 @@
-import { SearchOutlined } from '@ant-design/icons'
-import { Button, DatePicker, Input, InputNumber, Select, Space } from 'antd'
+import { CloseOutlined, SearchOutlined } from '@ant-design/icons'
+import {
+  Button,
+  DatePicker,
+  Input,
+  InputNumber,
+  Select,
+  TimePicker
+} from 'antd'
 import type { TableColumnType } from 'antd'
 import dayjs from 'dayjs'
 
@@ -22,6 +29,10 @@ type SearchOptions =
 export const getColumnSearchProps = <T,>(
   config: SearchOptions
 ): TableColumnType<T> => ({
+  filterDropdownProps: {
+    classNames: { root: 'admin-table-filter-popup' },
+    getPopupContainer: () => document.body
+  },
   filterDropdown: ({
     selectedKeys,
     setSelectedKeys,
@@ -36,33 +47,84 @@ export const getColumnSearchProps = <T,>(
       switch (config.type) {
         case 'date':
           return (
-            <DatePicker.RangePicker
-              format={config.showTime ? 'DD.MM.YYYY HH:mm:ss' : 'DD.MM.YYYY'}
-              showTime={config.showTime}
-              value={
-                selectedKeys.length === 2
-                  ? [dayjs(String(value)), dayjs(String(selectedKeys[1]))]
-                  : null
-              }
-              onChange={(dates) => {
-                const [from, to] = dates ?? []
-                setSelectedKeys(
-                  from && to
-                    ? [
-                        (config.showTime
-                          ? from
-                          : from.startOf('day')
-                        ).toISOString(),
-                        (config.showTime ? to : to.endOf('day')).toISOString()
-                      ]
-                    : []
-                )
-              }}
-            />
+            <div className="admin-column-search__dates">
+              {(['С', 'По'] as const).map((label, index) => (
+                <label key={label}>
+                  <span>{label}</span>
+                  <div className="admin-column-search__date-boundary">
+                    <DatePicker
+                      classNames={{
+                        popup: { root: 'admin-column-search-calendar' }
+                      }}
+                      aria-label={`${config.title}: ${label.toLowerCase()}`}
+                      placeholder={
+                        index === 0 ? 'Начало периода' : 'Конец периода'
+                      }
+                      format="DD.MM.YYYY"
+                      value={
+                        selectedKeys[index]
+                          ? dayjs(String(selectedKeys[index]))
+                          : null
+                      }
+                      onChange={(date) => {
+                        const next = [
+                          selectedKeys[0] ?? '',
+                          selectedKeys[1] ?? ''
+                        ]
+                        const previous = selectedKeys[index]
+                          ? dayjs(String(selectedKeys[index]))
+                          : undefined
+                        next[index] = date
+                          ? (config.showTime && previous
+                              ? date
+                                  .hour(previous.hour())
+                                  .minute(previous.minute())
+                                  .second(previous.second())
+                                  .millisecond(0)
+                              : index === 0
+                                ? date.startOf('day')
+                                : date.endOf('day')
+                            ).toISOString()
+                          : ''
+                        setSelectedKeys(next.some(Boolean) ? next : [])
+                      }}
+                    />
+                    {config.showTime && (
+                      <TimePicker
+                        className="admin-column-search__time"
+                        format="HH:mm:ss"
+                        placeholder="Время"
+                        needConfirm={false}
+                        allowClear={false}
+                        aria-label={`${config.title}: время ${label.toLowerCase()}`}
+                        disabled={!selectedKeys[index]}
+                        value={
+                          selectedKeys[index]
+                            ? dayjs(String(selectedKeys[index]))
+                            : null
+                        }
+                        onChange={(time) => {
+                          if (!time || !selectedKeys[index]) return
+                          const next = [...selectedKeys]
+                          next[index] = dayjs(String(selectedKeys[index]))
+                            .hour(time.hour())
+                            .minute(time.minute())
+                            .second(time.second())
+                            .millisecond(0)
+                            .toISOString()
+                          setSelectedKeys(next)
+                        }}
+                      />
+                    )}
+                  </div>
+                </label>
+              ))}
+            </div>
           )
         case 'select':
           return (
             <Select
+              aria-label={config.title}
               components={selectComponents}
               mode="multiple"
               placeholder={placeholder}
@@ -71,23 +133,25 @@ export const getColumnSearchProps = <T,>(
               options={config.options}
               onChange={setSelectedKeys}
               allowClear
+              maxTagCount="responsive"
             />
           )
         case 'number':
           return (
             <InputNumber
+              autoFocus
               aria-label={config.title}
               autoComplete="off"
               controls={false}
               placeholder={placeholder}
               value={typeof value === 'number' ? value : null}
               onChange={(next) => setSelectedKeys(next === null ? [] : [next])}
-              onPressEnter={() => confirm()}
             />
           )
         default:
           return (
             <Input
+              autoFocus
               aria-label={config.title}
               type="search"
               autoComplete="off"
@@ -96,7 +160,6 @@ export const getColumnSearchProps = <T,>(
               onChange={({ target }) =>
                 setSelectedKeys(target.value ? [target.value] : [])
               }
-              onPressEnter={() => confirm()}
               allowClear
             />
           )
@@ -104,28 +167,60 @@ export const getColumnSearchProps = <T,>(
     }
 
     return (
-      <div
+      <form
         className="admin-column-search"
-        onKeyDown={(event) => event.stopPropagation()}
+        aria-label={`Фильтр: ${config.title}`}
+        onKeyDown={(event) => {
+          event.stopPropagation()
+          if (event.key === 'Escape') close()
+          if (
+            event.key === 'Enter' &&
+            (event.target as HTMLElement).closest('.ant-picker')
+          )
+            event.preventDefault()
+        }}
+        onSubmit={(event) => {
+          event.preventDefault()
+          confirm()
+        }}
       >
-        {renderInput()}
-        <Space>
-          <Button type="primary" size="small" onClick={() => confirm()}>
-            Поиск
-          </Button>
+        <div className="admin-column-search__heading">
+          <span>{config.title}</span>
           <Button
+            type="text"
             size="small"
+            aria-label="Закрыть фильтр"
+            icon={<CloseOutlined />}
+            onClick={close}
+          />
+        </div>
+        {renderInput()}
+        <div className="admin-column-search__actions">
+          <Button
+            type="text"
             onClick={() =>
               clearFilters?.({ confirm: true, closeDropdown: true })
             }
           >
             Сбросить
           </Button>
-          <Button type="link" size="small" onClick={close}>
-            Закрыть
+          <Button
+            type="primary"
+            htmlType="submit"
+            disabled={
+              config.type === 'date' &&
+              selectedKeys.length > 0 &&
+              (!selectedKeys[0] ||
+                !selectedKeys[1] ||
+                dayjs(String(selectedKeys[0])).isAfter(
+                  dayjs(String(selectedKeys[1]))
+                ))
+            }
+          >
+            Применить
           </Button>
-        </Space>
-      </div>
+        </div>
+      </form>
     )
   },
   filterIcon: (filtered) => (

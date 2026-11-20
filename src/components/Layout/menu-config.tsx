@@ -7,6 +7,7 @@ import {
   FileProtectOutlined,
   FunctionOutlined,
   HistoryOutlined,
+  SecurityScanOutlined,
   TeamOutlined,
   UserOutlined
 } from '@ant-design/icons'
@@ -84,6 +85,7 @@ export const menuConfig = (name: string): CustomMenuItemType[] => [
       {
         key: 'auditManagement',
         label: 'Управление аудитом',
+        icon: <SecurityScanOutlined />,
         route: routePaths.auditManagement,
         permissions: [PermissionKeysType.audit_management_view]
       },
