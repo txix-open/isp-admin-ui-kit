@@ -3,14 +3,13 @@ import { FC, useEffect, useMemo, useRef, useState } from 'react'
 
 import { SelectedAccessMethodPropsType } from '@widgets/SelectedAccessMethod/selected-access-method.type'
 
+import { getAccessMethodKey as getMethodKey } from '@utils/accessListUtils'
 import { httpMethodColors } from '@utils/httpMethodColorUtils'
 
 import { AccessListMethodType } from '@type/accessList.type'
 
 import './selected-access-method.scss'
 
-const getMethodKey = (method: string, httpMethod?: string) =>
-  `${httpMethod || ''}_${method}`
 const rowHeight = 36
 const overscan = 8
 
@@ -29,7 +28,8 @@ const SelectedAccessMethod: FC<SelectedAccessMethodPropsType> = ({
     const routes = allRoutes[unknownMethodKey] || []
     return routes.find(
       (route) =>
-        route.path === method.method && route.httpMethod === method.httpMethod
+        getMethodKey(route.path, route.httpMethod) ===
+        getMethodKey(method.method, method.httpMethod)
     )
   }
 
@@ -140,7 +140,10 @@ const SelectedAccessMethod: FC<SelectedAccessMethodPropsType> = ({
       className="selected-access-method"
       onScroll={(event) => setScrollTop(event.currentTarget.scrollTop)}
     >
-      <div className="selected-access-method__virtual" style={{ height: totalHeight }}>
+      <div
+        className="selected-access-method__virtual"
+        style={{ height: totalHeight }}
+      >
         {visibleMethods.map((method, index) => {
           const isUnknown = Boolean(checkIsUnknownMethod(method))
           const top = (startIndex + index) * rowHeight
@@ -166,9 +169,7 @@ const SelectedAccessMethod: FC<SelectedAccessMethodPropsType> = ({
                   ellipsis
                   className={[
                     'selected-access-method__text',
-                    isUnknown
-                      ? 'selected-access-method__unknown'
-                      : undefined
+                    isUnknown ? 'selected-access-method__unknown' : undefined
                   ]
                     .filter(Boolean)
                     .join(' ')}
