@@ -1,3 +1,5 @@
+import '@utils/browserBuffer'
+
 import RefParser from '@apidevtools/json-schema-ref-parser'
 import JSONSchemaView from 'json-schema-view-js'
 import cloneDeep from 'lodash.clonedeep'
