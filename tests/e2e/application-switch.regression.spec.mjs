@@ -1,4 +1,4 @@
-import { test } from '@playwright/test'
+import { expect, test } from '@playwright/test'
 import assert from 'node:assert/strict'
 
 const fixture = new URL('../../build/playwright/layout.html', import.meta.url)
@@ -19,12 +19,16 @@ test('application switch', async ({ page }) => {
         `.applications-content__list .ant-list-item-meta-title:text-is("Приложение ${id - 100}")`
       )
       .click()
+    await expect(
+      page.locator(
+        '.applications-content__details > .page-header .page-header__title'
+      )
+    ).toHaveText(`Приложение ${id - 100}`)
     const actual = await evaluate(
-      `({ headers:document.querySelectorAll('.applications-content__details > .page-header').length, tables:document.querySelectorAll('.token-content .ant-table-wrapper').length, title:document.querySelector('.applications-content__details > .page-header .page-header__title')?.textContent, context:document.querySelector('.applications-content__details > .page-header .page-header__context')?.textContent })`
+      `({ headers:document.querySelectorAll('.applications-content__details > .page-header').length, tables:document.querySelectorAll('.token-content .ant-table-wrapper').length, context:document.querySelector('.applications-content__details > .page-header .page-header__context')?.textContent })`
     )
     assert.equal(actual.headers, 1, `Application ${id}: accumulated headers`)
     assert.equal(actual.tables, 1, `Application ${id}: extra token tables`)
-    assert.equal(actual.title, `Приложение ${id - 100}`)
     assert.ok(actual.context.includes(`ID ${id}`))
     console.log(`PASS application ${id}: one matching header and token table`)
   }
