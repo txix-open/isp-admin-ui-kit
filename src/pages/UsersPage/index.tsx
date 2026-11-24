@@ -24,6 +24,7 @@ import { dateFormats } from '@constants/date'
 
 import { getColumnSearchProps } from '@components/ColumnSearch'
 import { highlightSearchMatch } from '@components/ColumnSearch/highlightSearchMatch'
+import DownloadCsvButton from '@components/DownloadCsvButton'
 
 import { getUserFullName } from '@utils/userUtils/getFullNameUtil'
 
@@ -276,19 +277,35 @@ const UsersPage = () => {
         >
           Пользователи
         </span>
-        {hasCreateUserPermission && (
-          <Button
-            disabled={!hasCreateUserPermission}
-            onClick={() =>
-              navigate(`${routePaths.users}/new`, { state: { fromApp: true } })
-            }
-            data-cy="users-page__header__addButton"
-            type="primary"
-            icon={<PlusSquareOutlined />}
-          >
-            Добавить
-          </Button>
-        )}
+        <div className="users-page__header__actions">
+          {isPageAvailable && (
+            <DownloadCsvButton
+              type="user"
+              params={{ limit: 1000, offset: 0, ...searchParams }}
+              disabled={
+                isSearching ||
+                allUsers.length === 0 ||
+                isSearchError ||
+                isUsersError
+              }
+            />
+          )}
+          {hasCreateUserPermission && (
+            <Button
+              disabled={!hasCreateUserPermission}
+              onClick={() =>
+                navigate(`${routePaths.users}/new`, {
+                  state: { fromApp: true }
+                })
+              }
+              data-cy="users-page__header__addButton"
+              type="primary"
+              icon={<PlusSquareOutlined />}
+            >
+              Добавить
+            </Button>
+          )}
+        </div>
       </header>
       <section className="users-page__content">
         {(isUsersError || isSearchError) && (

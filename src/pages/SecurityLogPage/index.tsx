@@ -8,6 +8,7 @@ import { dateFormats } from '@constants/date'
 
 import { getColumnSearchProps } from '@components/ColumnSearch'
 import { highlightSearchMatch } from '@components/ColumnSearch/highlightSearchMatch'
+import DownloadCsvButton from '@components/DownloadCsvButton'
 
 import { getUserFullName } from '@utils/userUtils/getFullNameUtil'
 
@@ -129,6 +130,17 @@ const SecurityLogPage = () => {
         >
           Журнал событий
         </span>
+        {isPageAvailable && (
+          <DownloadCsvButton
+            type="log"
+            params={{
+              limit,
+              offset: (currentPage - 1) * limit,
+              ...searchParams
+            }}
+            disabled={isFetching || isError || !currentData?.items.length}
+          />
+        )}
       </header>
       <section className="security-log-page__content">
         {isError && (
