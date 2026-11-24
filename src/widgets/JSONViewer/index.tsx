@@ -1,5 +1,3 @@
-import '@utils/browserBuffer'
-
 import RefParser from '@apidevtools/json-schema-ref-parser'
 import { Alert, Spin } from 'antd'
 import JSONSchemaView from 'json-schema-view-js'
