@@ -54,6 +54,7 @@ export enum PermissionKeysType {
 }
 
 export interface RoleType {
+  applicationGroup: string
   changeMessage?: string
   createdAt: string
   description: string
@@ -66,7 +67,10 @@ export interface RoleType {
   exclusive: boolean
 }
 
-export type NewRoleType = Omit<RoleType, 'id' | 'createdAt' | 'updatedAt'>
+export type NewRoleType = Omit<
+  RoleType,
+  'id' | 'createdAt' | 'updatedAt' | 'applicationGroup'
+>
 
 export interface PermissionType {
   key: PermissionKeysType
