@@ -1,6 +1,18 @@
 import { theme } from 'antd'
 import type { ThemeConfig } from 'antd'
 
+const filledField = { variant: 'filled' } as const
+
+export const formControlDefaults = {
+  input: filledField,
+  inputNumber: filledField,
+  textArea: filledField,
+  select: filledField,
+  datePicker: filledField,
+  rangePicker: filledField,
+  timePicker: filledField
+}
+
 // Локальное расширение темы: семантический токен тени рабочей панели.
 // Antd не объявляет его в типах, но в рантайме выводит как CSS-переменную
 // --ant-page-panel-shadow, которую использует page-layout.scss.
@@ -28,6 +40,17 @@ const commonComponents: ThemeConfig['components'] = {
   }
 }
 
+const formComponents = (
+  colorBorder: string,
+  colorIcon: string
+): ThemeConfig['components'] => ({
+  Select: { colorTextQuaternary: colorIcon },
+  DatePicker: { colorTextQuaternary: colorIcon },
+  Checkbox: { colorBorder },
+  Radio: { colorBorder },
+  Switch: { colorTextQuaternary: colorBorder, colorTextTertiary: colorBorder }
+})
+
 export const darkTheme: AccentThemeConfig = {
   algorithm: theme.darkAlgorithm,
   cssVar: {},
@@ -41,6 +64,8 @@ export const darkTheme: AccentThemeConfig = {
     colorTextBase: '#f0f0f0', // Основной текст
     colorText: '#f0f0f0',
     colorTextSecondary: '#a6a6a6',
+    colorTextTertiary: '#a6a6a6',
+    colorTextDescription: '#a6a6a6',
     colorTextPlaceholder: '#929292',
 
     // Бордеры
@@ -51,6 +76,7 @@ export const darkTheme: AccentThemeConfig = {
     colorPrimary: '#3c89ff', // Более мягкий синий
     colorPrimaryHover: '#4c99ff',
     colorPrimaryActive: '#1677ff',
+    colorPrimaryBorder: '#69b1ff',
     colorPrimaryText: '#91caff',
     colorPrimaryTextHover: '#bae0ff',
     colorPrimaryTextActive: '#69b1ff',
@@ -92,14 +118,33 @@ export const darkTheme: AccentThemeConfig = {
   },
   components: {
     ...commonComponents,
+    ...formComponents('#787878', '#a6a6a6'),
+    Form: { colorError: '#ff7875' },
     Button: {
       ...commonComponents.Button,
       defaultBg: '#262626',
-      defaultBorderColor: '#434343',
       defaultHoverColor: '#91caff',
       defaultHoverBorderColor: '#69b1ff',
       defaultActiveColor: '#69b1ff',
-      defaultActiveBorderColor: '#4096ff'
+      defaultActiveBorderColor: '#4096ff',
+      colorError: '#ff7875',
+      colorErrorHover: '#ff9c9a',
+      colorErrorActive: '#ff8785',
+      dangerColor: '#141414'
+    },
+    Tabs: {
+      itemSelectedColor: '#91caff',
+      itemHoverColor: '#bae0ff',
+      itemActiveColor: '#69b1ff'
+    },
+    Segmented: {
+      trackBg: '#303030',
+      itemSelectedBg: '#28466e',
+      itemSelectedColor: '#d6eaff'
+    },
+    Menu: {
+      itemSelectedColor: '#91caff',
+      subMenuItemSelectedColor: '#91caff'
     },
     Layout: {
       // LayoutSider из isp-ui-kit использует theme="light", поэтому фон
@@ -115,13 +160,16 @@ export const lightTheme: AccentThemeConfig = {
   token: {
     // Базовый акцент: от него выводятся --ant-color-primary-bg и подсветки меню
     colorPrimary: '#1677ff',
+    colorPrimaryBorder: '#1668dc',
     colorPrimaryText: '#0958d9',
     colorLink: '#0958d9',
     colorLinkHover: '#1668dc',
     colorLinkActive: '#003eb3',
     colorText: '#1f1f1f',
     colorTextSecondary: '#595959',
-    colorTextPlaceholder: '#737373',
+    colorTextTertiary: '#595959',
+    colorTextDescription: '#595959',
+    colorTextPlaceholder: '#666666',
     colorBorder: '#d9d9d9',
     colorBorderSecondary: '#f0f0f0',
     colorSuccessText: '#237804',
@@ -135,12 +183,31 @@ export const lightTheme: AccentThemeConfig = {
   },
   components: {
     ...commonComponents,
+    ...formComponents('#8c8c8c', '#666666'),
+    Form: { colorError: '#cf1322' },
     Button: {
       ...commonComponents.Button,
       defaultHoverColor: '#0958d9',
       defaultHoverBorderColor: '#1668dc',
       defaultActiveColor: '#003eb3',
-      defaultActiveBorderColor: '#0958d9'
+      defaultActiveBorderColor: '#0958d9',
+      colorError: '#b42318',
+      colorErrorHover: '#9f1b16',
+      colorErrorActive: '#7a1614'
+    },
+    Tabs: {
+      itemSelectedColor: '#0958d9',
+      itemHoverColor: '#1668dc',
+      itemActiveColor: '#003eb3'
+    },
+    Segmented: {
+      trackBg: '#e6ebf3',
+      itemSelectedBg: '#cfe2ff',
+      itemSelectedColor: '#064cad'
+    },
+    Menu: {
+      itemSelectedColor: '#0958d9',
+      subMenuItemSelectedColor: '#0958d9'
     },
     Layout: {
       // LayoutSider из isp-ui-kit использует theme="light", поэтому фон

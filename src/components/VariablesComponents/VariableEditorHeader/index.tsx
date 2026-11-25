@@ -1,7 +1,7 @@
 import { Button } from 'antd'
 import { useLocation, useNavigate } from 'react-router-dom'
 
-import { PageHeader } from '@components/PageLayout'
+import { PageBackButton, PageHeader } from '@components/PageLayout'
 
 import { routePaths } from '@routes/routePaths'
 
@@ -29,13 +29,13 @@ const VariableEditorHeader = ({
       context={operation}
       focusOnMount
       back={
-        <Button
+        <PageBackButton
           data-testid="variable-editor-header__back-btn"
           disabled={isLoading}
           onClick={() => navigate({ pathname: routePaths.variables, search })}
         >
           К переменным
-        </Button>
+        </PageBackButton>
       }
       actions={
         isEditPermission && (

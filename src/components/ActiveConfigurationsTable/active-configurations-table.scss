@@ -110,6 +110,9 @@
   .ant-table-cell {
     overflow-wrap: anywhere;
   }
+  .ant-table-cell.active-configurations-table__version-cell {
+    white-space: nowrap;
+  }
   .ant-table-cell.active-configurations-table__actions-cell {
     padding-inline: 6px;
     white-space: nowrap;
@@ -117,7 +120,7 @@
   &__mobile-meta {
     display: none;
   }
-  @media (max-width: 767px) {
+  &--compact {
     --configuration-actions-width: 80px;
 
     .admin-table .ant-table-cell.active-configurations-table__actions-cell {
@@ -126,7 +129,7 @@
     .active-configurations-table-actions-field .admin-table-actions {
       flex-direction: column;
     }
-    &__table__name-field--editing {
+    .active-configurations-table__table__name-field--editing {
       flex-wrap: wrap;
       > input {
         flex-basis: 100%;
@@ -135,7 +138,7 @@
     .ant-table-cell:not(.active-configurations-table__actions-cell) {
       padding-inline: 8px;
     }
-    &__mobile-meta {
+    .active-configurations-table__mobile-meta {
       display: flex;
       flex-direction: column;
       gap: 4px;

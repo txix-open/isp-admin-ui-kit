@@ -6,7 +6,12 @@
   min-width: 0;
   overflow-y: auto;
   position: relative;
-  scrollbar-color: var(--ant-color-fill-secondary) transparent;
+  scrollbar-color: var(--ant-color-text-placeholder) transparent;
+
+  &:focus-visible {
+    outline: 2px solid var(--ant-color-primary-border);
+    outline-offset: -2px;
+  }
 
   &--empty {
     display: flex;
@@ -32,7 +37,7 @@
   }
 
   &__unknown {
-    color: var(--ant-color-error);
+    color: var(--ant-color-error-text);
   }
 
   &__row-content {
@@ -61,7 +66,7 @@
   }
 
   &::-webkit-scrollbar-thumb {
-    background: var(--ant-color-fill-secondary) !important;
+    background: var(--ant-color-text-placeholder) !important;
     border-radius: 10px;
     border: 2px solid transparent;
     background-clip: padding-box;
@@ -69,11 +74,11 @@
   }
 
   &::-webkit-scrollbar-thumb:hover {
-    background: var(--ant-color-fill) !important;
+    background: var(--ant-color-text-secondary) !important;
   }
 
   &::-webkit-scrollbar-thumb:active {
-    background: var(--ant-color-fill) !important;
+    background: var(--ant-color-text-secondary) !important;
   }
 
   &::-webkit-scrollbar-track {

@@ -78,7 +78,7 @@ const UsersFilters = ({
           aria-label="Статус пользователя"
           value={filters.status}
           options={[
-            { value: 'all', label: 'Все пользователи' },
+            { value: 'all', label: 'Все статусы' },
             { value: 'active', label: 'Не заблокированы' },
             { value: 'blocked', label: 'Заблокированы' }
           ]}

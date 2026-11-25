@@ -18,11 +18,11 @@ import './table-ui.scss'
 export const TableActionButton = forwardRef<
   ComponentRef<typeof Button>,
   ButtonProps
->(({ className = '', type = 'default', ...props }, ref) => (
+>(({ className = '', type, ...props }, ref) => (
   <Button
     {...props}
     ref={ref}
-    type={type === 'primary' ? 'primary' : 'default'}
+    type={type === 'primary' ? 'primary' : 'text'}
     size="middle"
     className={`admin-table-action ${className}`}
   />

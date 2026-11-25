@@ -1,4 +1,4 @@
-import { ArrowLeftOutlined, ReloadOutlined } from '@ant-design/icons'
+import { ReloadOutlined } from '@ant-design/icons'
 import { Alert, Button, Result } from 'antd'
 import { Column, EmptyData } from 'isp-ui-kit'
 import { memo } from 'react'
@@ -7,7 +7,7 @@ import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import ListItem from '@widgets/ListItem'
 
 import AppAccessContent from '@components/AppAccessContent'
-import PageLayout, { PageLoading } from '@components/PageLayout'
+import PageLayout, { PageBackButton, PageLoading } from '@components/PageLayout'
 
 import { ApplicationAppType } from '@pages/ApplicationsPage/applications.type'
 
@@ -133,9 +133,8 @@ const AppAccessPage = () => {
           onChangeSearchValue={handleOnChangeSearchValue}
         />
         <div className="app-access-page__content-wrap workspace-card">
-          <Button
+          <PageBackButton
             className="app-access-page__back-to-list"
-            icon={<ArrowLeftOutlined />}
             onClick={() =>
               navigate({
                 pathname: routePaths.appAccess,
@@ -144,7 +143,7 @@ const AppAccessPage = () => {
             }
           >
             К списку приложений
-          </Button>
+          </PageBackButton>
           {selectedItemId ? (
             <AppAccessContent
               paramPrefix={findMethodParam}

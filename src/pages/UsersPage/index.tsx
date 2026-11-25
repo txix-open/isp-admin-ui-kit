@@ -32,6 +32,7 @@ import {
   TableEmpty,
   TableStatus
 } from '@components/TableUI'
+import { useCompactTable } from '@components/TableUI/useCompactTable'
 
 import UserEditorForm from '@pages/UserEditor/UserEditorForm'
 
@@ -60,7 +61,9 @@ import './users-page.scss'
 const pageSize = 20
 
 const UsersPage = () => {
+  const { compact, toggle } = useCompactTable()
   const tableSearch = useTableSearch<UserType>(
+    ['id', 'userId', 'description', 'email', 'roles', 'lastSessionCreatedAt'],
     ['lastSessionCreatedAt'],
     ['userId', 'roles']
   )
@@ -131,12 +134,7 @@ const UsersPage = () => {
     setSearchParams(params, { replace: true })
   }
 
-  const resetFilters = () => {
-    tableSearch.reset()
-    const params = new URLSearchParams(searchParams)
-    for (const key of ['search', 'role', 'status', 'page']) params.delete(key)
-    setSearchParams(params, { replace: true })
-  }
+  const resetFilters = () => tableSearch.reset(['search', 'role', 'status'])
 
   const openEditor = (id: number | 'new') =>
     navigate({
@@ -219,11 +217,18 @@ const UsersPage = () => {
     )
   }
 
+  const renderStatus = (blocked: boolean) => (
+    <TableStatus tone={blocked ? 'error' : 'neutral'}>
+      {blocked ? 'Заблокирован' : 'Не заблокирован'}
+    </TableStatus>
+  )
+
   const columns: ColumnsType<UserType> = [
     {
       title: 'ID',
       width: 80,
       dataIndex: 'id',
+      hidden: compact,
       ...getColumnSearchProps<UserType>({ title: 'ID', type: 'number' }),
       sorter: true,
       render: (value) => highlightSearchMatch(value, tableSearch.query?.id),
@@ -232,7 +237,7 @@ const UsersPage = () => {
     },
     {
       title: 'Пользователь',
-      width: 220,
+      width: compact ? undefined : 220,
       dataIndex: 'userId',
       sorter: true,
       ...getColumnSearchProps<UserType>({
@@ -245,12 +250,26 @@ const UsersPage = () => {
       }),
       key: 'userId',
       className: 'admin-table-name',
-      render: (_, record) => getUserFullName(record)
+      render: (_, record) =>
+        compact ? (
+          <>
+            <div>{getUserFullName(record)}</div>
+            <div className="admin-table-compact-details">
+              {record.email && (
+                <span className="admin-table-meta">{record.email}</span>
+              )}
+              {renderStatus(record.blocked)}
+            </div>
+          </>
+        ) : (
+          getUserFullName(record)
+        )
     },
     {
       title: 'Описание',
       width: 240,
       dataIndex: 'description',
+      hidden: compact,
       ...getColumnSearchProps<UserType>({ title: 'Описание' }),
       sorter: true,
       render: (value) =>
@@ -262,6 +281,7 @@ const UsersPage = () => {
       title: 'Email',
       width: 240,
       dataIndex: 'email',
+      hidden: compact,
       ...getColumnSearchProps<UserType>({ title: 'Email' }),
       sorter: true,
       render: (value) => highlightSearchMatch(value, tableSearch.query?.email),
@@ -271,17 +291,15 @@ const UsersPage = () => {
       title: 'Статус',
       width: 170,
       dataIndex: 'blocked',
+      hidden: compact,
       key: 'blocked',
-      render: (blocked: boolean) => (
-        <TableStatus tone={blocked ? 'error' : 'neutral'}>
-          {blocked ? 'Заблокирован' : 'Не заблокирован'}
-        </TableStatus>
-      )
+      render: renderStatus
     },
     {
       title: 'Роль',
       width: 160,
       dataIndex: 'roles',
+      hidden: compact,
       ...getColumnSearchProps<UserType>({
         title: 'Роль',
         type: 'select',
@@ -308,6 +326,7 @@ const UsersPage = () => {
       title: 'Последняя сессия',
       width: 160,
       dataIndex: 'lastSessionCreatedAt',
+      hidden: compact,
       ...getColumnSearchProps<UserType>({
         title: 'Последняя сессия',
         type: 'date'
@@ -321,7 +340,7 @@ const UsersPage = () => {
       dataIndex: 'actions',
       align: 'right',
       key: 'actions',
-      width: 152,
+      width: compact ? 120 : 152,
       render: (_, record) => {
         return (
           <div className="users-page__content__table__actions">
@@ -391,6 +410,7 @@ const UsersPage = () => {
             type="user"
             params={{ limit: 1000, offset: 0, ...tableSearch.searchParams }}
             disabled={
+              hasFilters ||
               usersQuery.isFetching ||
               usersQuery.isError ||
               !usersQuery.currentData?.length
@@ -468,28 +488,8 @@ const UsersPage = () => {
           })),
           roles: roleOptions
         }}
-        onRemove={(field) => {
-          tableSearch.removeFilter(field)
-          setSearchParams(
-            (current) => {
-              const next = new URLSearchParams(current)
-              next.delete('page')
-              return next
-            },
-            { replace: true }
-          )
-        }}
-        onClearSort={() => {
-          tableSearch.clearSort()
-          setSearchParams(
-            (current) => {
-              const next = new URLSearchParams(current)
-              next.delete('page')
-              return next
-            },
-            { replace: true }
-          )
-        }}
+        onRemove={tableSearch.removeFilter}
+        onClearSort={tableSearch.clearSort}
         onReset={resetFilters}
       />
       <p className="users-page__summary" role="status">
@@ -499,26 +499,25 @@ const UsersPage = () => {
             ? 'Список пользователей недоступен'
             : `Найдено ${filteredUsers.length} из ${allUsers.length} загруженных пользователей`}
       </p>
+      {hasFilters && (
+        <p className="users-page__summary">
+          Для выгрузки CSV снимите фильтры загруженного списка. CSV учитывает
+          фильтры в заголовках колонок.
+        </p>
+      )}
+      {toggle && <div>{toggle}</div>}
       <div className="users-page__content__wrap-table">
         <Table<UserType>
-          onChange={(pagination, filters, sorter, extra) => {
-            if (extra.action === 'paginate') return
-            tableSearch.handleTableChange(pagination, filters, sorter, extra)
-            setSearchParams(
-              (current) => {
-                const next = new URLSearchParams(current)
-                next.delete('page')
-                return next
-              },
-              { replace: true }
-            )
-          }}
+          onChange={tableSearch.handleTableChange}
           data-cy="users-page__content__table"
-          className="admin-table"
+          className={
+            compact ? 'admin-table admin-table--compact' : 'admin-table'
+          }
           rowKey="id"
           size="middle"
           loading={usersQuery.isFetching}
-          scroll={{ x: 1422 }}
+          tableLayout={compact ? 'fixed' : undefined}
+          scroll={compact ? undefined : { x: 1422 }}
           pagination={{
             current: currentPage,
             pageSize,

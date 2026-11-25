@@ -1,4 +1,5 @@
-import { Layout, Spin } from 'antd'
+import { MenuOutlined } from '@ant-design/icons'
+import { Button, Drawer, Layout, Spin } from 'antd'
 import { findRouteWithParents, LayoutMenu, LayoutSider } from 'isp-ui-kit'
 import { useEffect, useMemo, useState } from 'react'
 import {
@@ -24,6 +25,7 @@ import UnsavedChangesProvider from '@components/UnsavedChangesProvider'
 import { LocalStorage } from '@utils/localStorageUtils'
 
 import { useAppDispatch, useAppSelector } from '@hooks/redux'
+import { useMobileWorkspace } from '@hooks/useMobileWorkspace'
 import useRole from '@hooks/useRole'
 
 import { fetchProfile, fetchUI } from '@stores/redusers/ActionCreators'
@@ -66,6 +68,8 @@ const LayoutComponent = ({ customRouters }: LayoutComponentPropsType) => {
     if (window.matchMedia(smallScreenQuery).matches) return true
     return LocalStorage.get('menu') ?? true
   })
+  const isMobile = useMobileWorkspace()
+  const [menuOpen, setMenuOpen] = useState(false)
   const [loading, setLoading] = useState(true)
   const dispatch = useAppDispatch()
   const {
@@ -171,17 +175,16 @@ const LayoutComponent = ({ customRouters }: LayoutComponentPropsType) => {
       smallScreen.removeEventListener('change', collapseOnSmallScreen)
   }, [])
 
+  useEffect(() => {
+    setMenuOpen(false)
+  }, [isMobile, location.pathname])
+
   const handleItemChange = ({ key }: { key: string }) => {
-    const routeWithParents = findRouteWithParents(key, resultMenuConfig)
-    const routePath = routeWithParents?.route.route
-
-    if (Array.isArray(routePath)) {
-      navigate(routePath[0])
-      return
-    }
-
-    if (typeof routePath === 'string') {
-      navigate(routePath)
+    const route = findRouteWithParents(key, resultMenuConfig)?.route.route
+    const path = Array.isArray(route) ? route[0] : route
+    if (typeof path === 'string') {
+      setMenuOpen(false)
+      navigate(path)
     }
   }
 
@@ -197,24 +200,55 @@ const LayoutComponent = ({ customRouters }: LayoutComponentPropsType) => {
     setCollapsed(value)
   }
 
+  const renderMenu = (inlineCollapsed: boolean) => (
+    <>
+      <Header collapsed={inlineCollapsed} />
+      <LayoutMenu
+        inlineCollapsed={inlineCollapsed}
+        onHideMenuItem={() => false}
+        currentPath={location.pathname}
+        menuConfig={visibleMenuConfig}
+        onClickItem={handleItemChange}
+      />
+    </>
+  )
+
   return (
     <section className="admin-shell">
       <Layout className="layout" data-cy="homePage">
-        <LayoutSider
-          collapsed={collapsed}
-          onCollapse={handleCollapsedChange}
-          style={{ height: '100%' }}
-        >
-          <Header collapsed={collapsed} />
-          <LayoutMenu
-            inlineCollapsed={collapsed}
-            onHideMenuItem={() => false}
-            currentPath={location.pathname}
-            menuConfig={visibleMenuConfig}
-            onClickItem={handleItemChange}
-          />
-        </LayoutSider>
+        {isMobile ? (
+          <Drawer
+            placement="left"
+            size="min(300px, 100vw)"
+            title="Навигация"
+            className="admin-mobile-navigation"
+            open={menuOpen}
+            onClose={() => setMenuOpen(false)}
+          >
+            {renderMenu(false)}
+          </Drawer>
+        ) : (
+          <LayoutSider
+            collapsed={collapsed}
+            onCollapse={handleCollapsedChange}
+            style={{ height: '100%' }}
+          >
+            {renderMenu(collapsed)}
+          </LayoutSider>
+        )}
         <Layout className="site-layout">
+          {isMobile && (
+            <div className="admin-mobile-toolbar">
+              <Button
+                icon={<MenuOutlined aria-hidden />}
+                aria-haspopup="dialog"
+                aria-expanded={menuOpen}
+                onClick={() => setMenuOpen(true)}
+              >
+                Меню
+              </Button>
+            </div>
+          )}
           <Content className="site-layout__content">
             {activeRequiredModules.length > 0 ? (
               <ModuleGuard requiredModules={activeRequiredModules}>

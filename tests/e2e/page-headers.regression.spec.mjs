@@ -14,6 +14,7 @@ test('page headers', async ({ page }) => {
     '/modules',
     '/modules/1/connections',
     '/modules/1/configurations/7/all_versions',
+    '/1/configEditor/7',
     '/app_access',
     '/app_access/101',
     '/users',
@@ -64,6 +65,11 @@ test('page headers', async ({ page }) => {
       await evaluate(`window.layoutTest.show('${path}')`)
       await expect(page.getByTestId('test-route')).toHaveText(path)
       await expect(page.locator('.page-header--screen').first()).toBeVisible()
+      for (const back of await page
+        .locator('.page-header__back .ant-btn:visible')
+        .all()) {
+        await expect(back).toHaveClass(/\bant-btn-variant-outlined\b/)
+      }
       if (checkLayout) {
         assert.equal(
           await evaluate('window.layoutTest.check().passed'),
@@ -84,9 +90,13 @@ test('page headers', async ({ page }) => {
       const headers = await evaluate(metrics)
       baseline ??= headers[0]
       for (const header of headers) {
-        assert.equal(header.padding, '8px 16px', path)
+        assert.equal(
+          header.padding,
+          width === 375 ? '8px 12px' : '8px 16px',
+          path
+        )
         assert.equal(header.size, '22px', path)
-        assert.equal(header.gap, '8px 12px', path)
+        assert.equal(header.gap, width === 375 ? '8px' : '8px 12px', path)
         assert.deepEqual(header, baseline, path)
       }
     }

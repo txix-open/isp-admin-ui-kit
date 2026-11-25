@@ -18,6 +18,8 @@ import useUnsavedChanges from '@hooks/useUnsavedChanges'
 
 import { PermissionKeysType, PermissionType, RoleType } from '@type/roles.type'
 
+import '../TableUI/table-ui.scss'
+
 import './roles-content.scss'
 
 const newRole: Partial<RoleType> = {
@@ -119,6 +121,7 @@ const RolesContent = ({
       name="permissions"
       render={({ field: { value, onChange } }) => (
         <Table
+          className="admin-table"
           columns={columns}
           dataSource={permissions}
           onChange={handleTableChange}

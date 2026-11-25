@@ -15,18 +15,15 @@ import {
   useEffect,
   useState
 } from 'react'
-import { useNavigate } from 'react-router-dom'
 
 import ChangePasswordModal from '@components/ChangePasswordModal'
-import { PageHeader } from '@components/PageLayout'
+import { PageAccessDenied, PageHeader } from '@components/PageLayout'
 
 import { useAppSelector } from '@hooks/redux'
 import useLogout from '@hooks/useLogout'
 import useRole from '@hooks/useRole'
 
 import { Context } from '@stores/index'
-
-import { routePaths } from '@routes/routePaths'
 
 import { PermissionKeysType } from '@type/roles.type'
 
@@ -47,16 +44,15 @@ const ProfilePage = () => {
       : '0 2px 4px rgba(15, 23, 42, 0.04), 0 10px 28px -6px rgba(15, 23, 42, 0.12)',
     '--profile-border-secondary': token.colorBorderSecondary,
     '--profile-primary-bg': token.colorPrimaryBg,
-    '--profile-primary': token.colorPrimary,
+    '--profile-primary': token.colorPrimaryText,
     '--profile-fill-tertiary': token.colorFillTertiary,
     '--profile-fill-quaternary': token.colorFillQuaternary
   } as CSSProperties
-  const { role, hasPermission } = useRole()
+  const { hasPermission } = useRole()
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false)
   const [permissionSearch, setPermissionSearch] = useState('')
   const { profile } = useAppSelector((state) => state.profileReducer)
   const { logoutUser, isLoading } = useLogout()
-  const navigate = useNavigate()
 
   const isPageAvailable = hasPermission(PermissionKeysType.profile_view)
   const canChangePassword = hasPermission(
@@ -108,20 +104,10 @@ const ProfilePage = () => {
   }
 
   useEffect(() => {
-    if (!role) {
-      navigate(routePaths.error)
-    }
-  }, [role])
-
-  useEffect(() => {
-    if (!isPageAvailable) {
-      navigate(routePaths.error)
-    }
-  }, [isPageAvailable])
-
-  useEffect(() => {
     localStorage.setItem('theme', JSON.stringify(changeTheme))
   }, [changeTheme])
+
+  if (!isPageAvailable) return <PageAccessDenied title="Профиль" />
 
   return (
     <section className="profile-page" style={profileColors}>
@@ -129,9 +115,7 @@ const ProfilePage = () => {
         onClose={() => setIsModalOpen(false)}
         open={isModalOpen}
       />
-      <PageHeader
-        title="Профиль"
-      />
+      <PageHeader title="Профиль" />
       <div className="profile-page__content">
         <div className="profile-page__grid">
           <section

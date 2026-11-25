@@ -1,5 +1,4 @@
 import {
-  ArrowLeftOutlined,
   FileProtectOutlined,
   PlusOutlined,
   ReloadOutlined
@@ -20,7 +19,7 @@ import { UseFormSetError } from 'react-hook-form'
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
 
 import AppModal from '@components/AppModal'
-import { PageHeader, PageLoading } from '@components/PageLayout'
+import { PageBackButton, PageHeader, PageLoading } from '@components/PageLayout'
 import TokenContent from '@components/TokenContent'
 
 import {
@@ -179,12 +178,12 @@ const ApplicationsContent = ({
           context={`Приложение · ID ${app.id} · Группа: ${group.name}`}
           description={app.description || 'Описание не задано'}
           back={
-            <Button
+            <PageBackButton
               className="applications-content__back"
               onClick={() => openApp('')}
             >
               К приложениям
-            </Button>
+            </PageBackButton>
           }
           actions={
             <>
@@ -257,12 +256,10 @@ const ApplicationsContent = ({
             title={
               <div className="applications-content__column-title">
                 <Tooltip title="К группам">
-                  <Button
+                  <PageBackButton
                     className="applications-page__back"
-                    type="text"
                     size="small"
                     aria-label="К группам"
-                    icon={<ArrowLeftOutlined />}
                     onClick={onBackToGroups}
                   />
                 </Tooltip>

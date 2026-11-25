@@ -1,6 +1,5 @@
 import { Alert, Badge, Button, List, message, Tooltip } from 'antd'
 import { Column } from 'isp-ui-kit'
-import { useEffect } from 'react'
 import {
   useLocation,
   useNavigate,
@@ -11,7 +10,11 @@ import {
 import { MODULES_TAB_KEYS } from '@constants/modules'
 
 import ModuleTabs from '@components/ModuleTabs'
-import PageLayout, { PageLoading } from '@components/PageLayout'
+import PageLayout, {
+  PageBackButton,
+  PageAccessDenied,
+  PageLoading
+} from '@components/PageLayout'
 
 import { ModuleType } from '@pages/ModulesPage/module.type'
 
@@ -35,7 +38,8 @@ import './modules-page.scss'
 const ModulesPage = () => {
   const { id: selectedItemId = '' } = useParams()
   const navigate = useNavigate()
-  const { role, hasPermission } = useRole()
+  const { hasPermission } = useRole()
+  const isPageAvailable = hasPermission(PermissionKeysType.module_view)
   const [searchParams, setSearchParams] = useSearchParams()
   const {
     data: ModulesList = [],
@@ -43,6 +47,7 @@ const ModulesPage = () => {
     isError,
     refetch
   } = modulesServiceApi.useGetModulesQuery('modules', {
+    skip: !isPageAvailable,
     pollingInterval: 5000,
     skipPollingIfUnfocused: true
   })
@@ -56,22 +61,8 @@ const ModulesPage = () => {
   const searchValue = searchParams.get('search') || ''
   const sortValue = searchParams.get('sort') || ''
   const directionValue = searchParams.get('direction') || ''
-  const isPageAvailable = hasPermission(PermissionKeysType.module_view)
   const canRemoveModule = hasPermission(PermissionKeysType.module_delete)
   const isLoading = isModulesLoading
-
-  useEffect(() => {
-    if (!isPageAvailable) {
-      navigate(routePaths.profile)
-      message.error('Страница не найдена')
-    }
-  }, [isPageAvailable])
-
-  useEffect(() => {
-    if (!role) {
-      navigate(routePaths.error)
-    }
-  }, [role])
 
   const setSelectedItemId = (id: string): void => {
     const params = new URLSearchParams(searchParams)
@@ -108,6 +99,8 @@ const ModulesPage = () => {
     })
   }
 
+  if (!isPageAvailable) return <PageAccessDenied title="Модули" />
+
   if (isLoading) {
     return (
       <PageLayout title="Модули">
@@ -121,6 +114,7 @@ const ModulesPage = () => {
   )
 
   const renderItems = (item: ModuleType) => {
+    const instances = item.status?.length ?? 0
     return (
       <List.Item>
         <Tooltip mouseEnterDelay={1} title={item.name}>
@@ -138,8 +132,17 @@ const ModulesPage = () => {
                   size="small"
                   className="module-item__count"
                   showZero
-                  count={item.status?.length ?? 0}
-                  color={item.status?.length ? 'cyan' : undefined}
+                  count={instances}
+                  styles={{
+                    indicator: {
+                      backgroundColor: instances
+                        ? 'var(--ant-color-primary-bg)'
+                        : 'var(--ant-color-error-bg)',
+                      color: instances
+                        ? 'var(--ant-color-primary-text)'
+                        : 'var(--ant-color-error-text)'
+                    }
+                  }}
                 />
               </div>
             }
@@ -154,7 +157,9 @@ const ModulesPage = () => {
       className="page-layout--local-scroll"
       title="Модули"
       actions={
-        <Button onClick={handleOpenModuleRelations}>Карта связей</Button>
+        <Button type="text" onClick={handleOpenModuleRelations}>
+          Карта связей
+        </Button>
       }
     >
       {isError && (
@@ -199,7 +204,7 @@ const ModulesPage = () => {
           setSelectedItemId={setSelectedItemId}
         />
         <div className="modules-page__detail-panel workspace-card">
-          <Button
+          <PageBackButton
             className="modules-page__back-to-list"
             onClick={() =>
               navigate({
@@ -209,7 +214,7 @@ const ModulesPage = () => {
             }
           >
             К списку модулей
-          </Button>
+          </PageBackButton>
           {currentModule && (
             <ModuleSummary
               module={currentModule}

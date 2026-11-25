@@ -3,6 +3,7 @@ import { Button, Table } from 'antd'
 import { useSearchParams } from 'react-router-dom'
 
 import { TableEmpty } from '@components/TableUI'
+import { useCompactTable } from '@components/TableUI/useCompactTable'
 
 import { useVariableColumns } from './variable-table-columns'
 import {
@@ -22,6 +23,7 @@ const VariablesTable = ({
   unavailable,
   removingName
 }: VariablesTablePropsType) => {
+  const { compact, toggle } = useCompactTable()
   const [params, setParams] = useSearchParams()
   const state = readVariableTableState(params)
   const hasFilters = Boolean(state.name || state.value)
@@ -39,6 +41,7 @@ const VariablesTable = ({
       value: state.value ? [state.value] : null
     },
     onRemoveVariable,
+    compact,
     removingName
   )
 
@@ -79,24 +82,25 @@ const VariablesTable = ({
               ? 'Список переменных недоступен'
               : `Найдено ${filteredCount} из ${dataTable.length} переменных`}
         </p>
+        {toggle}
         <Button
           data-testid="variables-table__clear-all-btn"
           icon={<ClearOutlined />}
           disabled={!hasFilters && !state.sort}
           onClick={clearAll}
         >
-          Сбросить фильтры и сортировку
+          {compact ? 'Сбросить условия' : 'Сбросить фильтры и сортировку'}
         </Button>
       </div>
       <Table<VariableType>
-        className="page-layout__table admin-table"
+        className={`page-layout__table admin-table ${compact ? 'admin-table--compact' : ''}`}
         size="middle"
         rowKey="name"
         loading={loading}
         dataSource={dataTable}
         columns={columns}
         tableLayout="fixed"
-        scroll={{ x: 1450 }}
+        scroll={compact ? undefined : { x: 1450 }}
         onChange={handleChange}
         pagination={{
           current: page,

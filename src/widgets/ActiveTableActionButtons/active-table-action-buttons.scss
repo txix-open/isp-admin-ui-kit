@@ -5,6 +5,6 @@
   gap: $basic-margin;
   justify-content: flex-end;
   .ant-btn.active-configurations-table-actions-field__activate {
-    color: var(--ant-color-success-text);
+    --admin-table-action-color: var(--ant-color-success-text);
   }
 }

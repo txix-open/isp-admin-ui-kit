@@ -4,6 +4,8 @@ import { FC } from 'react'
 import Modal from '@widgets/Modal'
 import { ModalPropsType } from '@widgets/Modal/modal.type'
 
+import '../TableUI/table-ui.scss'
+
 interface ErrorConfigModalProps extends Omit<
   ModalPropsType,
   'title' | 'children'
@@ -58,6 +60,7 @@ const ErrorConfigModal: FC<ErrorConfigModalProps> = ({
     >
       <div>
         <Table
+          className="admin-table"
           columns={columns}
           dataSource={data}
           rowKey="key"

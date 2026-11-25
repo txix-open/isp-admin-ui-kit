@@ -1,9 +1,6 @@
-@use '../../constants/style/styleConst' as *;
-
 .configuration-editor-page {
   display: flex;
   flex-direction: column;
-  border-left: 1px solid $border-color;
   height: 100%;
   min-height: 0;
   min-width: 0;
@@ -19,19 +16,33 @@
     overflow: hidden;
     padding: 16px 24px 24px;
 
-    > .ant-radio-group {
-      flex: none;
-      align-self: flex-start;
-      display: flex;
-      flex-wrap: wrap;
-    }
-
     > .ant-alert {
       flex: none;
     }
 
     @media (max-width: 767px) {
       padding: 16px;
+    }
+  }
+
+  &__mode-switch {
+    flex: none;
+    align-self: flex-start;
+    max-width: 100%;
+
+    .ant-segmented-item-label {
+      font-weight: 500;
+    }
+
+    @media (max-width: 767px) {
+      .ant-segmented-item {
+        min-width: 0;
+      }
+      .ant-segmented-item-label {
+        padding-inline: 8px;
+        white-space: normal;
+        line-height: 24px;
+      }
     }
   }
 
@@ -116,15 +127,4 @@
   margin: 0;
   font-size: 13px;
   line-height: 20px;
-}
-
-@media (max-width: 767px) {
-  .configuration-editor-page > .page-header {
-    .page-header__back {
-      flex-basis: auto;
-    }
-    .page-header__actions {
-      gap: 8px;
-    }
-  }
 }

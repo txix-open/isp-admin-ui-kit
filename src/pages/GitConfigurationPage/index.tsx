@@ -30,12 +30,16 @@ import {
   useState
 } from 'react'
 import { useForm } from 'react-hook-form'
-import { Navigate, useNavigate } from 'react-router-dom'
+import { Navigate } from 'react-router-dom'
 
 import { ValidationRules } from '@constants/form/validationRules'
 
 import GitConfigurationModal from '@components/GitConfigurationModal'
-import { PageHeader, PageLoading } from '@components/PageLayout'
+import {
+  PageAccessDenied,
+  PageHeader,
+  PageLoading
+} from '@components/PageLayout'
 
 import {
   GitFileFormType,
@@ -69,8 +73,7 @@ const MonacoEditor = lazy(() => import('@monaco-editor/react'))
 const GitConfigurationPage = () => {
   const { changeTheme } = useContext(Context)
   const dispatch = useAppDispatch()
-  const { role, hasPermission } = useRole()
-  const navigate = useNavigate()
+  const { hasPermission } = useRole()
   const isPageAvailable =
     hasPermission(PermissionKeysType.git_configuration_view) &&
     hasPermission(PermissionKeysType.module_view)
@@ -105,7 +108,9 @@ const GitConfigurationPage = () => {
     data: credentials = [],
     isLoading: isCredentialsLoading,
     isError: isCredentialsError
-  } = gitConfigurationApi.useCredentialsQuery()
+  } = gitConfigurationApi.useCredentialsQuery(undefined, {
+    skip: !isPageAvailable
+  })
 
   const [createCredentials, { isLoading: isCreateCredentialsLoading }] =
     gitConfigurationApi.useCreateCredentialsMutation()
@@ -129,7 +134,9 @@ const GitConfigurationPage = () => {
     data: modulesList = [],
     isLoading: isModulesLoading,
     isError: isModulesError
-  } = modulesServiceApi.useGetModulesQuery('modules')
+  } = modulesServiceApi.useGetModulesQuery('modules', {
+    skip: !isPageAvailable
+  })
 
   const isError = isCredentialsError || isModulesError
 
@@ -137,18 +144,6 @@ const GitConfigurationPage = () => {
     addModal: false,
     updateModal: false
   })
-
-  useEffect(() => {
-    if (!isPageAvailable) {
-      navigate(routePaths.home)
-    }
-  }, [isPageAvailable])
-
-  useEffect(() => {
-    if (!role) {
-      navigate(routePaths.error)
-    }
-  }, [role])
 
   const currentCredential = useMemo(
     () => credentials.find((item) => item.name === selectedCredentialName),
@@ -384,6 +379,8 @@ const GitConfigurationPage = () => {
       .catch((e) => handleApiError(e, 'Не удалось удалить подключение Git'))
   }
 
+  if (!isPageAvailable) return <PageAccessDenied title="Git конфигурация" />
+
   if (isError) {
     return <Navigate to={routePaths.error} />
   }
@@ -430,10 +427,14 @@ const GitConfigurationPage = () => {
           </p>
           <div className="git-configuration-page__selects">
             <div className="git-configuration-page__select-field">
-              <span className="git-configuration-page__select-label">
+              <label
+                className="git-configuration-page__select-label"
+                htmlFor="git-configuration-credential"
+              >
                 Зона ответственности
-              </span>
+              </label>
               <Select
+                id="git-configuration-credential"
                 placeholder="Выберите GIT"
                 value={selectedCredentialName}
                 onChange={handleSelectCredential}

@@ -10,12 +10,6 @@
 }
 
 .login-page {
-  --login-input-border: color-mix(
-    in srgb,
-    var(--ant-color-text-placeholder) 70%,
-    var(--ant-color-border)
-  );
-
   display: grid;
   flex: 1;
   grid-template-columns: minmax(0, 1fr);
@@ -92,10 +86,6 @@
 
   .ant-input {
     text-align: start;
-  }
-
-  .ant-input-outlined {
-    --ant-color-border: var(--login-input-border);
   }
 
   .ant-divider {

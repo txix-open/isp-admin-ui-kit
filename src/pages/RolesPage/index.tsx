@@ -5,7 +5,7 @@ import { UseFormSetError } from 'react-hook-form'
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
 
 import DownloadCsvButton from '@components/DownloadCsvButton'
-import PageLayout, { PageLoading } from '@components/PageLayout'
+import PageLayout, { PageBackButton, PageLoading } from '@components/PageLayout'
 import RolesContent from '@components/RolesContent'
 
 import { notifyApiError } from '@utils/apiErrorNotifications'
@@ -242,11 +242,19 @@ const RolesPage = () => {
       title="Роли пользователей"
       context="Пользователи и роли"
       actions={
-        isAddRolePermissions ? (
-          <Button type="primary" icon={<PlusOutlined />} onClick={openCreate}>
-            Новая роль
-          </Button>
-        ) : undefined
+        <>
+          <DownloadCsvButton
+            type="role"
+            disabled={
+              rolesQuery.isFetching || rolesQuery.isError || data.length === 0
+            }
+          />
+          {isAddRolePermissions && (
+            <Button type="primary" icon={<PlusOutlined />} onClick={openCreate}>
+              Новая роль
+            </Button>
+          )}
+        </>
       }
     >
       <section className="roles-page" data-selected={Boolean(selectedRoleId)}>
@@ -266,15 +274,6 @@ const RolesPage = () => {
             setUrlValue(value, setSearchParams, 'direction')
           }
           title="Список ролей"
-          extraTitle={
-            <DownloadCsvButton
-              type="role"
-              iconOnly
-              disabled={
-                rolesQuery.isFetching || rolesQuery.isError || data.length === 0
-              }
-            />
-          }
           searchPlaceholder="Введите имя или id"
           showUpdateBtn={false}
           items={filterFirstColumnItems(data, searchValue)}
@@ -296,9 +295,12 @@ const RolesPage = () => {
         />
         <div className="roles-page__content workspace-card">
           {selectedRoleId && (
-            <Button className="roles-page__back-to-list" onClick={goToList}>
+            <PageBackButton
+              className="roles-page__back-to-list"
+              onClick={goToList}
+            >
               К списку ролей
-            </Button>
+            </PageBackButton>
           )}
           {isError && (
             <Alert

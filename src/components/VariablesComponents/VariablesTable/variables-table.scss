@@ -34,6 +34,26 @@
     gap: 12px;
   }
 
+  @media (max-width: 767px) {
+    &__toolbar {
+      justify-content: flex-start;
+      gap: 8px;
+
+      > .page-layout__summary {
+        flex-basis: 100%;
+      }
+
+      > .ant-btn {
+        max-width: 100%;
+        height: auto;
+        min-height: 32px;
+        padding-inline: 8px;
+        white-space: normal;
+        text-align: start;
+      }
+    }
+  }
+
   &__configurations {
     margin: 0;
     padding: 0;

@@ -13,6 +13,10 @@
   min-width: 500px;
 }
 
-.ant-btn:focus-visible{
-  outline: none !important;
+.ant-input-password .ant-input-password-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-inline-size: 24px;
+  min-block-size: 24px;
 }

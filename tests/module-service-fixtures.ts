@@ -13,28 +13,35 @@ function mutation(name) {
 }
 
 export const modulesApi = {
-  useGetModulesQuery: () => ({
-    data: fixtures().modules,
-    isLoading: false,
-    ...fixtures().queryStates.modules,
-    refetch: () => {
-      fixtures().retried = 'modules'
+  useGetModulesQuery: (args, { skip = false } = {}) => {
+    fixtures().queryCalls.push({ service: 'modules', args, skip })
+    return {
+      data: skip ? undefined : fixtures().modules,
+      isLoading: false,
+      ...fixtures().queryStates.modules,
+      refetch: () => {
+        fixtures().retried = 'modules'
+      }
     }
-  }),
-  useGetByModuleIdQuery: () => {
+  },
+  useGetByModuleIdQuery: (args) => {
+    fixtures().queryCalls.push({ service: 'configurationSchema', args })
     const data = {
       schema: fixtures().configurationSchema ?? { type: 'object' }
     }
     return { data, currentData: data, isLoading: false }
   },
-  useGetRequiredModulesQuery: () => ({
-    data: [],
-    isLoading: false,
-    isFetching: false,
-    isError: false,
-    ...fixtures().queryStates.map,
-    refetch: () => ({ unwrap: () => Promise.resolve() })
-  }),
+  useGetRequiredModulesQuery: (args) => {
+    fixtures().queryCalls.push({ service: 'map', args })
+    return {
+      data: [],
+      isLoading: false,
+      isFetching: false,
+      isError: false,
+      ...fixtures().queryStates.map,
+      refetch: () => ({ unwrap: () => Promise.resolve() })
+    }
+  },
   useRemoveModuleMutation: () => mutation('deleteModule')
 }
 
@@ -60,6 +67,11 @@ export const configApi = {
     }
   },
   useGetConfigByIdQuery: (id, options = {}) => {
+    fixtures().queryCalls.push({
+      service: 'configuration',
+      args: id,
+      skip: options.skip
+    })
     const data = options.skip
       ? undefined
       : (Object.values(fixtures().moduleConfigs ?? {})

@@ -2,13 +2,20 @@ import { ComponentType, lazy, Suspense } from 'react'
 import { RouteObject, Navigate } from 'react-router-dom'
 
 import LayoutComponent from '@components/Layout'
-import { PageLoading } from '@components/PageLayout'
+import { filterMenuByPermissions } from '@components/Layout/filter-menu'
+import type { CustomMenuItemType } from '@components/Layout/layout.type'
+import { menuConfig } from '@components/Layout/menu-config'
+import { PageAccessDenied, PageLoading } from '@components/PageLayout'
 
 import ModulesRelationsDiagram from '@pages/ModuleRelationsPage'
+
+import useRole from '@hooks/useRole'
 
 import PrivateRoute from '@routes/PrivateRoute'
 import { generateCustomRoutes } from '@routes/customRoutes'
 import { routePaths } from '@routes/routePaths'
+
+import { PermissionKeysType } from '@type/roles.type'
 
 // Ленивые импорты
 const LoginPage = lazy(() => import('@pages/LoginPage'))
@@ -43,6 +50,49 @@ const lazyElement = (Component: ComponentType) => (
   </Suspense>
 )
 
+const firstMenuRoute = (items: CustomMenuItemType[]): string | undefined => {
+  for (const item of items) {
+    const paths = Array.isArray(item.route) ? item.route : [item.route]
+    const path = paths.find(
+      (value) => value && value !== routePaths.home && !/[:*]/.test(value)
+    )
+    if (path) return path
+    const childPath = firstMenuRoute(item.children ?? [])
+    if (childPath) return childPath
+  }
+}
+
+const StartPage = ({
+  defaultRoutePath,
+  customRouters
+}: {
+  defaultRoutePath: string
+  customRouters: CustomMenuItemType[]
+}) => {
+  const { hasPermission } = useRole()
+
+  if (
+    defaultRoutePath !== routePaths.modules ||
+    hasPermission(PermissionKeysType.module_view)
+  ) {
+    return <Navigate to={defaultRoutePath} replace />
+  }
+
+  const availableItems = filterMenuByPermissions(
+    [...menuConfig(''), ...customRouters],
+    hasPermission
+  )
+  const startPath = firstMenuRoute(availableItems)
+  return startPath ? (
+    <Navigate to={startPath} replace />
+  ) : (
+    <PageAccessDenied
+      title="Главная"
+      subTitle="Для вашей роли нет доступных разделов."
+    />
+  )
+}
+
 export const getRoutesConfig = (
   customRouters: any[],
   defaultRoutePath = routePaths.modules
@@ -61,7 +111,12 @@ export const getRoutesConfig = (
           children: [
             {
               index: true,
-              element: <Navigate to={defaultRoutePath} replace />
+              element: (
+                <StartPage
+                  defaultRoutePath={defaultRoutePath}
+                  customRouters={customRouters}
+                />
+              )
             },
             {
               path: routePaths.profile,

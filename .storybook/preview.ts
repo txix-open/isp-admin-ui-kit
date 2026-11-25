@@ -3,7 +3,11 @@ import { ConfigProvider } from 'antd'
 import ruRu from 'antd/locale/ru_RU'
 import { createElement } from 'react'
 
-import { darkTheme, lightTheme } from '../src/constants/theme'
+import {
+  darkTheme,
+  formControlDefaults,
+  lightTheme
+} from '../src/constants/theme'
 
 const preview: Preview = {
   globalTypes: {
@@ -24,6 +28,7 @@ const preview: Preview = {
       createElement(ConfigProvider, {
         locale: ruRu,
         theme: globals.adminTheme === 'dark' ? darkTheme : lightTheme,
+        ...formControlDefaults,
         children: createElement(Story)
       })
   ],

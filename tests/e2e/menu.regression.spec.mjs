@@ -44,12 +44,25 @@ test('menu', async ({ page }) => {
     assert.equal(await evaluate(popupCount), 0)
   })
   await check(
-    'responsive collapse also closes the initially expanded group',
+    'mobile navigation overlays the workspace and closes after selection',
     async () => {
       await show('/roles/1', false, 375)
-      await waitFor(
-        `document.querySelector('.layout-sider').classList.contains('ant-layout-sider-collapsed')`
-      )
+      const menuButton = page.getByRole('button', { name: 'Меню', exact: true })
+      const drawer = page.getByRole('dialog', { name: 'Навигация' })
+      const workspace = page.locator('.site-layout__content')
+      await expect(page.locator('.layout-sider')).toHaveCount(0)
+      await expect(drawer).toBeHidden()
+      const width = (await workspace.boundingBox()).width
+      expect(width).toBe(375)
+      await menuButton.click()
+      await expect(drawer).toBeVisible()
+      expect((await workspace.boundingBox()).width).toBe(width)
+      await page.keyboard.press('Escape')
+      await expect(drawer).toBeHidden()
+      await menuButton.click()
+      await drawer.getByRole('menuitem', { name: /Пользователи$/ }).click()
+      await waitFor(`${route} === '/users'`)
+      await expect(drawer).toBeHidden()
       assert.equal(await evaluate(popupCount), 0)
     }
   )

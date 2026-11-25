@@ -1,5 +1,4 @@
 import {
-  ArrowLeftOutlined,
   ReloadOutlined,
   CloudServerOutlined,
   LinkOutlined
@@ -9,16 +8,23 @@ import { useCallback } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 
 import { FlowDiagram } from '@components/FlowDiagram/FlowDiagram'
-import { PageHeader } from '@components/PageLayout'
+import {
+  PageAccessDenied,
+  PageBackButton,
+  PageHeader
+} from '@components/PageLayout'
 import { StatsCard } from '@components/StatsCard/StatsCard'
 
 import { notifyApiError } from '@utils/apiErrorNotifications'
 
 import { useModuleRelations } from '@hooks/useModuleRelations'
+import useRole from '@hooks/useRole'
 
 import modulesServiceApi from '@services/modulesService'
 
 import { routePaths } from '@routes/routePaths'
+
+import { PermissionKeysType } from '@type/roles.type'
 
 import './modules-relations-diagram.scss'
 
@@ -46,11 +52,7 @@ const Header = ({
   return (
     <PageHeader
       title="Карта связей модулей"
-      back={
-        <Button icon={<ArrowLeftOutlined />} onClick={onBack}>
-          К модулям
-        </Button>
-      }
+      back={<PageBackButton onClick={onBack}>К модулям</PageBackButton>}
       actions={
         <Button
           icon={<ReloadOutlined />}
@@ -80,7 +82,7 @@ const Legend = () => {
   )
 }
 
-const ModuleRelationsPage = () => {
+const ModuleRelations = () => {
   const navigate = useNavigate()
   const { state } = useLocation()
   const { token } = theme.useToken()
@@ -191,6 +193,13 @@ const ModuleRelationsPage = () => {
       </div>
     </div>
   )
+}
+
+const ModuleRelationsPage = () => {
+  const { hasPermission } = useRole()
+  if (!hasPermission(PermissionKeysType.module_view))
+    return <PageAccessDenied title="Карта связей модулей" />
+  return <ModuleRelations />
 }
 
 export default ModuleRelationsPage

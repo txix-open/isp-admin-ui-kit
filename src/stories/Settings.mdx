@@ -108,7 +108,7 @@ loader.init();
 |----------|----------|--------|
 | `customRouters` | Массив объектов маршрутов | `[{ route, element, label, key, ... }]` |
 | `configProviderProps` | Пропсы для `ConfigProvider` из Ant Design | `{ theme: lightTheme, locale: ru }` |
-| `defaultRoutePath` | Путь для редиректа с главной страницы (`/`) | `"/modules"` |
+| `defaultRoutePath` | Путь для перехода с главной (`/`). Если раздел модулей недоступен, стандартный маршрут открывает первый доступный пункт меню. | `"/modules"` |
 | `excludePermissions` | Массив пермишенов для скрытия страниц | `[PermissionKeysType.user_view]` |
 
 ### Примеры использования

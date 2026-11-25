@@ -2,7 +2,7 @@ import { CheckOutlined, CloseOutlined, EditOutlined } from '@ant-design/icons'
 import { Button, message, Table, Tooltip } from 'antd'
 import { ColumnsType } from 'antd/es/table'
 import dayjs from 'dayjs'
-import { FC, useEffect, useId, useRef, useState } from 'react'
+import { FC, useEffect, useId, useLayoutEffect, useRef, useState } from 'react'
 
 import { dateFormats } from '@constants/date'
 
@@ -33,6 +33,8 @@ const ActiveConfigurationsTable: FC<ActiveConfigurationsTablePropsType> = ({
   const { hasPermission } = useRole()
   const [editKeyConfig, setEditKeyConfig] = useState<string>('')
   const [draftName, setDraftName] = useState('')
+  const [tableWidth, setTableWidth] = useState(0)
+  const tableRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
   const tableId = useId()
   const [updateConfigName, { isLoading: isRenaming }] =
@@ -44,6 +46,18 @@ const ActiveConfigurationsTable: FC<ActiveConfigurationsTablePropsType> = ({
   const canEditConfig = hasPermission(
     PermissionKeysType.module_configuration_edit
   )
+  const compact = tableWidth < 550
+
+  useLayoutEffect(() => {
+    const element = tableRef.current
+    if (!element) return
+    setTableWidth(element.clientWidth)
+    const observer = new ResizeObserver(([entry]) => {
+      setTableWidth(entry.contentRect.width)
+    })
+    observer.observe(element)
+    return () => observer.disconnect()
+  }, [])
 
   useEffect(() => {
     inputRef.current?.focus()
@@ -169,7 +183,6 @@ const ActiveConfigurationsTable: FC<ActiveConfigurationsTablePropsType> = ({
             canEditConfig && (
               <Tooltip title="Редактировать название">
                 <TableActionButton
-                  type="text"
                   id={`${tableId}-rename-${record.id}`}
                   aria-label={`Переименовать конфигурацию «${value}»`}
                   disabled={isRenaming}
@@ -207,8 +220,9 @@ const ActiveConfigurationsTable: FC<ActiveConfigurationsTablePropsType> = ({
       title: 'Версия',
       dataIndex: 'version',
       key: 'version',
-      width: 72,
-      responsive: ['md'],
+      className: 'active-configurations-table__version-cell',
+      width: 84,
+      hidden: compact,
       render: (value: number) => (
         <span className="active-configurations-table__version">{value}</span>
       ),
@@ -218,8 +232,8 @@ const ActiveConfigurationsTable: FC<ActiveConfigurationsTablePropsType> = ({
       title: 'Статус',
       dataIndex: 'valid',
       key: 'valid',
-      width: '20%',
-      responsive: ['md'],
+      width: 144,
+      hidden: compact,
       align: 'center',
       render: (value: boolean) => (
         <TableStatus tone={value ? 'success' : 'error'}>
@@ -232,7 +246,7 @@ const ActiveConfigurationsTable: FC<ActiveConfigurationsTablePropsType> = ({
       dataIndex: 'updatedAt',
       key: 'updatedAt',
       width: '20%',
-      responsive: ['xl'],
+      hidden: tableWidth < 740,
       align: 'left',
       render: (value: string) => <TableDate value={value} />
     },
@@ -264,7 +278,8 @@ const ActiveConfigurationsTable: FC<ActiveConfigurationsTablePropsType> = ({
   }
   return (
     <div
-      className={`active-configurations-table ${isActiveTable ? 'active-configurations-table--active' : ''}`}
+      ref={tableRef}
+      className={`active-configurations-table${isActiveTable ? ' active-configurations-table--active' : ''}${compact ? ' active-configurations-table--compact' : ''}`}
     >
       <div className="active-configurations-table__buttons">
         <h2 className="active-configurations-table__title">

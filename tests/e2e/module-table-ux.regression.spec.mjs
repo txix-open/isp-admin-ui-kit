@@ -1,4 +1,4 @@
-import { test } from '@playwright/test'
+import { expect, test } from '@playwright/test'
 import assert from 'node:assert/strict'
 
 const fixture = new URL('../../build/playwright/layout.html', import.meta.url)
@@ -24,6 +24,33 @@ test('module table ux', async ({ page }) => {
     .locator('.active-configurations-table__name-button')
     .first()
     .waitFor()
+
+  const rename = page.getByRole('button', {
+    name: 'Переименовать конфигурацию «Основная конфигурация»'
+  })
+  await expect(rename).toHaveCSS('background-color', 'rgba(0, 0, 0, 0)')
+  await expect(rename).toHaveCSS('border-top-color', 'rgba(0, 0, 0, 0)')
+  await expect(rename).toHaveCSS('width', '32px')
+  await page.keyboard.press('Tab')
+  await rename.focus()
+  await expect(rename).toHaveCSS('outline-style', 'solid')
+
+  const versionHeader = page.getByRole('columnheader', { name: 'Версия' })
+  await expect(versionHeader).toHaveCount(2)
+  for (const cell of await versionHeader.all()) {
+    expect(
+      await cell.evaluate((element) => {
+        const range = document.createRange()
+        range.selectNodeContents(element)
+        return range.getClientRects().length
+      })
+    ).toBe(1)
+  }
+  await page.setViewportSize({ width: 768, height: 1000 })
+  await expect(versionHeader).toHaveCount(0)
+  await expect(page.getByText('Версия 1 · Корректная')).toBeVisible()
+  await page.setViewportSize({ width: 1440, height: 1000 })
+  await expect(versionHeader).toHaveCount(2)
   assert.equal(
     await evaluate(
       `document.querySelectorAll('.active-configurations-table').length`

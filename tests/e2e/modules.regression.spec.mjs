@@ -166,7 +166,8 @@ test('modules', async ({ page }) => {
   assert.equal(await route(), `/1/configEditor/${editorId}`)
   assert.ok((await query()).includes('search='))
   await page
-    .locator('.configuration-editor-page button:has-text("Назад")')
+    .locator('.configuration-editor-page')
+    .getByRole('button', { name: 'К конфигурациям' })
     .click()
   await page.locator('.configurations').first().waitFor()
   assert.equal(
@@ -243,7 +244,8 @@ test('modules', async ({ page }) => {
     'Новая конфигурация для теста'
   )
   await page
-    .locator('.configuration-editor-page button:has-text("Назад")')
+    .locator('.configuration-editor-page')
+    .getByRole('button', { name: 'К конфигурациям' })
     .click()
   await page.locator('.configurations').first().waitFor()
   assert.equal(

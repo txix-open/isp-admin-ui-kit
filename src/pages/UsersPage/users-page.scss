@@ -63,9 +63,12 @@
   }
 
   @media (max-width: 767px) {
-    &__filters__search,
-    &__filters__select {
+    &__filters__search {
       flex-basis: 100%;
+    }
+
+    &__filters__select {
+      flex: 1 1 120px;
     }
   }
 }

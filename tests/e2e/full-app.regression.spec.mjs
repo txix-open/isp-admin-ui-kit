@@ -62,6 +62,81 @@ for (const [path, heading, expectedPath] of routes) {
   })
 }
 
+test('home selects a visible menu leaf when modules are unavailable', async ({
+  page
+}) => {
+  await page.evaluate(() => {
+    window.layoutFixtures.grantedPermissions = ['user_view']
+  })
+  await openRoute(page, '/', 'Пользователи', '/users')
+  await page.evaluate(() => {
+    window.layoutFixtures.grantedPermissions = []
+  })
+  await openRoute(page, '/', 'Главная')
+  await expect(
+    page.getByText('Для вашей роли нет доступных разделов.')
+  ).toBeVisible()
+})
+
+test('a consumer can set its own start route', async ({ page }) => {
+  await page.evaluate(() => {
+    window.layoutFixtures.customRoute = true
+    window.layoutFixtures.modules.push({ name: 'fixture-module', active: true })
+  })
+  await show(page, '/', { defaultRoutePath: '/custom' })
+  await expect(
+    page.getByRole('heading', { name: 'Раздел приложения' })
+  ).toBeVisible()
+  await expect(page.getByTestId('test-route')).toHaveText('/custom')
+})
+
+test('direct restricted URLs retain the section title and skip its requests', async ({
+  page
+}) => {
+  const routes = [
+    ['/profile', 'Профиль'],
+    ['/modules', 'Модули'],
+    ['/modules/1/connections', 'Модули'],
+    ['/modules/relations', 'Карта связей модулей'],
+    ['/1/configEditor/7', 'Редактирование конфигурации'],
+    ['/1/configEditor/new', 'Создание конфигурации'],
+    ['/git_configuration', 'Git конфигурация']
+  ]
+  await page.evaluate(() => {
+    window.layoutFixtures.grantedPermissions = [
+      'user_view',
+      'git_configuration_view'
+    ]
+    window.layoutFixtures.queryCalls = []
+  })
+  for (const [path, heading] of routes) {
+    await openRoute(page, path, heading)
+    await expect(
+      page.getByText('Нет доступа к разделу', { exact: true })
+    ).toBeVisible()
+  }
+  const calls = await page.evaluate(() => window.layoutFixtures.queryCalls)
+  expect(calls).toContainEqual({
+    service: 'modules',
+    args: 'modules',
+    skip: true
+  })
+  expect(calls).toContainEqual({ service: 'git', skip: true })
+  expect(
+    calls
+      .filter(({ service }) =>
+        [
+          'modules',
+          'map',
+          'configurationSchema',
+          'configuration',
+          'git'
+        ].includes(service)
+      )
+      .every(({ skip }) => skip)
+  ).toBe(true)
+})
+
 for (const path of ['/error', '/missing-route']) {
   test(`recovery screen returns home from ${path}`, async ({ page }) => {
     await show(page, path)
@@ -377,7 +452,13 @@ test('configuration code protects invalid JSON and shares a valid draft across m
   page
 }) => {
   await openRoute(page, '/1/configEditor/7', 'Тестовая конфигурация')
-  await page.getByText('Редактор кода', { exact: true }).click()
+  const modes = page.getByRole('radiogroup', { name: 'Режим редактирования' })
+  await expect(page.locator('.configuration-editor-page')).toHaveCSS(
+    'border-left-width',
+    '0px'
+  )
+  await expect(modes).toHaveCSS('border-top-width', '0px')
+  await modes.getByRole('radio', { name: 'JSON' }).press('ArrowRight')
   const code = page.getByRole('textbox', { name: 'JSON-код конфигурации' })
   await code.fill('{')
   await expect(
@@ -397,7 +478,15 @@ test('configuration code protects invalid JSON and shares a valid draft across m
   await expect(
     page.getByRole('region', { name: 'Дерево конфигурации' })
   ).toContainText('timeout')
-  await page.getByRole('button', { name: /Назад$/ }).click()
+  await page.getByRole('button', { name: 'Есть изменения' }).click()
+  const preview = page.getByRole('dialog', { name: 'Изменения конфигурации' })
+  await preview.getByText('После очистки', { exact: true }).click()
+  await expect(
+    preview.getByText('Справа: после очистки перед сохранением')
+  ).toBeVisible()
+  await page.keyboard.press('Escape')
+  await expect(preview).toBeHidden()
+  await page.getByRole('button', { name: 'К конфигурациям' }).click()
   const dialog = page.getByRole('dialog', {
     name: 'Есть несохранённые изменения'
   })
@@ -408,7 +497,7 @@ test('configuration code protects invalid JSON and shares a valid draft across m
   await expect(
     page.getByRole('region', { name: 'Дерево конфигурации' })
   ).toContainText('timeout')
-  await page.getByRole('button', { name: /Назад$/ }).click()
+  await page.getByRole('button', { name: 'К конфигурациям' }).click()
   await dialog.getByRole('button', { name: 'Выйти без сохранения' }).click()
   await expect(page.getByTestId('test-route')).toHaveText(
     '/modules/1/configurations'
@@ -458,6 +547,36 @@ for (const [path, field, value, mutation, fieldName, destination] of [
     ).toBe(value)
   })
 }
+
+test('user column filters survive returning from the editor', async ({
+  page
+}) => {
+  await openRoute(page, '/users', 'Пользователи')
+  await page
+    .getByRole('columnheader', { name: /Описание/ })
+    .locator('.ant-table-filter-trigger')
+    .click()
+  const filter = page.getByRole('form', { name: 'Фильтр: Описание' })
+  await filter.getByRole('searchbox').fill('Тест')
+  await filter.getByRole('button', { name: 'Применить' }).click()
+  const chip = page.getByRole('button', { name: 'Удалить фильтр «Описание»' })
+  await expect(chip).toBeVisible()
+
+  await page
+    .getByRole('button', { name: /^Редактировать пользователя:/ })
+    .first()
+    .click()
+  const route = page.getByTestId('test-route')
+  await expect(route).toHaveText('/users/7')
+  await expect(route).toHaveAttribute('data-search', /tableFilters=/)
+
+  await page.getByRole('button', { name: 'Вернуться к пользователям' }).click()
+  await expect(route).toHaveText('/users')
+  await expect(chip).toBeVisible()
+  await chip.click()
+  await expect(chip).toHaveCount(0)
+  await expect(route).toHaveAttribute('data-search', '')
+})
 
 test('failed OAuth exchange keeps the user signed out', async ({ page }) => {
   await page.evaluate(() => {

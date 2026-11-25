@@ -52,7 +52,9 @@
       background: var(--ant-color-bg-container);
       border: 1px solid var(--ant-color-border-secondary);
       border-radius: var(--admin-panel-radius, 16px);
-      box-shadow: var(--ant-page-panel-shadow), 0 4px 16px rgb(15 23 42 / 4%);
+      box-shadow:
+        var(--ant-page-panel-shadow),
+        0 4px 16px rgb(15 23 42 / 4%);
     }
 
     .workspace-card--navigation {
@@ -107,7 +109,9 @@
   &--screen {
     border: 1px solid var(--ant-color-border-secondary);
     border-radius: var(--admin-panel-radius, 16px);
-    box-shadow: var(--ant-page-panel-shadow), 0 4px 16px rgb(15 23 42 / 4%);
+    box-shadow:
+      var(--ant-page-panel-shadow),
+      0 4px 16px rgb(15 23 42 / 4%);
   }
 
   &__inner {
@@ -164,8 +168,45 @@
   .page-layout__body {
     padding: 16px;
   }
-  .page-header__back {
+  .page-header {
+    padding-inline: 12px;
+  }
+  .page-header__inner {
+    column-gap: 8px;
+  }
+  .page-header__back + .page-header__heading {
+    flex: 1 1 calc(100% - 48px);
+  }
+  .page-header__back .page-back-button {
+    position: relative;
+    width: 36px;
+    padding-inline: 0;
+  }
+  .page-header__back .page-back-button__label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+  .page-header__heading {
+    min-width: 0;
     flex-basis: 100%;
+  }
+  .page-header__actions {
+    gap: 6px;
+    min-width: 0;
+  }
+  .page-header__actions .ant-btn:not(.ant-btn-icon-only) {
+    padding-inline: 8px;
+  }
+  .page-header__title {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    white-space: normal;
+    overflow-wrap: anywhere;
   }
 }
 

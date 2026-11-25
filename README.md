@@ -61,6 +61,11 @@ npm install isp-admin-ui-kit
 
 Приложение и кит используют общие экземпляры React и React DOM. При интеграции сверяйте версии с `peerDependencies` установленной версии пакета. Ниже указаны диапазоны из текущего `package.json`.
 
+При переходе на `isp-admin-ui-kit` 3.0.0 обновите в приложении `isp-ui-kit`
+до `^3.0.0`, `react-router-dom` до `^7.18.6` и `axios` до `^1.20.0`, если
+соответствующие зависимости ещё на более ранних версиях. Обновляйте оба кита
+вместе в `dependencies` приложения и пересоберите его lock-файл.
+
 ```json
 {
   "@ant-design/icons": "^6.2.5",
@@ -68,15 +73,15 @@ npm install isp-admin-ui-kit
   "@monaco-editor/react": "^4.7.0",
   "@reduxjs/toolkit": "^2.12.0",
   "antd": ">=6.0.0",
-  "axios": "^1.17.0",
+  "axios": "^1.20.0",
   "dayjs": "^1.11.21",
-  "isp-ui-kit": "^2.3.4",
+  "isp-ui-kit": "^3.0.0",
   "monaco-editor": "^0.55.1",
   "react": ">=18",
   "react-dom": ">=18",
   "react-hook-form": "^7.78.0",
   "react-redux": "^9.3.0",
-  "react-router-dom": "^6.30.4",
+  "react-router-dom": "^7.18.6",
   "reactflow": "^11.11.4",
   "redoc": "^2.5.3",
   "yaml": "^2.9.0"

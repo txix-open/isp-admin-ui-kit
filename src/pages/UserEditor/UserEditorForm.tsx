@@ -1,4 +1,4 @@
-import { ArrowLeftOutlined, SaveOutlined } from '@ant-design/icons'
+import { SaveOutlined } from '@ant-design/icons'
 import { Button, message } from 'antd'
 import dayjs from 'dayjs'
 import {
@@ -15,7 +15,7 @@ import { useLocation, useNavigate } from 'react-router-dom'
 import { dateFormats } from '@constants/date'
 import { ValidationRules } from '@constants/form/validationRules'
 
-import { PageHeader } from '@components/PageLayout'
+import { PageBackButton, PageHeader } from '@components/PageLayout'
 
 import { notifyApiError } from '@utils/apiErrorNotifications'
 import { hasUserChanges } from '@utils/formChanges'
@@ -181,10 +181,9 @@ const UserEditorForm = ({
         }
         focusOnMount
         back={
-          <Button
+          <PageBackButton
             data-cy="user-editor__header__nav__backBtn"
             className="user-editor__header__nav__backBtn"
-            type="text"
             aria-label={
               onCancel
                 ? 'Отменить создание пользователя'
@@ -192,10 +191,10 @@ const UserEditorForm = ({
             }
             disabled={isSaving}
             onClick={goToUsers}
-            icon={onCancel ? undefined : <ArrowLeftOutlined />}
+            icon={onCancel ? null : undefined}
           >
             {onCancel ? 'Отмена' : 'К пользователям'}
-          </Button>
+          </PageBackButton>
         }
         actions={
           <Button

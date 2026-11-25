@@ -1,6 +1,5 @@
 import {
   DownOutlined,
-  RollbackOutlined,
   DiffOutlined,
   InfoCircleOutlined
 } from '@ant-design/icons'
@@ -11,7 +10,7 @@ import {
   MenuProps,
   message,
   Popover,
-  Radio,
+  Segmented,
   Space
 } from 'antd'
 import { AxiosError } from 'axios'
@@ -25,7 +24,12 @@ import ConfigurationEditorJson from '@components/ConfigurationEditorJson'
 import ConfirmConfigModal from '@components/ConfirmConfigModal/ConfirmConfigModal'
 import ErrorConfigModal from '@components/ErrorConfigModal/ErrorConfigModal'
 import JsonDiffModal from '@components/JsonDiffModal'
-import { PageHeader, PageLoading } from '@components/PageLayout'
+import {
+  PageAccessDenied,
+  PageBackButton,
+  PageHeader,
+  PageLoading
+} from '@components/PageLayout'
 
 import { ConfigType } from '@pages/ModulesPage/module.type'
 
@@ -52,11 +56,6 @@ const ConfigurationEditor: FC = () => {
   const { moduleId = '', id = '' } = useParams()
   const { state, search } = useLocation()
   const isNew = id === 'new'
-  const isPageAvailable = hasPermission(
-    isNew
-      ? PermissionKeysType.module_configuration_add
-      : PermissionKeysType.module_configuration_edit
-  )
   const isUnsafeButton = hasPermission(
     PermissionKeysType.module_configuration_save_unsafe
   )
@@ -65,16 +64,14 @@ const ConfigurationEditor: FC = () => {
     isLoading: isLoadingJsonSchema,
     isError: isSchemaError,
     refetch: refetchSchema
-  } = modulesServiceApi.useGetByModuleIdQuery(moduleId, {
-    skip: !isPageAvailable
-  })
+  } = modulesServiceApi.useGetByModuleIdQuery(moduleId)
   const {
     currentData: currentConfig,
     isLoading: isCurrentConfigLoading,
     isError: isConfigError,
     refetch: refetchConfig
   } = configServiceApi.useGetConfigByIdQuery(id, {
-    skip: isNew || !isPageAvailable
+    skip: isNew
   })
   const [createUpdateConfig, { isLoading: isSaving }] =
     configServiceApi.useCreateUpdateConfigMutation()
@@ -83,7 +80,7 @@ const ConfigurationEditor: FC = () => {
   const [showChanges, setShowChanges] = useState(false)
   const [previewCleaned, setPreviewCleaned] = useState(false)
   const [conflictRevision, setConflictRevision] = useState(0)
-  const [radioValue, setRadioValue] = useState('json')
+  const [editorMode, setEditorMode] = useState<'form' | 'json' | 'code'>('json')
   const [bufConfig, setBufConfig] = useState<ConfigType>()
   const [baseline, setBaseline] = useState<ConfigType>()
   const [editorRevision, setEditorRevision] = useState(0)
@@ -95,10 +92,6 @@ const ConfigurationEditor: FC = () => {
   const savingRef = useRef(false)
   const saveOptions = useRef({ unsafe: false, isGoBack: false })
   const initialized = useRef(false)
-
-  useEffect(() => {
-    if (!isPageAvailable) navigate(routePaths.home)
-  }, [isPageAvailable, navigate])
 
   useEffect(() => {
     if (initialized.current || (!isNew && !currentConfig)) return
@@ -139,7 +132,6 @@ const ConfigurationEditor: FC = () => {
     disableBtn ||
     isSaving ||
     (!isNew && !hasChanges) ||
-    !isPageAvailable ||
     (isNew && !bufConfig.name)
   const goToConfigurationPage = () =>
     navigate(
@@ -240,7 +232,7 @@ const ConfigurationEditor: FC = () => {
   const isLoading =
     isLoadingJsonSchema ||
     isCurrentConfigLoading ||
-    (!bufConfig && !isConfigError && isPageAvailable)
+    (!bufConfig && !isConfigError)
 
   return (
     <main className="configuration-editor-page">
@@ -281,13 +273,9 @@ const ConfigurationEditor: FC = () => {
           </span>
         }
         back={
-          <Button
-            disabled={isSaving}
-            onClick={goToConfigurationPage}
-            icon={<RollbackOutlined />}
-          >
-            Назад
-          </Button>
+          <PageBackButton disabled={isSaving} onClick={goToConfigurationPage}>
+            К конфигурациям
+          </PageBackButton>
         }
         actions={
           <>
@@ -358,18 +346,19 @@ const ConfigurationEditor: FC = () => {
         ) : (
           bufConfig && (
             <>
-              <Radio.Group
-                value={radioValue}
+              <Segmented
+                className="configuration-editor-page__mode-switch"
+                aria-label="Режим редактирования"
+                tabIndex={-1}
+                value={editorMode}
                 disabled={disableBtn || isSaving}
-                size="large"
-                onChange={(event) => setRadioValue(event.target.value)}
-              >
-                <Radio.Button value="form" disabled={!jsonSchema}>
-                  Форма
-                </Radio.Button>
-                <Radio.Button value="json">JSON</Radio.Button>
-                <Radio.Button value="code">Редактор кода</Radio.Button>
-              </Radio.Group>
+                onChange={setEditorMode}
+                options={[
+                  { label: 'Форма', value: 'form', disabled: !jsonSchema },
+                  { label: 'JSON', value: 'json' },
+                  { label: 'Редактор кода', value: 'code' }
+                ]}
+              />
               <Popover
                 trigger="click"
                 placement="bottomLeft"
@@ -393,17 +382,17 @@ const ConfigurationEditor: FC = () => {
                 </Button>
               </Popover>
               <fieldset
-                className={`configuration-editor-page__editor configuration-editor-page__editor--${radioValue}`}
+                className={`configuration-editor-page__editor configuration-editor-page__editor--${editorMode}`}
                 disabled={isSaving}
                 key={editorRevision}
               >
-                {radioValue === 'form' && (
+                {editorMode === 'form' && (
                   <ConfigurationEditorForm {...editorProps} />
                 )}
-                {radioValue === 'json' && (
+                {editorMode === 'json' && (
                   <ConfigurationEditorJson {...editorProps} />
                 )}
-                {radioValue === 'code' && (
+                {editorMode === 'code' && (
                   <ConfigurationEditorCode
                     {...editorProps}
                     setDisableBtn={setDisableBtn}
@@ -432,13 +421,14 @@ const ConfigurationEditor: FC = () => {
           }
           toolbar={
             <>
-              <Radio.Group
-                value={previewCleaned}
-                onChange={(event) => setPreviewCleaned(event.target.value)}
-                optionType="button"
+              <Segmented
+                aria-label="Данные для сравнения"
+                tabIndex={-1}
+                value={previewCleaned ? 'cleaned' : 'draft'}
+                onChange={(value) => setPreviewCleaned(value === 'cleaned')}
                 options={[
-                  { label: 'Черновик', value: false },
-                  { label: 'После очистки', value: true }
+                  { label: 'Черновик', value: 'draft' },
+                  { label: 'После очистки', value: 'cleaned' }
                 ]}
               />
               <p>
@@ -492,6 +482,19 @@ const ConfigurationEditor: FC = () => {
 
 const ConfigurationEditorPage: FC = () => {
   const { moduleId, id } = useParams()
+  const { hasPermission } = useRole()
+  const isNew = id === 'new'
+  const canAccess = hasPermission(
+    isNew
+      ? PermissionKeysType.module_configuration_add
+      : PermissionKeysType.module_configuration_edit
+  )
+  if (!canAccess)
+    return (
+      <PageAccessDenied
+        title={isNew ? 'Создание конфигурации' : 'Редактирование конфигурации'}
+      />
+    )
   return <ConfigurationEditor key={`${moduleId}/${id}`} />
 }
 

@@ -1,8 +1,4 @@
-import {
-  ArrowLeftOutlined,
-  DownloadOutlined,
-  ReloadOutlined
-} from '@ant-design/icons'
+import { DownloadOutlined, ReloadOutlined } from '@ant-design/icons'
 import { Alert, Button, Empty, Layout, Spin, Tag } from 'antd'
 import {
   memo,
@@ -16,7 +12,7 @@ import {
 import { useLocation, useNavigate, useParams } from 'react-router-dom'
 import { ErrorBoundary, StoreBuilder } from 'redoc'
 
-import PageLayout from '@components/PageLayout'
+import PageLayout, { PageBackButton } from '@components/PageLayout'
 
 import { Context } from '@stores/index'
 
@@ -168,8 +164,7 @@ const SwaggerPage = () => {
         className="swagger-screen"
         split
         back={
-          <Button
-            icon={<ArrowLeftOutlined />}
+          <PageBackButton
             onClick={() =>
               navigate(
                 {
@@ -181,7 +176,7 @@ const SwaggerPage = () => {
             }
           >
             К модулю
-          </Button>
+          </PageBackButton>
         }
         actions={
           <>

@@ -15,7 +15,12 @@ import {
 
 import LayoutComponent from '../src/components/Layout'
 import { PageHeader } from '../src/components/PageLayout'
-import { darkTheme, lightTheme } from '../src/constants/theme'
+import '../src/components/admin-base.scss'
+import {
+  darkTheme,
+  formControlDefaults,
+  lightTheme
+} from '../src/constants/theme'
 
 import AllVersionsPage from '../src/pages/AllVersionsPage'
 import AppAccessPage from '../src/pages/AppAccessPage'
@@ -247,7 +252,10 @@ function show(
 ) {
   if (remount) renderVersion++
   root.render(
-    <ConfigProvider theme={dark ? darkTheme : lightTheme}>
+    <ConfigProvider
+      theme={dark ? darkTheme : lightTheme}
+      {...formControlDefaults}
+    >
       <MemoryRouter
         key={`${path}-${dark}-${renderVersion}`}
         initialEntries={[path]}
@@ -335,7 +343,10 @@ function FullApp({
       <Context.Provider
         value={{ changeTheme, setChangeTheme, excludePermissions: [] }}
       >
-        <ConfigProvider theme={changeTheme ? darkTheme : lightTheme}>
+        <ConfigProvider
+          theme={changeTheme ? darkTheme : lightTheme}
+          {...formControlDefaults}
+        >
           <RouterProvider router={router} />
         </ConfigProvider>
       </Context.Provider>
@@ -344,7 +355,18 @@ function FullApp({
 }
 
 let fullRouter: ReturnType<typeof createMemoryRouter> | undefined
-function showApp(path: string, { authenticated = true, dark = false } = {}) {
+function showApp(
+  path: string,
+  {
+    authenticated = true,
+    dark = false,
+    defaultRoutePath
+  }: {
+    authenticated?: boolean
+    dark?: boolean
+    defaultRoutePath?: string
+  } = {}
+) {
   window.layoutFixtures.fullApp = true
   configureOfflineAuth(authenticated)
   fullRouter?.dispose()
@@ -368,7 +390,8 @@ function showApp(path: string, { authenticated = true, dark = false } = {}) {
                   requiredModules: ['fixture-module']
                 }
               ]
-            : []
+            : [],
+          defaultRoutePath
         )
       }
     ],

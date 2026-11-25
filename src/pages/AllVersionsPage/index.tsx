@@ -1,5 +1,4 @@
 import {
-  ArrowLeftOutlined,
   ClearOutlined,
   DeleteOutlined,
   EyeOutlined,
@@ -23,6 +22,7 @@ import { useLocation, useNavigate, useParams } from 'react-router-dom'
 
 import CompareVersionModal from '@components/CompareVersionModal'
 import ConfigurationPreviewModal from '@components/ConfigurationPreviewModal'
+import { PageBackButton } from '@components/PageLayout'
 import {
   TableActionButton,
   TableActions,
@@ -119,9 +119,7 @@ const AllVersionsPage = () => {
 
   const header = (
     <header className="all-version-page__header">
-      <Button
-        type="text"
-        icon={<ArrowLeftOutlined />}
+      <PageBackButton
         onClick={() =>
           navigate(
             {
@@ -133,7 +131,7 @@ const AllVersionsPage = () => {
         }
       >
         К конфигурациям
-      </Button>
+      </PageBackButton>
       <div className="all-version-page__heading">
         <h2 className="all-version-page__title">История версий</h2>
         <span

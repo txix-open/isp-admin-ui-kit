@@ -1,5 +1,5 @@
 import { ReloadOutlined } from '@ant-design/icons'
-import { Alert, Button, Checkbox, message } from 'antd'
+import { Alert, Button, Checkbox, message, Popconfirm, Space } from 'antd'
 
 import PageLayout, {
   PageAccessDenied,
@@ -30,7 +30,6 @@ const AuditSettings = () => {
   const sortedEvents = [...events].sort((a, b) =>
     (a.name || a.event).localeCompare(b.name || b.event)
   )
-  const allChecked = events.length > 0 && enabledCount === events.length
   const disabled = isFetching || isSaving
 
   const saveEvents = async (selected: LogEventKeyType[]) => {
@@ -110,18 +109,26 @@ const AuditSettings = () => {
           aria-busy={disabled}
         >
           <div className="audit-management-page__toolbar">
-            <Checkbox
-              checked={allChecked}
-              indeterminate={!allChecked && enabledCount > 0}
-              disabled={disabled}
-              onChange={({ target }) =>
-                saveEvents(
-                  target.checked ? events.map(({ event }) => event) : []
-                )
-              }
-            >
-              Все события
-            </Checkbox>
+            <Space wrap>
+              <Button
+                disabled={disabled || enabledCount === events.length}
+                onClick={() => saveEvents(events.map(({ event }) => event))}
+              >
+                Включить все
+              </Button>
+              <Popconfirm
+                title="Отключить все события аудита?"
+                description={`Будет отключено событий: ${enabledCount}. Их запись в журнал прекратится.`}
+                okText="Отключить все"
+                okButtonProps={{ danger: true, disabled }}
+                cancelText="Отмена"
+                onConfirm={() => saveEvents([])}
+              >
+                <Button danger disabled={disabled || enabledCount === 0}>
+                  Отключить все
+                </Button>
+              </Popconfirm>
+            </Space>
             <span className="audit-management-page__summary" role="status">
               {isSaving
                 ? 'Сохранение…'

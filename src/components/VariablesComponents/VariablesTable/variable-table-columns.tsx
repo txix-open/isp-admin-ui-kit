@@ -42,6 +42,7 @@ export const useVariableColumns = (
   sortedInfo: Sorts,
   filteredInfo: Filters,
   onRemoveVariable: (name: string) => void | Promise<void>,
+  compact: boolean,
   removingName?: string
 ): TableColumnType<VariableType>[] => {
   const navigate = useNavigate()
@@ -53,34 +54,51 @@ export const useVariableColumns = (
   const isModulesPageAvailable = hasPermission(
     PermissionKeysType.module_configuration_edit
   )
+  const renderType = (type: VariableType['type']) => (
+    <Tag color={type === 'TEXT' ? 'green' : 'orange'}>
+      {type === 'TEXT' ? 'ТЕКСТ' : 'СЕКРЕТ'}
+    </Tag>
+  )
+  const renderValue = (record: VariableType) =>
+    record.type === 'SECRET' ? 'Скрыто' : renderText(record.value)
+
   const columns: TableColumnType<VariableType>[] = [
     {
       title: 'Наименование',
       dataIndex: 'name',
       key: 'name',
-      width: 200,
+      width: compact ? undefined : 200,
       align: 'left',
       sorter: (a, b) => a.name.localeCompare(b.name),
       sortOrder: sortedInfo.columnKey === 'name' ? sortedInfo.order : null,
       ...getColumnSearchProps('name', filteredInfo),
-      render: (name: string) => (
-        <Tooltip
-          title={name}
-          trigger={['hover', 'focus']}
-          classNames={{ container: 'variables-table__tooltip' }}
-        >
-          <Link
-            className="variables-table__name admin-table-name"
-            to={{ pathname: `${routePaths.variables}/${name}`, search }}
+      render: (name: string, record) => (
+        <>
+          <Tooltip
+            title={name}
+            trigger={['hover', 'focus']}
+            classNames={{ container: 'variables-table__tooltip' }}
           >
-            {name}
-          </Link>
-        </Tooltip>
+            <Link
+              className="variables-table__name admin-table-name"
+              to={{ pathname: `${routePaths.variables}/${name}`, search }}
+            >
+              {name}
+            </Link>
+          </Tooltip>
+          {compact && (
+            <div className="admin-table-compact-details admin-table-meta">
+              {renderType(record.type)}
+              {renderValue(record)}
+            </div>
+          )}
+        </>
       )
     },
     {
       title: 'Описание',
       dataIndex: 'description',
+      hidden: compact,
       key: 'description',
       className: 'admin-table-meta',
       align: 'left',
@@ -90,19 +108,18 @@ export const useVariableColumns = (
     {
       title: 'Тип',
       dataIndex: 'type',
+      hidden: compact,
       key: 'type',
       width: 100,
       align: 'center',
       sorter: (a, b) => a.type.localeCompare(b.type),
       sortOrder: sortedInfo.columnKey === 'type' ? sortedInfo.order : null,
-      render: (value) => {
-        const label = value === 'TEXT' ? 'ТЕКСТ' : 'СЕКРЕТ'
-        return <Tag color={value === 'TEXT' ? 'green' : 'orange'}>{label}</Tag>
-      }
+      render: renderType
     },
     {
       title: 'Значение',
       dataIndex: 'value',
+      hidden: compact,
       key: 'value',
       align: 'left',
       width: 200,
@@ -110,12 +127,12 @@ export const useVariableColumns = (
       onFilter: (value, record) =>
         record.type === 'TEXT' &&
         matchesVariableSearch(record.value, String(value)),
-      render: (_, record) =>
-        record.type === 'SECRET' ? 'Скрыто' : renderText(record.value)
+      render: (_, record) => renderValue(record)
     },
     {
       title: 'Используется в конфигурациях',
       dataIndex: 'containsInConfigs',
+      hidden: compact,
       key: 'containsInConfigs',
       align: 'left',
       width: 200,
@@ -164,6 +181,7 @@ export const useVariableColumns = (
     {
       title: 'Дата создания',
       dataIndex: 'createdAt',
+      hidden: compact,
       key: 'createdAt',
       width: 200,
       align: 'left',
@@ -175,6 +193,7 @@ export const useVariableColumns = (
     {
       title: 'Дата обновления',
       dataIndex: 'updatedAt',
+      hidden: compact,
       key: 'updatedAt',
       width: 200,
       align: 'left',
@@ -187,7 +206,7 @@ export const useVariableColumns = (
       title: 'Действия',
       dataIndex: 'actions',
       key: 'actions',
-      width: 150,
+      width: compact ? 90 : 150,
       align: 'right',
       render: (_, record) => {
         const isUsedInConfigs = Boolean(record.containsInConfigs?.length)

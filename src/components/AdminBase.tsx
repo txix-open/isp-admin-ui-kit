@@ -4,7 +4,7 @@ import { FC, useEffect, useMemo, useState } from 'react'
 import { createBrowserRouter, RouterProvider } from 'react-router-dom'
 
 import { sessionStorageKeys } from '@constants/localStorageKeys'
-import { darkTheme, lightTheme } from '@constants/theme'
+import { darkTheme, formControlDefaults, lightTheme } from '@constants/theme'
 
 import { AdminBasePropsType } from '@components/admin-base.type'
 
@@ -49,7 +49,12 @@ const AdminBase: FC<AdminBasePropsType> = ({
   useEffect(() => {
     ConfigProvider.config({
       holderRender: (children) => (
-        <ConfigProvider locale={ruRu} theme={theme} {...configProviderProps}>
+        <ConfigProvider
+          locale={ruRu}
+          theme={theme}
+          {...formControlDefaults}
+          {...configProviderProps}
+        >
           {children}
         </ConfigProvider>
       )
@@ -84,7 +89,12 @@ const AdminBase: FC<AdminBasePropsType> = ({
         excludePermissions
       }}
     >
-      <ConfigProvider theme={theme} locale={ruRu} {...configProviderProps}>
+      <ConfigProvider
+        theme={theme}
+        locale={ruRu}
+        {...formControlDefaults}
+        {...configProviderProps}
+      >
         <RouterProvider router={routerConfig} />
       </ConfigProvider>
     </Context.Provider>

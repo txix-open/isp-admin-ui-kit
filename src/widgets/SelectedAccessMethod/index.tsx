@@ -3,8 +3,8 @@ import { FC, useEffect, useMemo, useRef, useState } from 'react'
 
 import { SelectedAccessMethodPropsType } from '@widgets/SelectedAccessMethod/selected-access-method.type'
 
-import { getHttpMethodLabel } from '@utils/accessRouteFilters'
 import { getAccessMethodKey as getMethodKey } from '@utils/accessListUtils'
+import { getHttpMethodLabel } from '@utils/accessRouteFilters'
 import { httpMethodColors } from '@utils/httpMethodColorUtils'
 
 import { AccessListMethodType } from '@type/accessList.type'
@@ -156,6 +156,9 @@ const SelectedAccessMethod: FC<SelectedAccessMethodPropsType> = ({
     <div
       ref={containerRef}
       className="selected-access-method"
+      role="region"
+      aria-label="Разрешённые методы"
+      tabIndex={0}
       onScroll={(event) => setScrollTop(event.currentTarget.scrollTop)}
     >
       <div

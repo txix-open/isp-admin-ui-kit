@@ -63,16 +63,21 @@ export function configureOfflineAuth(authenticated: boolean) {
 }
 
 export const gitConfigurationApi = {
-  useCredentialsQuery: () => ({
-    data: [
-      {
-        name: 'Конфигурации сервиса',
-        dirPath: 'configs',
-        repositoryUrl: 'https://example.test/configurations.git'
-      }
-    ],
-    ...fixtures().queryStates.git
-  }),
+  useCredentialsQuery: (_, { skip = false } = {}) => {
+    fixtures().queryCalls.push({ service: 'git', skip })
+    return {
+      data: skip
+        ? undefined
+        : [
+            {
+              name: 'Конфигурации сервиса',
+              dirPath: 'configs',
+              repositoryUrl: 'https://example.test/configurations.git'
+            }
+          ],
+      ...fixtures().queryStates.git
+    }
+  },
   useCreateCredentialsMutation: () => useMutation('createGit'),
   useUpdateCredentialsMutation: () => useMutation('updateGit'),
   useDeleteCredentialsMutation: () => useMutation('deleteGit'),

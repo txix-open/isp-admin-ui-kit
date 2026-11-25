@@ -1,7 +1,36 @@
-import { Result, Spin } from 'antd'
-import { ReactNode, useEffect, useRef } from 'react'
+import { ArrowLeftOutlined } from '@ant-design/icons'
+import { Button, Result, Spin } from 'antd'
+import type { ButtonProps } from 'antd'
+import { forwardRef, ReactNode, useEffect, useRef } from 'react'
+import type { ComponentRef } from 'react'
 
 import './page-layout.scss'
+
+export const PageBackButton = forwardRef<
+  ComponentRef<typeof Button>,
+  Omit<ButtonProps, 'type' | 'variant' | 'color'>
+>(
+  (
+    {
+      icon = <ArrowLeftOutlined aria-hidden />,
+      children,
+      className = '',
+      ...props
+    },
+    ref
+  ) => (
+    <Button
+      {...props}
+      ref={ref}
+      type="default"
+      icon={icon}
+      className={`page-back-button ${className}`}
+    >
+      <span className="page-back-button__label">{children}</span>
+    </Button>
+  )
+)
+PageBackButton.displayName = 'PageBackButton'
 
 export interface PageHeaderProps {
   title: string
@@ -93,10 +122,11 @@ export const PageLoading = ({ label = 'Загрузка…' }: { label?: string 
 
 export const PageAccessDenied = ({
   title,
-  context
-}: Pick<PageHeaderProps, 'title' | 'context'>) => (
+  context,
+  subTitle
+}: Pick<PageHeaderProps, 'title' | 'context'> & { subTitle?: string }) => (
   <PageLayout title={title} context={context}>
-    <Result status="403" title="Нет доступа к разделу" />
+    <Result status="403" title="Нет доступа к разделу" subTitle={subTitle} />
   </PageLayout>
 )
 

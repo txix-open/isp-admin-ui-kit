@@ -1,4 +1,4 @@
-import { Alert, Button, Empty, Table, Tag } from 'antd'
+import { Alert, Button, Table, Tag } from 'antd'
 import { ColumnsType } from 'antd/es/table'
 import dayjs from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime'
@@ -8,6 +8,7 @@ import { useNavigate, useParams } from 'react-router-dom'
 import { dateFormats } from '@constants/date'
 
 import { PageLoading } from '@components/PageLayout'
+import { TableEmpty } from '@components/TableUI'
 
 import {
   AddressType,
@@ -150,16 +151,21 @@ const Connections = () => {
       )}
       {(!isError || instances.length > 0) && (
         <div className="connection-page__content">
-          <div className="connection-page__content__wrap-table">
+          <div
+            className="connection-page__content__wrap-table"
+            role="region"
+            aria-label="Подключения модуля"
+            tabIndex={0}
+          >
             <Table
+              className="admin-table"
               rowKey={(record) => record.id}
               pagination={false}
               dataSource={instances}
               columns={columns}
-              scroll={{ x: 820 }}
               locale={{
                 emptyText: (
-                  <Empty description="У модуля нет подключённых экземпляров" />
+                  <TableEmpty description="У модуля нет подключённых экземпляров" />
                 )
               }}
               expandable={{

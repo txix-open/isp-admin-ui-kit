@@ -16,6 +16,7 @@ import {
   TableEmpty,
   TableStatus
 } from '@components/TableUI'
+import { useCompactTable } from '@components/TableUI/useCompactTable'
 
 import { notifyApiError } from '@utils/apiErrorNotifications'
 import { getUserFullName } from '@utils/userUtils/getFullNameUtil'
@@ -33,7 +34,9 @@ import { SessionType } from '@type/session.type'
 const limit = 10
 
 const SessionsPage = () => {
+  const { compact, toggle } = useCompactTable()
   const tableSearch = useTableSearch<SessionType>(
+    ['userId', 'id', 'createdAt', 'expiredAt', 'status'],
     ['createdAt', 'expiredAt'],
     ['userId', 'status']
   )
@@ -72,6 +75,12 @@ const SessionsPage = () => {
     [SessionStatusKeysType.expired]: 'warning'
   } as const
 
+  const renderStatus = (status: SessionStatusKeysType) => (
+    <TableStatus tone={statusTones[status]}>
+      {sessionStatuses[status] ?? status}
+    </TableStatus>
+  )
+
   const columns: ColumnsType<SessionType> = [
     {
       title: 'Пользователь',
@@ -87,17 +96,32 @@ const SessionsPage = () => {
       sorter: true,
       key: 'userId',
       className: 'admin-table-name',
-      render: (id) => {
+      render: (id, record) => {
         const user = usersQuery.data?.find(
           (item) => String(item.id) === String(id)
         )
-        return user ? getUserFullName(user) : `Пользователь #${id}`
+        const name = user ? getUserFullName(user) : `Пользователь #${id}`
+        return compact ? (
+          <>
+            <div>{name}</div>
+            <div className="admin-table-compact-details">
+              <span className="admin-table-meta">Сессия #{record.id}</span>
+              {renderStatus(record.status)}
+            </div>
+          </>
+        ) : (
+          name
+        )
       }
     },
     {
       title: 'ID сессии',
       dataIndex: 'id',
-      ...getColumnSearchProps<SessionType>({ title: 'ID сессии', type: 'number' }),
+      hidden: compact,
+      ...getColumnSearchProps<SessionType>({
+        title: 'ID сессии',
+        type: 'number'
+      }),
       sorter: true,
       key: 'id',
       render: (value) => highlightSearchMatch(value, tableSearch.query?.id),
@@ -107,6 +131,7 @@ const SessionsPage = () => {
     {
       title: 'Начало сессии',
       dataIndex: 'createdAt',
+      hidden: compact,
       ...getColumnSearchProps<SessionType>({
         title: 'Начало сессии',
         type: 'date',
@@ -119,6 +144,7 @@ const SessionsPage = () => {
     {
       title: 'Окончание сессии',
       dataIndex: 'expiredAt',
+      hidden: compact,
       ...getColumnSearchProps<SessionType>({
         title: 'Окончание сессии',
         type: 'date',
@@ -131,6 +157,7 @@ const SessionsPage = () => {
     {
       title: 'Статус',
       dataIndex: 'status',
+      hidden: compact,
       ...getColumnSearchProps<SessionType>({
         title: 'Статус',
         type: 'select',
@@ -142,18 +169,14 @@ const SessionsPage = () => {
       sorter: true,
       key: 'status',
       width: 140,
-      render: (status: SessionStatusKeysType) => (
-        <TableStatus tone={statusTones[status]}>
-          {sessionStatuses[status] ?? status}
-        </TableStatus>
-      )
+      render: renderStatus
     },
     ...(canRevoke
       ? [
           {
             title: 'Действия',
             key: 'actions',
-            width: 112,
+            width: compact ? 90 : 112,
             align: 'right' as const,
             render: (_: unknown, record: SessionType) =>
               record.status === SessionStatusKeysType.allowed && (
@@ -266,18 +289,9 @@ const SessionsPage = () => {
             label
           }))
         }}
-        onRemove={(field) => {
-          tableSearch.removeFilter(field)
-          changePage(1)
-        }}
-        onClearSort={() => {
-          tableSearch.clearSort()
-          changePage(1)
-        }}
-        onReset={() => {
-          tableSearch.reset()
-          changePage(1)
-        }}
+        onRemove={tableSearch.removeFilter}
+        onClearSort={tableSearch.clearSort}
+        onReset={tableSearch.reset}
       />
       <p className="page-layout__summary" role="status">
         {query.isFetching
@@ -286,19 +300,17 @@ const SessionsPage = () => {
             ? `Всего сессий: ${data.totalCount}`
             : 'Список сессий недоступен'}
       </p>
+      {toggle && <div>{toggle}</div>}
       <Table<SessionType>
-        onChange={(pagination, filters, sorter, extra) => {
-          if (extra.action === 'paginate') return
-          tableSearch.handleTableChange(pagination, filters, sorter, extra)
-          changePage(1)
-        }}
-        className="page-layout__table admin-table"
+        onChange={tableSearch.handleTableChange}
+        className={`page-layout__table admin-table ${compact ? 'admin-table--compact' : ''}`}
         size="middle"
         rowKey="id"
         loading={query.isFetching}
         dataSource={data?.items ?? []}
         columns={tableSearch.applyToColumns(columns)}
-        scroll={{ x: 1000 }}
+        tableLayout={compact ? 'fixed' : undefined}
+        scroll={compact ? undefined : { x: 1000 }}
         pagination={{
           current: page,
           total: data?.totalCount ?? query.data?.totalCount ?? 0,
@@ -318,12 +330,7 @@ const SessionsPage = () => {
                 }
               >
                 {tableSearch.query && (
-                  <Button
-                    onClick={() => {
-                      tableSearch.reset()
-                      changePage(1)
-                    }}
-                  >
+                  <Button onClick={() => tableSearch.reset()}>
                     Сбросить фильтры
                   </Button>
                 )}
