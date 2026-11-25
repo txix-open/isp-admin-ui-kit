@@ -3,6 +3,7 @@ import { createApi } from '@reduxjs/toolkit/query/react'
 import { apiPaths } from '@constants/api/apiPaths'
 
 import { axiosBaseQuery } from '@utils/apiUtils'
+import { getApplicationGroup } from '@utils/configUtils'
 
 import { PermissionType } from '@type/roles.type'
 import type { TableSearchParams } from '@type/table-search.type'
@@ -23,7 +24,10 @@ const userServiceApi = createApi({
       providesTags: () => ['users']
     }),
     getAllPermissions: builder.query<PermissionType[], void>({
-      query: () => ({ url: apiPaths.getAllPermissions, data: {} }),
+      query: () => ({
+        url: apiPaths.getAllPermissions,
+        data: { applicationGroup: getApplicationGroup() }
+      }),
       providesTags: () => ['permissions']
     }),
     blockUser: builder.mutation<void, number>({

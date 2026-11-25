@@ -8,6 +8,7 @@ import {
 } from '@pages/ProfilePage/profile-page.type'
 
 import { initUI } from '@utils/UIUtiles'
+import { getApplicationGroup } from '@utils/configUtils'
 
 import { apiService } from '@services/apiService'
 
@@ -16,7 +17,8 @@ export const fetchProfile = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     try {
       const response = await apiService.post<ProfileDataType>(
-        apiPaths.getProfile
+        apiPaths.getProfile,
+        { applicationGroup: getApplicationGroup() }
       )
       return response.data
     } catch (error) {
