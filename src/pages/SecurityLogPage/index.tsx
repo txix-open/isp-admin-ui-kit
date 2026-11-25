@@ -133,11 +133,7 @@ const SecurityLogPage = () => {
         {isPageAvailable && (
           <DownloadCsvButton
             type="log"
-            params={{
-              limit,
-              offset: (currentPage - 1) * limit,
-              ...searchParams
-            }}
+            params={searchParams}
             disabled={isFetching || isError || !currentData?.items.length}
           />
         )}

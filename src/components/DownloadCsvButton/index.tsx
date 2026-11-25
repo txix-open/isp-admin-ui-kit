@@ -2,18 +2,19 @@ import { DownloadOutlined } from '@ant-design/icons'
 import { Button, message } from 'antd'
 import { useState } from 'react'
 
-import {
-  downloadCsv,
-  type CsvDownloadParams,
-  type CsvDownloadType
-} from '@services/downloadService'
+import { downloadCsv, type RoleDownloadParams } from '@services/downloadService'
 
-interface DownloadCsvButtonProps {
-  type: CsvDownloadType
-  params?: CsvDownloadParams
+import type { TableSearchParams } from '@type/table-search.type'
+
+type DownloadCsvButtonProps = {
   disabled?: boolean
   iconOnly?: boolean
-}
+} & (
+  | { type: 'user'; params?: TableSearchParams }
+  | { type: 'role'; params?: RoleDownloadParams }
+  | { type: 'session'; params?: TableSearchParams }
+  | { type: 'log'; params?: TableSearchParams }
+)
 
 const DownloadCsvButton = ({
   type,

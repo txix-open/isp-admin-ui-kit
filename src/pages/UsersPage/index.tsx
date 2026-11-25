@@ -281,7 +281,7 @@ const UsersPage = () => {
           {isPageAvailable && (
             <DownloadCsvButton
               type="user"
-              params={{ limit: 1000, offset: 0, ...searchParams }}
+              params={searchParams}
               disabled={
                 isSearching ||
                 allUsers.length === 0 ||
