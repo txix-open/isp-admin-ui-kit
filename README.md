@@ -433,3 +433,24 @@ PROJECTS=project1,project2,project3
 ## 📄 Лицензия
 
 MIT License.
+
+
+### Исправления зависимостей и совместимость
+
+UI-kit требует `react-router-dom@^7.18.6` и `axios@^1.20.0`. Обновляйте эти peer
+зависимости также в приложении-потребителе. Monaco остаётся в ветке 0.55,
+Mermaid — в ветке 11. JSONViewer сам подключает минимальный полифил Buffer,
+необходимый браузерной сборке парсера JSON Schema.
+
+В корневом `package.json` зафиксированы overrides DOMPurify (`~3.4.18`),
+KaTeX (`~0.18.2`), minimatch 7–10 (`^11.0.1`) и glob 9–14.0.1 (`^14.0.2`).
+Они проверены сборками библиотеки и Storybook. npm применяет overrides только
+из корневого проекта: при установке опубликованной библиотеки потребитель должен
+иметь такие же overrides для DOMPurify/KaTeX. Обновление lock-файла библиотеки
+само по себе не обновляет зависимости приложения.
+
+Проверки: `node --test tests/*.test.mjs`,
+`npx tsc --noEmit --emitDeclarationOnly false`, `npm run build:prod`,
+`npm run build-storybook`, `npm audit`.
+Браузерная проверка зависимостей находится в `isp-admin-ui/tests/dependency-smoke.html`
+и собирается командой `npm run test:dependencies` в приложении.

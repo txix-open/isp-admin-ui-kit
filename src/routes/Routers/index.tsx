@@ -23,6 +23,7 @@ const SwaggerPage = lazy(() => import('@pages/SwaggerPage'))
 const ErrorWrapperPage = lazy(() => import('@pages/ErrorWrapperPage'))
 const SessionsPage = lazy(() => import('@pages/SessionsPage'))
 const SecurityLogPage = lazy(() => import('@pages/SecurityLogPage'))
+const AuditManagementPage = lazy(() => import('@pages/AuditManagementPage'))
 const AppAccessPage = lazy(() => import('@pages/AppAccessPage'))
 const ModulesPage = lazy(() => import('@pages/ModulesPage'))
 const GitConfigurationPage = lazy(() => import('@pages/GitConfigurationPage'))
@@ -113,6 +114,10 @@ export const getRoutesConfig = (
             {
               path: routePaths.securityLog,
               element: lazyElement(SecurityLogPage)
+            },
+            {
+              path: routePaths.auditManagement,
+              element: lazyElement(AuditManagementPage)
             },
             {
               path: routePaths.appAccess,

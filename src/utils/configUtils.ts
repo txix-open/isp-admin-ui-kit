@@ -14,3 +14,6 @@ export const getConfigProperty = (property: string, defaultValue: any) => {
   }
   return defaultValue
 }
+
+export const getApplicationGroup = () =>
+  getConfigProperty('CLIENT_NAME', import.meta.env.VITE_CLIENT_NAME)

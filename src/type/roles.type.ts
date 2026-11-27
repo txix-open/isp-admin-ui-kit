@@ -45,6 +45,7 @@ export enum PermissionKeysType {
   role_delete = 'role_delete', // Удаление роли
 
   security_log_view = 'security_log_view',
+  audit_management_view = 'audit_management_view', // Управление аудитом
   ALWAYS_VIEW = 'ALWAYS_VIEW', // Просмотр экрана "Просмотр журналов ИБ"
 
   git_configuration_credentials_edit = 'git_configuration_credentials_edit', // Редактирование данных Git репозитория
@@ -53,6 +54,7 @@ export enum PermissionKeysType {
 }
 
 export interface RoleType {
+  applicationGroup: string
   changeMessage?: string
   createdAt: string
   description: string
@@ -65,7 +67,10 @@ export interface RoleType {
   exclusive: boolean
 }
 
-export type NewRoleType = Omit<RoleType, 'id' | 'createdAt' | 'updatedAt'>
+export type NewRoleType = Omit<
+  RoleType,
+  'id' | 'createdAt' | 'updatedAt' | 'applicationGroup'
+>
 
 export interface PermissionType {
   key: PermissionKeysType

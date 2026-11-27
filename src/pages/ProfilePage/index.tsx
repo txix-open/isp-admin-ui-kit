@@ -7,7 +7,16 @@ import {
   SunOutlined,
   UserOutlined
 } from '@ant-design/icons'
-import { Avatar, Button, Input, Popconfirm, Segmented, Tag, theme } from 'antd'
+import {
+  Avatar,
+  Button,
+  Input,
+  Popconfirm,
+  Segmented,
+  Spin,
+  Tag,
+  theme
+} from 'antd'
 import {
   CSSProperties,
   ReactNode,
@@ -22,6 +31,8 @@ import ChangePasswordModal from '@components/ChangePasswordModal'
 import { useAppSelector } from '@hooks/redux'
 import useLogout from '@hooks/useLogout'
 import useRole from '@hooks/useRole'
+
+import userServiceApi from '@services/userService'
 
 import { Context } from '@stores/index'
 
@@ -73,8 +84,18 @@ const ProfilePage = () => {
   const roles: string[] = Array.isArray(profile.roleNames)
     ? profile.roleNames
     : []
+  const {
+    data: permissionCatalog,
+    isLoading: isPermissionCatalogLoading,
+    isError: isPermissionCatalogError
+  } = userServiceApi.useGetAllPermissionsQuery()
+  const knownPermissions = new Set<string>(
+    permissionCatalog?.map(({ key }) => key)
+  )
   const permissions: string[] = Array.isArray(profile.permissions)
-    ? profile.permissions
+    ? profile.permissions.filter((permission: string) =>
+        knownPermissions.has(permission)
+      )
     : []
 
   const permissionQuery = permissionSearch.trim().toLowerCase()
@@ -282,15 +303,17 @@ const ProfilePage = () => {
                 role="status"
                 aria-live="polite"
               >
-                {permissionQuery
-                  ? `${filteredPermissions.length} из ${permissions.length}`
-                  : permissions.length}
+                {!isPermissionCatalogLoading &&
+                  !isPermissionCatalogError &&
+                  (permissionQuery
+                    ? `${filteredPermissions.length} из ${permissions.length}`
+                    : permissions.length)}
               </span>
             </div>
             <p className="profile-page__muted">
               Разрешения, назначенные вашей учётной записи
             </p>
-            {permissions.length > 0 && (
+            {!isPermissionCatalogError && permissions.length > 0 && (
               <Input
                 className="profile-page__permission-search"
                 aria-label="Поиск по разрешениям"
@@ -301,7 +324,13 @@ const ProfilePage = () => {
                 onChange={(event) => setPermissionSearch(event.target.value)}
               />
             )}
-            {filteredPermissions.length > 0 ? (
+            {isPermissionCatalogLoading ? (
+              <Spin size="small" />
+            ) : isPermissionCatalogError ? (
+              <p className="profile-page__empty">
+                Не удалось загрузить список разрешений
+              </p>
+            ) : filteredPermissions.length > 0 ? (
               <ul className="profile-page__permission-list">
                 {filteredPermissions.map((permission, index) => (
                   <li key={`${permission}-${index}`}>
