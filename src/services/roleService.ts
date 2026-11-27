@@ -3,6 +3,7 @@ import { createApi } from '@reduxjs/toolkit/query/react'
 import { apiPaths } from '@constants/api/apiPaths'
 
 import { axiosBaseQuery } from '@utils/apiUtils'
+import { getApplicationGroup } from '@utils/configUtils'
 
 import { NewRoleType, RoleType } from '@type/roles.type'
 
@@ -13,20 +14,29 @@ const roleApi = createApi({
   baseQuery: axiosBaseQuery({ baseUrl: apiPaths.baseAdminUrl }),
   endpoints: (builder) => ({
     getAllRoles: builder.query<RoleType[], void>({
-      query: () => ({ url: apiPaths.getAllRoles }),
+      query: () => ({
+        url: apiPaths.getAllRoles,
+        data: { applicationGroup: getApplicationGroup() }
+      }),
       providesTags: () => ['Roles']
     }),
     createRole: builder.mutation<RoleType, NewRoleType>({
       query: (newRole) => ({
         url: apiPaths.createRole,
-        data: newRole
+        data: {
+          ...newRole,
+          applicationGroup: getApplicationGroup()
+        }
       }),
       invalidatesTags: ['Roles']
     }),
-    updateRole: builder.mutation<void, RoleType>({
+    updateRole: builder.mutation<RoleType, RoleType>({
       query: (role) => ({
         url: apiPaths.updateRole,
-        data: role
+        data: {
+          ...role,
+          applicationGroup: getApplicationGroup()
+        }
       }),
       invalidatesTags: ['Roles']
     }),

@@ -77,6 +77,10 @@ type PathKeys =
   | 'gitFile'
   | 'baseGitConfigurationUrl'
   | 'applicationsGetAll'
+  | 'downloadUsers'
+  | 'downloadRoles'
+  | 'downloadSessions'
+  | 'downloadLogs'
 
 const BASE_URL = import.meta.env.BASE_URL?.replace(/\/$/, '') || ''
 export const API_BASE_URL = `${BASE_URL}/api`
@@ -89,6 +93,11 @@ export const apiPaths: Record<PathKeys, string> = {
   baseSystemUrl: apiWithBaseURL('/system'),
   baseConfigUrl: apiWithBaseURL('/config'),
   baseGitConfigurationUrl: apiWithBaseURL('/isp-git-config-service'),
+  // ======= CSV DOWNLOADS ======
+  downloadUsers: '/user/download',
+  downloadRoles: '/role/download',
+  downloadSessions: '/session/download',
+  downloadLogs: '/log/download',
   // ======= ROLES ======
   getAllRoles: '/role/all',
   createRole: '/role/create',

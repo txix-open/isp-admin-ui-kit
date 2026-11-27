@@ -8,6 +8,7 @@ type RoutePaths =
   | 'users'
   | 'sessions'
   | 'securityLog'
+  | 'auditManagement'
   | 'roles'
   | 'appAccess'
   | 'applicationsGroup'
@@ -33,6 +34,7 @@ export const routePaths: Record<RoutePaths, string> = {
   users: '/users',
   sessions: '/sessions',
   securityLog: '/security_logs',
+  auditManagement: '/auditManagement',
   roles: '/roles',
   appAccess: '/app_access',
   applicationsGroup: '/application_groups',

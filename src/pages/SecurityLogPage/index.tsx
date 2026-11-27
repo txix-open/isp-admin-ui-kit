@@ -1,14 +1,19 @@
-import { Pagination, Spin, Table } from 'antd'
+import { Alert, Pagination, Spin, Table } from 'antd'
 import { ColumnsType } from 'antd/es/table'
 import dayjs from 'dayjs'
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 
 import { dateFormats } from '@constants/date'
 
+import { getColumnSearchProps } from '@components/ColumnSearch'
+import { highlightSearchMatch } from '@components/ColumnSearch/highlightSearchMatch'
+import DownloadCsvButton from '@components/DownloadCsvButton'
+
 import { getUserFullName } from '@utils/userUtils/getFullNameUtil'
 
 import useRole from '@hooks/useRole'
+import { useTableSearch } from '@hooks/useTableSearch'
 
 import securityLogServiceApi from '@services/securityLogService'
 import userServiceApi from '@services/userService'
@@ -23,22 +28,30 @@ import './security-log-page.scss'
 const limit = 10
 
 const SecurityLogPage = () => {
-  const [getAllLogs, { data, isLoading: isLoadingLogs }] =
-    securityLogServiceApi.useGetAllLogsMutation()
+  const {
+    query,
+    searchParams,
+    currentPage,
+    setCurrentPage,
+    handleTableChange
+  } = useTableSearch<LogType>(['createdAt'], ['userId'])
+  const { currentData, data, isFetching, isError } =
+    securityLogServiceApi.useSearchLogsQuery(
+      {
+        limit,
+        offset: (currentPage - 1) * limit,
+        ...searchParams
+      },
+      { refetchOnMountOrArgChange: true }
+    )
 
   const { data: allUsers = [], isLoading: isUsersLoading } =
     userServiceApi.useGetAllUsersQuery()
   const { role, hasPermission } = useRole()
   const navigate = useNavigate()
 
-  const [currentPage, setCurrentPage] = useState(1)
-
-  const isLoading = isUsersLoading || isLoadingLogs
+  const isLoading = isUsersLoading
   const isPageAvailable = hasPermission(PermissionKeysType.security_log_view)
-
-  useEffect(() => {
-    getAllLogs({ limit, offset: 0 })
-  }, [])
 
   useEffect(() => {
     if (!isPageAvailable) {
@@ -52,12 +65,7 @@ const SecurityLogPage = () => {
     }
   }, [role])
 
-  const handleChangePagination = (page: number) => {
-    setCurrentPage(page)
-    getAllLogs({ limit, offset: (page - 1) * limit })
-  }
-
-  if (isLoading || !data) {
+  if (isLoading) {
     return <Spin />
   }
 
@@ -66,6 +74,15 @@ const SecurityLogPage = () => {
       title: 'Пользователь',
       dataIndex: 'userId',
       key: 'userId',
+      sorter: true,
+      ...getColumnSearchProps({
+        title: 'Пользователь',
+        type: 'select',
+        options: allUsers.map((user) => ({
+          value: user.id,
+          label: getUserFullName(user)
+        }))
+      }),
       render: (value) => {
         const user = allUsers.find((el) => el.id === value)
         if (user) {
@@ -77,6 +94,12 @@ const SecurityLogPage = () => {
       title: 'Время события',
       dataIndex: 'createdAt',
       key: 'createdAt',
+      sorter: true,
+      ...getColumnSearchProps({
+        title: 'Время события',
+        type: 'date',
+        showTime: true
+      }),
       render: (value) => {
         return dayjs(value).format(dateFormats.fullFormat)
       }
@@ -85,12 +108,18 @@ const SecurityLogPage = () => {
       title: 'Действие',
       dataIndex: 'message',
       key: 'message',
+      sorter: true,
+      ...getColumnSearchProps({ title: 'Действие' }),
       render: (value: string) =>
-        value.split('\n').map((line) => <p key={line}>{line}</p>)
+        value
+          .split('\n')
+          .map((line, index) => (
+            <p key={index}>{highlightSearchMatch(line, query?.message)}</p>
+          ))
     }
   ]
 
-  const { totalCount, items } = data
+  const totalCount = (currentData ?? data)?.totalCount ?? 0
 
   return (
     <section className="security-log-page">
@@ -101,13 +130,25 @@ const SecurityLogPage = () => {
         >
           Журнал событий
         </span>
+        {isPageAvailable && (
+          <DownloadCsvButton
+            type="log"
+            params={searchParams}
+            disabled={isFetching || isError || !currentData?.items.length}
+          />
+        )}
       </header>
       <section className="security-log-page__content">
+        {isError && (
+          <Alert type="error" title="Не удалось загрузить журнал событий" />
+        )}
         <div className="security-log-page__content__wrap-table">
           <Table
             rowKey={(record) => record.id}
             pagination={false}
-            dataSource={items}
+            dataSource={currentData?.items ?? []}
+            loading={isFetching}
+            onChange={handleTableChange}
             columns={columns}
           />
         </div>
@@ -117,7 +158,8 @@ const SecurityLogPage = () => {
             current={currentPage}
             total={totalCount}
             pageSize={limit}
-            onChange={handleChangePagination}
+            onChange={setCurrentPage}
+            disabled={isFetching}
           />
         </div>
       </section>

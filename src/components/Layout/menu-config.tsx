@@ -77,6 +77,12 @@ export const menuConfig = (name: string): CustomMenuItemType[] => [
         permissions: [PermissionKeysType.security_log_view]
       },
       {
+        key: 'auditManagement',
+        label: 'Управление аудитом',
+        route: routePaths.auditManagement,
+        permissions: [PermissionKeysType.audit_management_view]
+      },
+      {
         key: 'roles',
         label: 'Роли',
         route: routePaths.roles,

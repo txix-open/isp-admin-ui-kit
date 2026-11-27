@@ -9,6 +9,7 @@ import {
   useSearchParams
 } from 'react-router-dom'
 
+import DownloadCsvButton from '@components/DownloadCsvButton'
 import RolesContent from '@components/RolesContent'
 
 import { setUrlValue } from '@utils/columnLayoutUtils'
@@ -206,6 +207,15 @@ const RolesPage = () => {
           setUrlValue(value, setSearchParams, 'direction')
         }
         title="Роли пользователей"
+        extraTitle={
+          isPageAvailable && (
+            <DownloadCsvButton
+              type="role"
+              iconOnly
+              disabled={isLoading || data.length === 0}
+            />
+          )
+        }
         searchPlaceholder="Введите имя или id"
         showUpdateBtn={false}
         items={filterFirstColumnItems(data, searchValue)}

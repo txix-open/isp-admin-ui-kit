@@ -1,6 +1,6 @@
 {
   "name": "isp-admin-ui-kit",
-  "version": "1.14.2",
+  "version": "1.16.0",
   "description": "react ui lib for admin-panels",
   "main": "dist/cjs/index.js",
   "module": "dist/esm/index.js",
@@ -57,10 +57,11 @@
     "compare-versions": "^6.1.1",
     "json-schema-view-js": "^2.0.1",
     "lodash.clonedeep": "^4.5.0",
-    "mermaid": "^11.15.0",
+    "mermaid": "^11.17.2",
     "react-resizable": "^4.0.1",
     "simplebar": "^6.3.3",
-    "simplebar-react": "^3.3.2"
+    "simplebar-react": "^3.3.2",
+    "buffer": "^6.0.3"
   },
   "devDependencies": {
     "@babel/core": "^7.29.7",
@@ -76,18 +77,17 @@
     "@rollup/plugin-node-resolve": "^16.0.3",
     "@rollup/plugin-terser": "^1.0.0",
     "@rollup/plugin-typescript": "^12.3.0",
-    "@storybook/addon-docs": "^10.4.3",
-    "@storybook/react-vite": "^10.4.3",
+    "@storybook/addon-docs": "^10.6.8",
+    "@storybook/react-vite": "^10.6.8",
     "@trivago/prettier-plugin-sort-imports": "^6.0.2",
     "@types/lodash.clonedeep": "^4.5.9",
     "@types/node": "^25.9.2",
     "@types/react": "^18.3.31",
     "@types/react-dom": "^18.3.7",
     "@types/react-resizable": "^3.0.8",
-    "@types/react-router-dom": "^5.3.3",
     "@types/swagger-ui-react": "^5.18.0",
-    "@typescript-eslint/eslint-plugin": "^8.61.0",
-    "@typescript-eslint/parser": "^8.61.0",
+    "@typescript-eslint/eslint-plugin": "^8.74.0",
+    "@typescript-eslint/parser": "^8.74.0",
     "eslint": "^9.39.4",
     "eslint-config-prettier": "^10.1.8",
     "eslint-import-resolver-typescript": "^4.4.5",
@@ -96,7 +96,7 @@
     "eslint-plugin-react": "^7.37.5",
     "eslint-plugin-react-hooks": "^7.1.1",
     "eslint-plugin-react-refresh": "^0.5.2",
-    "eslint-plugin-storybook": "^10.4.3",
+    "eslint-plugin-storybook": "^10.6.8",
     "husky": "^9.1.7",
     "prettier": "^3.8.4",
     "remark-gfm": "^4.0.1",
@@ -105,7 +105,7 @@
     "rollup-plugin-peer-deps-external": "^2.2.4",
     "rollup-plugin-postcss": "^4.0.2",
     "sass": "^1.100.0",
-    "storybook": "^10.4.3",
+    "storybook": "^10.6.8",
     "terser": "^5.48.0",
     "tsc-alias": "^1.8.17",
     "typescript": "^5.9.3"
@@ -116,7 +116,7 @@
     "@monaco-editor/react": "^4.7.0",
     "@reduxjs/toolkit": "^2.12.0",
     "antd": ">=6.0.0",
-    "axios": "^1.17.0",
+    "axios": "^1.20.0",
     "dayjs": "^1.11.21",
     "isp-ui-kit": "^2.3.4",
     "monaco-editor": "^0.55.1",
@@ -124,7 +124,7 @@
     "react-dom": ">=18",
     "react-hook-form": "^7.78.0",
     "react-redux": "^9.3.0",
-    "react-router-dom": "^6.30.4",
+    "react-router-dom": "^7.18.6",
     "reactflow": "^11.11.4",
     "redoc": "^2.5.3",
     "yaml": "^2.9.0"
@@ -141,5 +141,11 @@
       "npx prettier --write",
       "npx eslint --fix"
     ]
+  },
+  "overrides": {
+    "dompurify": "~3.4.18",
+    "katex": "~0.18.2",
+    "minimatch@>=7 <11": "^11.0.1",
+    "glob@>=9 <14.0.2": "^14.0.2"
   }
 }

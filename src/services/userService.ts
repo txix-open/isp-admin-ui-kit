@@ -3,8 +3,10 @@ import { createApi } from '@reduxjs/toolkit/query/react'
 import { apiPaths } from '@constants/api/apiPaths'
 
 import { axiosBaseQuery } from '@utils/apiUtils'
+import { getApplicationGroup } from '@utils/configUtils'
 
 import { PermissionType } from '@type/roles.type'
+import type { TableSearchParams } from '@type/table-search.type'
 import { NewUserType, UserResponseType, UserType } from '@type/user.type'
 
 const userServiceApi = createApi({
@@ -13,13 +15,19 @@ const userServiceApi = createApi({
   tagTypes: ['users', 'permissions'],
   baseQuery: axiosBaseQuery({ baseUrl: apiPaths.baseUserUrl }),
   endpoints: (builder) => ({
-    getAllUsers: builder.query<UserType[], void>({
-      query: () => ({ url: apiPaths.getUsers, data: { limit: 1000 } }),
+    getAllUsers: builder.query<UserType[], TableSearchParams | void>({
+      query: (request) => ({
+        url: apiPaths.getUsers,
+        data: { ...request, limit: 1000 }
+      }),
       transformResponse: (response: UserResponseType) => response.items,
       providesTags: () => ['users']
     }),
     getAllPermissions: builder.query<PermissionType[], void>({
-      query: () => ({ url: apiPaths.getAllPermissions, data: {} }),
+      query: () => ({
+        url: apiPaths.getAllPermissions,
+        data: { applicationGroup: getApplicationGroup() }
+      }),
       providesTags: () => ['permissions']
     }),
     blockUser: builder.mutation<void, number>({
